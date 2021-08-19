@@ -50,17 +50,31 @@ module.exports = class mStableSubpool {
 
         let apy = ethers.utils.parseUnits(data.data.masset.savingsContractsV2[0].dailyAPY, 16);
 
-        if(includeIMUsdVaultApy)
-                apy = apy.add(
-                    await this.getIMUsdVaultApy
-                )
+        console.log( await this.getIMUsdVaultWeeklyRoi(data.data.masset.savingsContractsV2[0].boostedSavingsVaults[0].totalStakingRewards, data.data.masset.savingsContractsV2[0].latestExchangeRate.rate ), "YOOO")
+        // if(includeIMUsdVaultApy)
+        //         apy = apy.add(
+        //             await this.getIMUsdVaultApy
+        //         )
         return data;
     }
 
+    async getMtaUsdPrice() {
+        return (
+            await axios(
+                "https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0xa3bed4e1c75d00fa6f4e5e6922db7261b5e9acd2&vs_currencies=USD"
+            )
+        ).data["0xa3bed4e1c75d00fa6f4e5e6922db7261b5e9acd2"].usd;
+    }
+
     async getIMUsdVaultWeeklyRoi(totalStakingRewards, stakingTokenPrice) {
+        // Get Total Staked by our account
         const contract = new ethers.Contract("0x30647a72dc82d7fbb1123ea74716ab8a317eac19", erc20Abi, this.provider)
-        const totalStaked = await contract.balanceOf("0x78befca7de27d07dc6e71da295cc2946681a6c7b")
-        return totalStaked
+        const totalStaked = await contract.balanceOf("0x78befca7de27d07dc6e71da295cc2946681a6c7b") / ethers.constants.WeiPerEther.toString()
+       
+        // https://github.com/mstable/mStable-app/blob/56055318f23b43479455cdf0a9521dfec493b01c/src/hooks/useVaultWeeklyROI.ts#L43
+        const mtaPerWeekInUsd = totalStakingRewards * (await this.getMtaUsdPrice());
+        const totalStakedInUsd = stakingTokenPrice * totalStaked;
+        return mtaPerWeekInUsd / totalStakedInUsd;
     }
 
     async getIMUsdVaultApy(totalStakingRewards, stakingTokenPrice) {

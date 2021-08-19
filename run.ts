@@ -101,8 +101,10 @@ const Testing = async () => {
                         // const fee = rari.subpools.mStable.cache
                         // console.log(fee)
                     // Print total staked
-                        const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
-                        console.log( data.div(ss.constants.WeiPerEther).toString())
+                        // const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
+                        // console.log( data.div(ss.constants.WeiPerEther).toString())
+                    // Print weekly return on investment
+                        const data = await rari.subpools.mStable.getMUsdSavingsApy()
 }
 
 Testing()
