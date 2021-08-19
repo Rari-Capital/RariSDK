@@ -1,6 +1,6 @@
 
 // Axios
-const axios = require('axios')
+var axios = require('axios')
 
 // Ethers
 var { ethers } = require('ethers')
@@ -9,7 +9,8 @@ var { ethers } = require('ethers')
 var Caches = require('./cache.ts')
 
 // Subpools
-// const AaveSubpool = require("./subpools/aave.ts")
+const AaveSubpool = require("./subpools/aave.ts")
+const DydxSubpool = require("./subpools/dydx.ts")
 
 // Pools
 const StablePool = require("./pools/stable.ts")
@@ -23,6 +24,7 @@ module.exports = class Rari {
     price
     getEthUsdPriceBN
     getAllTokens
+    subpools
     pools
 
     constructor(web3Provider) {
@@ -84,12 +86,18 @@ module.exports = class Rari {
             });
         };
 
-        let subpools = {
-            // Aave: new AaveSubpool(this.provider)
+        this.subpools = {
+            Aave: new AaveSubpool(this.provider),
+            dYdX: new DydxSubpool(this.provider)
         }
 
         this.pools = {
-            stable: new StablePool(this.provider, subpools, this.getAllTokens)
+            stable: new StablePool(
+                this.provider, 
+                {
+                   Aave: "Aave"
+                },
+                this.getAllTokens)
         }
     }
 
