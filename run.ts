@@ -90,7 +90,12 @@ const Testing = async () => {
                     //console.log( await rari.subpools.Compound.getCurrencyApys() )
 
             // mStable
-                console.log( rari.subpools.mStable.externalContracts )
+                // External contracts
+                //console.log( rari.subpools.mStable.externalContracts )
+
+                // getMUsdSavingsApy
+                const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                console.log(data)
 }
 
 Testing()
