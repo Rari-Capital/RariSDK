@@ -37,45 +37,45 @@ const Testing = async () => {
 
         // Balances
             // getTotalSupply
-            // console.log( (await rari.pools.stable.balances.getTotalSupply()).toString() )
+                // console.log( (await rari.pools.stable.balances.getTotalSupply()).toString() )
 
             // getTotalInterestAccrued
-            // console.log( (await rari.pools.stable.balances.getTotalInterestAccrued() ).toString() / ss.constants.WeiPerEther)
+                // console.log( (await rari.pools.stable.balances.getTotalInterestAccrued() ).toString() / ss.constants.WeiPerEther)
 
             // Balance of
-            // console.log( (await rari.pools.stable.balances.balanceOf('0x5853eD4f26A3fceA565b3FBC698bb19cdF6DEB85')).toString() / ss.constants.WeiPerEther)
+                // console.log( (await rari.pools.stable.balances.balanceOf('0x5853eD4f26A3fceA565b3FBC698bb19cdF6DEB85')).toString() / ss.constants.WeiPerEther)
 
         // Allocations
             // Get currency allocations with fees
-            // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocations()
-            // //@ts-ignore
-            // Object.keys(allocations).map(vasl => console.log(
-            //     (allocations[vasl]
-            //         .div( rari.internalTokens[vasl].decimals === 18
-            //             ? ss.constants.WeiPerEther
-            //             : 10 ** ss.BigNumber.from(rari.internalTokens[vasl].decimals)
-            //         ).toString())))
+                // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocations()
+                // //@ts-ignore
+                // Object.keys(allocations).map(vasl => console.log(
+                //     (allocations[vasl]
+                //         .div( rari.internalTokens[vasl].decimals === 18
+                //             ? ss.constants.WeiPerEther
+                //             : 10 ** ss.BigNumber.from(rari.internalTokens[vasl].decimals)
+                //         ).toString())))
 
             //  Get currency allocations in USD
-            // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocationsInUsd()
-            // Object.keys(allocations).map(val => console.log(
-            //     allocations[val].toString() / ss.constants.WeiPerEther
-            // ))
+                // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocationsInUsd()
+                // Object.keys(allocations).map(val => console.log(
+                //     allocations[val].toString() / ss.constants.WeiPerEther
+                // ))
 
             // Get Pool Allocations
-            // const allocations = await rari.pools.stable.allocations.getRawPoolAllocations()
-            // Object.keys(allocations).map(val => console.log(
-            //      allocations[val].toString() / ss.constants.WeiPerEther
-            // ))
-            // console.log(allocations)
+                // const allocations = await rari.pools.stable.allocations.getRawPoolAllocations()
+                // Object.keys(allocations).map(val => console.log(
+                //      allocations[val].toString() / ss.constants.WeiPerEther
+                // ))
+                // console.log(allocations)
 
             // Get Raw Allocations
-            // const allocations = await rari.pools.stable.allocations.getRawAllocations()
-            // Object.keys(allocations).map(val => Object.keys(allocations[val]).map(valas => console.log(allocations[val][valas].toString())))
+                // const allocations = await rari.pools.stable.allocations.getRawAllocations()
+                // Object.keys(allocations).map(val => Object.keys(allocations[val]).map(valas => console.log(allocations[val][valas].toString())))
 
             // Get Currency Usd Prices
-            // const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
-            // Object.keys(currencies).map(key => console.log(currencies[key].toString()))
+                // const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
+                // Object.keys(currencies).map(key => console.log(currencies[key].toString()))
 
             // dYdX getCurrencyApys() subpools has to be converted to a property i.e this.subpools
                 // const data = await rari.subpools.dYdX.getCurrencyApys()
@@ -83,7 +83,11 @@ const Testing = async () => {
                 // Object.keys(data).forEach(key => console.log(ss.utils.formatUnits(data[key], 77) * 1e18))
 
             // Compound
-            console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
+                // Get Currency Supplier And Compo Apys
+                    //console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
+                
+                // Get Currency APYs
+                    console.log( await rari.subpools.Compound.getCurrencyApys() )
 }
 
 Testing()
