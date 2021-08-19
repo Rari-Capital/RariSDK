@@ -1,6 +1,7 @@
 var ethers = require('ethers')
 var axios = require('axios')
 var Caches = require('../cache.ts') 
+var erc20Abi = require('../abi/ERC20.json')
 
 const externalContractAddresses = {
     Masset: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
@@ -46,8 +47,24 @@ module.exports = class mStableSubpool {
                 return console.error("Failed to decode exchange rates from The Graph when calculating mStable 24-hour APY");
         
         this.cache.update("mUsdSwapFee", ethers.BigNumber.from(data.data.masset.feeRate));
-        
+
+        let apy = ethers.utils.parseUnits(data.data.masset.savingsContractsV2[0].dailyAPY, 16);
+
+        if(includeIMUsdVaultApy)
+                apy = apy.add(
+                    await this.getIMUsdVaultApy
+                )
         return data;
+    }
+
+    async getIMUsdVaultWeeklyRoi(totalStakingRewards, stakingTokenPrice) {
+        const contract = new ethers.Contract("0x30647a72dc82d7fbb1123ea74716ab8a317eac19", erc20Abi, this.provider)
+        const totalStaked = await contract.balanceOf("0x78befca7de27d07dc6e71da295cc2946681a6c7b")
+        return totalStaked
+    }
+
+    async getIMUsdVaultApy(totalStakingRewards, stakingTokenPrice) {
+
     }
 
 

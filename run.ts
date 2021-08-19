@@ -95,11 +95,14 @@ const Testing = async () => {
 
                 // getMUsdSavingsApy
                     // Print Data
-                        const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
                         // console.log(data)
                     // Print UsdSwapFee
-                        const fee = rari.subpools.mStable.cache
-                        console.log(fee)
+                        // const fee = rari.subpools.mStable.cache
+                        // console.log(fee)
+                    // Print total staked
+                        const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
+                        console.log( data.div(ss.constants.WeiPerEther).toString())
 }
 
 Testing()
