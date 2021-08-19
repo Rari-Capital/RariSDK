@@ -1,4 +1,4 @@
-const cache = require('../cache') 
+var Caches = require('../cache.ts') 
 
 module.exports = class AaveSubpool {
     ethers
@@ -6,7 +6,7 @@ module.exports = class AaveSubpool {
 
     constructor(ethers) {
         this.ethers = ethers;
-        this.cache = new Cache({
+        this.cache = new Caches({
             aaveCurrencyApys: 300,
         });
     }
@@ -54,7 +54,7 @@ module.exports = class AaveSubpool {
                     : data.data.reserves[i].symbol
                 ] = ethers.BigNumber
                     .from(data.date.reserves[i].liquidityRate)
-                    .div(ethers.BigNumber.from(1e19))
+                    .div(ethers.BigNumber.from(1e9))
             }
 
             return apyBNs
