@@ -42,6 +42,11 @@ module.exports = class mStableSubpool {
             )
         ).data;
 
+        if (!data || !data.data)
+                return console.error("Failed to decode exchange rates from The Graph when calculating mStable 24-hour APY");
+        
+        this.cache.update("mUsdSwapFee", ethers.BigNumber.from(data.data.masset.feeRate));
+        
         return data;
     }
 

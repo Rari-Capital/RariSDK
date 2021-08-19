@@ -91,11 +91,15 @@ const Testing = async () => {
 
             // mStable
                 // External contracts
-                //console.log( rari.subpools.mStable.externalContracts )
+                // console.log( rari.subpools.mStable.externalContracts )
 
                 // getMUsdSavingsApy
-                const data = await rari.subpools.mStable.getMUsdSavingsApy()
-                console.log(data)
+                    // Print Data
+                        const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                        // console.log(data)
+                    // Print UsdSwapFee
+                        const fee = rari.subpools.mStable.cache
+                        console.log(fee)
 }
 
 Testing()
