@@ -70,8 +70,12 @@ const Testing = async () => {
             // console.log(allocations)
 
             // Get Raw Allocations
-            const allocations = await rari.pools.stable.allocations.getRawAllocations()
-            Object.keys(allocations).map(val => Object.keys(allocations[val]).map(valas => console.log(allocations[val][valas].toString())))
+            // const allocations = await rari.pools.stable.allocations.getRawAllocations()
+            // Object.keys(allocations).map(val => Object.keys(allocations[val]).map(valas => console.log(allocations[val][valas].toString())))
+
+            // Get Currency Usd Prices
+            const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
+            console.log(Object.keys(currencies).map(key => console.log(currencies[key].toString())))
         
             
 }

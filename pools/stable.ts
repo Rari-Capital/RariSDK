@@ -319,6 +319,17 @@ module.exports = class StablePool {
                     }
                 } 
                 return currencies;
+            },
+            getCurrencyUsdPrices: async () => {
+                const prices = {};
+                const allBalances = await self.cache.getOrUpdate(
+                    "allBalances", 
+                    self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                );
+                for (let i = 0; i < allBalances["0"].length; i++) {
+                    prices[allBalances["0"][i]] = ethers.BigNumber.from(allBalances["4"][i]);
+                }
+                return prices;
             }
         }
     }
