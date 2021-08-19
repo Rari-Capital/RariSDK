@@ -21,7 +21,6 @@ module.exports = class DydxSubpool {
             let apyBNs= {};
 
             for (let i =0; i < data.markets.length; i++) {
-                console.log(typeof data.markets[i].totalSupplyAPR, data.markets[i].totalSupplyAPR * 1e18)
                 apyBNs[data.markets[i].symbol] = ethers.utils.parseUnits(data.markets[i].totalSupplyAPR, 77)
             }
             return apyBNs
