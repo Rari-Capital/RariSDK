@@ -87,7 +87,10 @@ const Testing = async () => {
                     //console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
                 
                 // Get Currency APYs
-                    console.log( await rari.subpools.Compound.getCurrencyApys() )
+                    //console.log( await rari.subpools.Compound.getCurrencyApys() )
+
+            // mStable
+                console.log( rari.subpools.mStable.externalContracts )
 }
 
 Testing()

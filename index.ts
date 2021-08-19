@@ -12,6 +12,7 @@ var Caches = require('./cache.ts')
 const AaveSubpool = require("./subpools/aave.ts")
 const DydxSubpool = require("./subpools/dydx.ts")
 const CompoundSubpool = require("./subpools/compound.ts")
+const mStable = require('./subpools/mstable.ts')
 
 // Pools
 const StablePool = require("./pools/stable.ts")
@@ -91,6 +92,7 @@ module.exports = class Rari {
             Aave: new AaveSubpool(this.provider),
             dYdX: new DydxSubpool(this.provider),
             Compound: new CompoundSubpool(this.provider),
+            mStable: new mStable(this.provider),
         }
 
         this.pools = {
