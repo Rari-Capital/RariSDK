@@ -8,7 +8,7 @@ const { ethers: ss } = require('ethers')
 const rari = new Rari(turboGethURL);
 
 //const blocks = rari.provider.getBlock(10000).then(res => console.log(res))
- 
+
 const Testing = async () => {
     // GetEthUsdPriceBN
 
@@ -45,14 +45,14 @@ const Testing = async () => {
             // Balance of
             // console.log( (await rari.pools.stable.balances.balanceOf('0x5853eD4f26A3fceA565b3FBC698bb19cdF6DEB85')).toString() / ss.constants.WeiPerEther)
 
-        // Allocations 
+        // Allocations
             // Get currency allocations with fees
             // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocations()
             // //@ts-ignore
             // Object.keys(allocations).map(vasl => console.log(
             //     (allocations[vasl]
-            //         .div( rari.internalTokens[vasl].decimals === 18 
-            //             ? ss.constants.WeiPerEther 
+            //         .div( rari.internalTokens[vasl].decimals === 18
+            //             ? ss.constants.WeiPerEther
             //             : 10 ** ss.BigNumber.from(rari.internalTokens[vasl].decimals)
             //         ).toString())))
 
@@ -74,10 +74,16 @@ const Testing = async () => {
             // Object.keys(allocations).map(val => Object.keys(allocations[val]).map(valas => console.log(allocations[val][valas].toString())))
 
             // Get Currency Usd Prices
-            const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
-            console.log(Object.keys(currencies).map(key => console.log(currencies[key].toString())))
-        
-            
+            // const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
+            // Object.keys(currencies).map(key => console.log(currencies[key].toString()))
+
+            // dYdX getCurrencyApys() subpools has to be converted to a property i.e this.subpools
+                // const data = await rari.subpools.dYdX.getCurrencyApys()
+                // console.log(data)
+                // Object.keys(data).forEach(key => console.log(ss.utils.formatUnits(data[key], 77) * 1e18))
+
+            // Compound
+            console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
 }
 
 Testing()
