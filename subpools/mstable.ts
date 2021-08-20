@@ -3,12 +3,12 @@ var axios = require('axios')
 var Caches = require('../cache.ts') 
 var erc20Abi = require('../abi/ERC20.json')
 
-const externalContractAddresses = {
+var externalContractAddresses = {
     Masset: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
     MassetValidationHelper: "0xabcc93c3be238884cc3309c19afd128fafc16911",
   };
 
-let externalAbis = {};
+var externalAbis = {};
 for (const contractName of Object.keys(externalContractAddresses)) {
     externalAbis[contractName] = require('./mstable/abi/' + contractName + '.json')
 }
@@ -57,6 +57,7 @@ module.exports = class mStableSubpool {
 
         return apy;
     }
+
 
     async getMtaUsdPrice() {
         return (

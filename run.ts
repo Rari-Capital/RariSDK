@@ -109,8 +109,14 @@ const Testing = async () => {
                         // const data = await rari.subpools.mStable.getMUsdSavingsApy()
 
                     // Print MUsdSavings Apy
-                        const data = await rari.subpools.mStable.getMUsdSavingsApy()
-                        console.log(data.toString() / 1e16)
+                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                        // console.log(data.toString() / 1e16)
+            // Alpha
+                // External Contracts
+                 console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
+
+                // getIBEthApyBN
+                console.log(await rari.subpools.Alpha.getIBEthApyBN())
 }
 
 Testing()
