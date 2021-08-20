@@ -38,7 +38,8 @@ module.exports = class AlphaSubpool {
             try {
                 const glbDebtVal = await self.externalContracts.Bank.glbDebtVal()
                 const balance = await self.provider.getBalance(self.externalContracts.Bank.address)
-                return balance
+                const interestRatePerSecondBN = await self.externalContracts.ConfigurableInterestBankConfig.callStatic.getInterestRate(glbDebtVal, balance)
+                return interestRatePerSecondBN
             } catch(e) {
                 console.log(e)
             }
