@@ -91,7 +91,7 @@ module.exports = class Rari {
             });
         };
 
-        this.subpools = {
+        let subpools = {
             Aave: new AaveSubpool(this.provider),
             dYdX: new DydxSubpool(this.provider),
             Compound: new CompoundSubpool(this.provider),
@@ -114,7 +114,20 @@ module.exports = class Rari {
             stable: new StablePool(
                 this.provider, 
                 {
-                   Aave: "Aave"
+                   Aave: subpools["Aave"],
+                   dYdX: subpools["dYdX"],
+                   Compound: subpools["Compound"],
+                   mStable: subpools["mStable"],
+                   Fuse2: subpools["Fuse2"],
+                   Fuse3: subpools["Fuse3"],
+                   Fuse6: subpools["Fuse6"],
+                   Fuse7: subpools["Fuse7"],
+                   Fuse11: subpools["Fuse11"],
+                   Fuse13: subpools["Fuse13"],
+                   Fuse14: subpools["Fuse14"],
+                   Fuse15: subpools["Fuse15"],
+                   Fuse16: subpools["Fuse16"],
+                   Fuse18: subpools["Fuse18"],
                 },
                 this.getAllTokens)
         }
