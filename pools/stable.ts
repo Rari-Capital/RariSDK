@@ -68,6 +68,7 @@ module.exports = class StablePool {
     legacyContracts
     balances
     allocations
+    apy
 
     constructor(provider, subpools, getAllTokens) {
         this.provider = provider;
@@ -143,7 +144,7 @@ module.exports = class StablePool {
                 var rftAmountBN = amount.mul(rftTotalSupplyBN).div(fundBalanceBN);
                 return await self.contracts.RariFundToken.transfer(recipient, rftAmountBN).send(options)
             }
-        }
+        };
 
         this.allocations = {
             CURRENCIES: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"],
@@ -330,6 +331,81 @@ module.exports = class StablePool {
                     prices[allBalances["0"][i]] = ethers.BigNumber.from(allBalances["4"][i]);
                 }
                 return prices;
+            }
+        };
+
+        this.apy = {
+            getCurrentRawApy: async () => {
+                let factors:any[] = [];
+                let totalBalanceUsdBN = ethers.constants.Zero;
+
+                // Get all Balances
+                const allBalances = await self.cache.getOrUpdate(
+                    "allBalances",
+                    self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                );
+
+                // Get raw balance
+                for (let i = 0; i < allBalances["0"].length; i++) {
+                    const currencyCode = allBalances["0"][i];
+                    const priceInUsdBN = ethers.BigNumber.from(allBalances["4"][i]);
+                    const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
+
+                    const contractBalanceUsdBN = contractBalanceBN
+                        .mul(priceInUsdBN)
+                        .div(
+                            self.internalTokens[currencyCode].decimals === 18 
+                            ? ethers.constants.WeiPerEther 
+                            : ethers.BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                        );
+                    
+                    factors.push([contractBalanceUsdBN, ethers.constants.Zero]);
+                    totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN)
+                    const pools = allBalances["2"][i];
+                    const poolBalances = allBalances["3"][i];
+
+                    for (let j = 0; j < pools.length; j++ ) {
+                        const pool = pools[j]
+                        const poolBalanceBN = ethers.BigNumber.from(poolBalances[j])
+                        const poolBalanceUsdBN = poolBalanceBN
+                            .mul(priceInUsdBN)
+                            .div(
+                                self.internalTokens[currencyCode].decimals === 18 
+                                ? ethers.constants.WeiPerEther 
+                                : ethers.BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                            );
+
+                        const poolApyBN = poolBalanceUsdBN.gt(ethers.constants.Zero) 
+                            ? ( await self.pools[self.allocations.POOLS[pool]].getCurrencyApys() )[currencyCode]
+                            : ethers.constants.Zero
+                        
+                        factors.push([poolBalanceUsdBN, poolApyBN]);
+                        totalBalanceUsdBN = totalBalanceUsdBN.add(poolBalanceUsdBN)
+                    }
+                }
+                
+                console.log(totalBalanceUsdBN.isZero())
+                if (totalBalanceUsdBN.isZero()) {
+                    let maxApyBN = ethers.constants.Zero;
+                    for (let i = 0; i < factors.length; i++ ){
+                        if(factors[i][1].gt(maxApyBN)) 
+                            maxApyBN = factors[i][1];
+                        }
+                    return maxApyBN;
+                }
+
+                let apyBN = ethers.constants.Zero
+                for (let i =0; i < factors.length; i++){
+                    apyBN = apyBN.add(
+                        factors[i][0]
+                        .mul(
+                            factors[i][1].gt(ethers.constants.Zero)
+                            ? factors[i][1]
+                            : ethers.constants.Zero
+                        ).div(totalBalanceUsdBN)
+                    );
+                };
+                return apyBN;
             }
         }
     }

@@ -76,59 +76,64 @@ const Testing = async () => {
             // Get Currency Usd Prices
                 // const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
                 // Object.keys(currencies).map(key => console.log(currencies[key].toString()))
+            // Get raw apy
+                const apy = await rari.pools.stable.apy.getCurrentRawApy()
+                console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
 
-            // dYdX getCurrencyApys() subpools has to be converted to a property i.e this.subpools
-                // const data = await rari.subpools.dYdX.getCurrencyApys()
+    // dYdX 
+        //getCurrencyApys() subpools has to be converted to a property i.e this.subpools
+            // const data = await rari.subpools.dYdX.getCurrencyApys()
+            // console.log(data)
+            // Object.keys(data).forEach(key => console.log(ss.utils.formatUnits(data[key], 77) * 1e18))
+
+    // Compound
+        // Get Currency Supplier And Compo Apys
+            //console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
+        
+        // Get Currency APYs
+            //console.log( await rari.subpools.Compound.getCurrencyApys() )
+
+    // mStable
+        // External contracts
+        // console.log( rari.subpools.mStable.externalContracts )
+
+        // getMUsdSavingsApy
+            // Print Data
+                // const data = await rari.subpools.mStable.getMUsdSavingsApy()
                 // console.log(data)
-                // Object.keys(data).forEach(key => console.log(ss.utils.formatUnits(data[key], 77) * 1e18))
+            // Print UsdSwapFee
+                // const fee = rari.subpools.mStable.cache
+                // console.log(fee)
+            // Print total staked
+                // const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
+                // console.log( data.div(ss.constants.WeiPerEther).toString())
+            // Print weekly return on investment
+                // const data = await rari.subpools.mStable.getMUsdSavingsApy()
+            // Print vault apy in BN
+                // const data = await rari.subpools.mStable.getMUsdSavingsApy()
 
-            // Compound
-                // Get Currency Supplier And Compo Apys
-                    //console.log( await rari.subpools.Compound.getCurrencySupplierAndCompApys() ) 
-                
-                // Get Currency APYs
-                    //console.log( await rari.subpools.Compound.getCurrencyApys() )
+            // Print MUsdSavings Apy
+                // const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                // console.log(data.toString() / 1e16)
+    // Alpha
+        // External Contracts
+            // console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
 
-            // mStable
-                // External contracts
-                // console.log( rari.subpools.mStable.externalContracts )
-
-                // getMUsdSavingsApy
-                    // Print Data
-                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
-                        // console.log(data)
-                    // Print UsdSwapFee
-                        // const fee = rari.subpools.mStable.cache
-                        // console.log(fee)
-                    // Print total staked
-                        // const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
-                        // console.log( data.div(ss.constants.WeiPerEther).toString())
-                    // Print weekly return on investment
-                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
-                    // Print vault apy in BN
-                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
-
-                    // Print MUsdSavings Apy
-                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
-                        // console.log(data.toString() / 1e16)
-            // Alpha
-                // External Contracts
-                 // console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
-
-                // getIBEthApyBN
-                //console.log((await rari.subpools.Alpha.getIBEthApyBN()).toString() / 1e18)
-            // Fuse
-                // getCurrencyAPY
-                console.log(await rari.subpools.Fuse2.getCurrencyApys())
-                console.log(await rari.subpools.Fuse3.getCurrencyApys())
-                console.log(await rari.subpools.Fuse6.getCurrencyApys())
-                console.log(await rari.subpools.Fuse7.getCurrencyApys())
-                console.log(await rari.subpools.Fuse11.getCurrencyApys())
-                console.log(await rari.subpools.Fuse13.getCurrencyApys())
-                console.log(await rari.subpools.Fuse14.getCurrencyApys())
-                console.log(await rari.subpools.Fuse15.getCurrencyApys())
-                console.log(await rari.subpools.Fuse16.getCurrencyApys())
-                console.log(await rari.subpools.Fuse18.getCurrencyApys())
+        // getIBEthApyBN
+            //console.log((await rari.subpools.Alpha.getIBEthApyBN()).toString() / 1e18)
+    // Fuse
+        // getCurrencyAPY
+            // console.log(await rari.subpools.Fuse2.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse3.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse6.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse7.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse11.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse13.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse14.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse15.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse16.getCurrencyApys())
+            // console.log(await rari.subpools.Fuse18.getCurrencyApys())
+            
 
 }
 
