@@ -113,10 +113,10 @@ const Testing = async () => {
                         // console.log(data.toString() / 1e16)
             // Alpha
                 // External Contracts
-                 console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
+                 // console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
 
                 // getIBEthApyBN
-                console.log(await rari.subpools.Alpha.getIBEthApyBN())
+                console.log((await rari.subpools.Alpha.getIBEthApyBN()).toString() / 1e18)
 }
 
 Testing()

@@ -36,9 +36,9 @@ module.exports = class AlphaSubpool {
         var self = this;
         return await this.cache.getOrUpdate("alphaIBEthApy", async function() {
             try {
-                console.log('here')
-                var glbDebtVal = await self.externalContracts.Bank.glbDebtVal()
-                return glbDebtVal
+                const glbDebtVal = await self.externalContracts.Bank.glbDebtVal()
+                const balance = await self.provider.getBalance(self.externalContracts.Bank.address)
+                return balance
             } catch(e) {
                 console.log(e)
             }
