@@ -58,6 +58,15 @@ module.exports = class mStableSubpool {
         return apy;
     }
 
+    async getCurrencyApys() {
+        var self = this;
+        return await self.cache.getOrUpdate(
+            "mStableCurrencyApys",
+            async function () {
+                return { mUSD: await self.getMUsdSavingsApy(true) };
+            }
+        )
+    }
 
     async getMtaUsdPrice() {
         return (
