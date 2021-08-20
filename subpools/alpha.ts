@@ -38,10 +38,11 @@ module.exports = class AlphaSubpool {
             try {
                 const glbDebtVal = await self.externalContracts.Bank.glbDebtVal()
                 const balance = await self.provider.getBalance(self.externalContracts.Bank.address)
+                // as this is no longer being used I'll leave it as is
                 const interestRatePerSecondBN = await self.externalContracts.ConfigurableInterestBankConfig.callStatic.getInterestRate(glbDebtVal, balance)
-                return interestRatePerSecondBN
+                return balance
             } catch(e) {
-                console.log(e)
+                throw new Error("Failed to get Alpha Homora V1 interest rate: " + e);
             }
         })
     }
