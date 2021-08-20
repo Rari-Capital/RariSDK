@@ -116,7 +116,20 @@ const Testing = async () => {
                  // console.log( Object.keys(rari.subpools.Alpha.externalContracts) )
 
                 // getIBEthApyBN
-                console.log((await rari.subpools.Alpha.getIBEthApyBN()).toString() / 1e18)
+                //console.log((await rari.subpools.Alpha.getIBEthApyBN()).toString() / 1e18)
+            // Fuse
+                // getCurrencyAPY
+                console.log(await rari.subpools.Fuse2.getCurrencyApys())
+                console.log(await rari.subpools.Fuse3.getCurrencyApys())
+                console.log(await rari.subpools.Fuse6.getCurrencyApys())
+                console.log(await rari.subpools.Fuse7.getCurrencyApys())
+                console.log(await rari.subpools.Fuse11.getCurrencyApys())
+                console.log(await rari.subpools.Fuse13.getCurrencyApys())
+                console.log(await rari.subpools.Fuse14.getCurrencyApys())
+                console.log(await rari.subpools.Fuse15.getCurrencyApys())
+                console.log(await rari.subpools.Fuse16.getCurrencyApys())
+                console.log(await rari.subpools.Fuse18.getCurrencyApys())
+
 }
 
 Testing()

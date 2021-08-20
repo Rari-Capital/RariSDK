@@ -15,6 +15,7 @@ const CompoundSubpool = require("./subpools/compound.ts")
 const mStable = require('./subpools/mstable.ts')
 const yVault = require('./subpools/yvault.ts')
 const Alpha = require('./subpools/alpha.ts')
+const Fuse = require('./subpools/fuse.ts')
 
 // Pools
 const StablePool = require("./pools/stable.ts")
@@ -96,8 +97,18 @@ module.exports = class Rari {
             Compound: new CompoundSubpool(this.provider),
             mStable: new mStable(this.provider),
             yVault: new yVault(this.provider),
-            Alpha: new Alpha(this.provider)
-        }
+            Alpha: new Alpha(this.provider),
+            Fuse2: new Fuse(this.provider, { "USDC": "0x69aEd4932B3aB019609dc567809FA6953a7E0858" }),
+            Fuse3: new Fuse(this.provider, { "USDC": "0x94C49563a3950424a2a7790c3eF5458A2A359C7e" }),
+            Fuse6: new Fuse(this.provider, { "USDC": "0xdb55b77f5e8a1a41931684cf9e4881d24e6b6cc9", "DAI": "0x989273ec41274C4227bCB878C2c26fdd3afbE70d" }),
+            Fuse7: new Fuse(this.provider, { "USDC": "0x53De5A7B03dc24Ff5d25ccF7Ad337a0425Dfd8D1", "DAI": "0x7322B10Db09687fe8889aD8e87f333f95104839F" }),
+            Fuse11: new Fuse(this.provider, { "USDC": "0x241056eb034BEA7482290f4a9E3e4dd7269D4329" }),
+            Fuse13: new Fuse(this.provider, { "USDC": "0x3b624de26A6CeBa421f9857127e37A5EFD8ecaab" }),
+            Fuse14: new Fuse(this.provider, { "USDC": "0x6447026FE96363669B5be2EE135843a5e4d15B50" }),
+            Fuse15: new Fuse(this.provider, { "USDC": "0x5F9FaeD5599D86D2e6F8d982189d560C067897a0" }),
+            Fuse16: new Fuse(this.provider, { "USDC": "0x7bA788fa2773fb157EfAfAd046FE5E0e6120DEd5" }),
+            Fuse18: new Fuse(this.provider,  { "USDC": "0x6f95d4d251053483f41c8718C30F4F3C404A8cf2", "DAI": "0x8E4E0257A4759559B4B1AC087fe8d80c63f20D19" }),
+        };
 
         this.pools = {
             stable: new StablePool(
