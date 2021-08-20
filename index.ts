@@ -114,13 +114,12 @@ module.exports = class Rari {
             stable: new StablePool(
                 this.provider, 
                 {
-                   Aave: subpools["Aave"],
                    dYdX: subpools["dYdX"],
                    Compound: subpools["Compound"],
+                   Aave: subpools["Aave"],
                    mStable: subpools["mStable"],
                    Fuse2: subpools["Fuse2"],
                    Fuse3: subpools["Fuse3"],
-                   Fuse6: subpools["Fuse6"],
                    Fuse7: subpools["Fuse7"],
                    Fuse11: subpools["Fuse11"],
                    Fuse13: subpools["Fuse13"],
@@ -128,6 +127,7 @@ module.exports = class Rari {
                    Fuse15: subpools["Fuse15"],
                    Fuse16: subpools["Fuse16"],
                    Fuse18: subpools["Fuse18"],
+                   Fuse6: subpools["Fuse6"],
                 },
                 this.getAllTokens)
         }
