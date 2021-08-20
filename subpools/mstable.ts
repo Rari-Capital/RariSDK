@@ -50,12 +50,12 @@ module.exports = class mStableSubpool {
 
         let apy = ethers.utils.parseUnits(data.data.masset.savingsContractsV2[0].dailyAPY, 16);
 
-        console.log(await this.getIMUsdVaultApy(data.data.masset.savingsContractsV2[0].boostedSavingsVaults[0].totalStakingRewards, data.data.masset.savingsContractsV2[0].latestExchangeRate.rate ), "YOOO")
-        // if(includeIMUsdVaultApy)
-        //         apy = apy.add(
-        //             await this.getIMUsdVaultApy
-        //         )
-        return data;
+        if(includeIMUsdVaultApy)
+                apy = apy.add(
+                    await this.getIMUsdVaultApy(data.data.masset.savingsContractsV2[0].boostedSavingsVaults[0].totalStakingRewards, data.data.masset.savingsContractsV2[0].latestExchangeRate.rate )
+                );
+
+        return apy;
     }
 
     async getMtaUsdPrice() {

@@ -106,7 +106,11 @@ const Testing = async () => {
                     // Print weekly return on investment
                         // const data = await rari.subpools.mStable.getMUsdSavingsApy()
                     // Print vault apy in BN
+                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
+
+                    // Print MUsdSavings Apy
                         const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                        console.log(data.toString() / 1e16)
 }
 
 Testing()
