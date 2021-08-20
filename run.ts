@@ -104,6 +104,8 @@ const Testing = async () => {
                         // const data =  await rari.subpools.mStable.getIMUsdVaultWeeklyRoi()
                         // console.log( data.div(ss.constants.WeiPerEther).toString())
                     // Print weekly return on investment
+                        // const data = await rari.subpools.mStable.getMUsdSavingsApy()
+                    // Print vault apy in BN
                         const data = await rari.subpools.mStable.getMUsdSavingsApy()
 }
 

@@ -50,7 +50,7 @@ module.exports = class mStableSubpool {
 
         let apy = ethers.utils.parseUnits(data.data.masset.savingsContractsV2[0].dailyAPY, 16);
 
-        console.log( await this.getIMUsdVaultWeeklyRoi(data.data.masset.savingsContractsV2[0].boostedSavingsVaults[0].totalStakingRewards, data.data.masset.savingsContractsV2[0].latestExchangeRate.rate ), "YOOO")
+        console.log(await this.getIMUsdVaultApy(data.data.masset.savingsContractsV2[0].boostedSavingsVaults[0].totalStakingRewards, data.data.masset.savingsContractsV2[0].latestExchangeRate.rate ), "YOOO")
         // if(includeIMUsdVaultApy)
         //         apy = apy.add(
         //             await this.getIMUsdVaultApy
@@ -78,7 +78,19 @@ module.exports = class mStableSubpool {
     }
 
     async getIMUsdVaultApy(totalStakingRewards, stakingTokenPrice) {
+        const weeklyROI = await this.getIMUsdVaultWeeklyRoi(totalStakingRewards, stakingTokenPrice)
+        const apyBN = ethers.utils.parseUnits(
+                            ethers.utils.formatUnits(
+                                (
+                                    (
+                                        (
+                                            (weeklyROI + 1) 
+                                        ** 52) 
+                                    - 1) 
+                                * 1e18)
+                            .toFixed(0), 18) , 18)
 
+        return apyBN
     }
 
 
