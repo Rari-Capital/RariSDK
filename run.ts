@@ -77,8 +77,8 @@ const Testing = async () => {
                 // const currencies = await rari.pools.stable.allocations.getCurrencyUsdPrices()
                 // Object.keys(currencies).map(key => console.log(currencies[key].toString()))
             // Get raw apy
-                const apy = await rari.pools.stable.apy.getCurrentRawApy()
-                console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
+                // const apy = await rari.pools.stable.apy.getCurrentRawApy()
+                // console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
 
     // dYdX 
         //getCurrencyApys() subpools has to be converted to a property i.e this.subpools
@@ -133,7 +133,10 @@ const Testing = async () => {
             // console.log(await rari.subpools.Fuse15.getCurrencyApys())
             // console.log(await rari.subpools.Fuse16.getCurrencyApys())
             // console.log(await rari.subpools.Fuse18.getCurrencyApys())
-            
+    
+    // Dai Pool
+        // getAllTokens
+            console.log(Object.keys(rari.pools.dai.contracts))
 
 }
 

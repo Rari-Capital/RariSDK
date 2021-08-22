@@ -19,6 +19,7 @@ const Fuse = require('./subpools/fuse.ts')
 
 // Pools
 const StablePool = require("./pools/stable.ts")
+const DaiPool = require('./pools/dai.ts')
 
 // ERC20ABI
 var erc20Abi = require('./abi/ERC20.json')
@@ -129,7 +130,12 @@ module.exports = class Rari {
                    Fuse18: subpools["Fuse18"],
                    Fuse6: subpools["Fuse6"],
                 },
-                this.getAllTokens)
+                this.getAllTokens),
+            dai: new DaiPool(
+                this.provider,
+                {},
+                this.getAllTokens
+            ),
         }
     }
 
