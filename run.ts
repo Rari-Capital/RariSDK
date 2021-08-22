@@ -37,7 +37,7 @@ const Testing = async () => {
 
         // Balances
             // getTotalSupply
-                // console.log( (await rari.pools.stable.balances.getTotalSupply()).toString() )
+                console.log( (await rari.pools.stable.balances.getTotalSupply()).toString() / ss.constants.WeiPerEther )
 
             // getTotalInterestAccrued
                 // console.log( (await rari.pools.stable.balances.getTotalInterestAccrued() ).toString() / ss.constants.WeiPerEther)
@@ -57,10 +57,10 @@ const Testing = async () => {
                 //         ).toString())))
 
             //  Get currency allocations in USD
-                // const allocations = await rari.pools.stable.allocations.getRawCurrencyAllocationsInUsd()
-                // Object.keys(allocations).map(val => console.log(
-                //     allocations[val].toString() / ss.constants.WeiPerEther
-                // ))
+                const allocationss = await rari.pools.stable.allocations.getRawCurrencyAllocationsInUsd()
+                Object.keys(allocationss).map(val => console.log(
+                    allocationss[val].toString() / ss.constants.WeiPerEther
+                ))
 
             // Get Pool Allocations
                 // const allocations = await rari.pools.stable.allocations.getRawPoolAllocations()
@@ -145,13 +145,16 @@ const Testing = async () => {
             // console.log(Object.keys(rari.pools.dai.legacyContracts['v1.0.0']))
 
         // Get allocations in USD
-                // const allocations = await rari.pools.dai.allocations.getRawCurrencyAllocationsInUsd()
-                // Object.keys(allocations).map(val => console.log(
-                //         allocations[val].toString() / ss.constants.WeiPerEther
-                // ))
+                const allocations = await rari.pools.dai.allocations.getRawCurrencyAllocationsInUsd()
+                Object.keys(allocations).map(val => console.log(
+                        allocations[val].toString() / ss.constants.WeiPerEther
+                ))
         // Get apy
-            const apy = await rari.pools.dai.apy.getCurrentRawApy()
-            console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
+            // const apy = await rari.pools.dai.apy.getCurrentRawApy()
+            // console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
+
+        // getTotalSupply
+                console.log( (await rari.pools.dai.balances.getTotalSupply()).toString() / ss.constants.WeiPerEther )
 
 }
 
