@@ -3,14 +3,14 @@ var axios = require('axios')
 var Caches = require('../cache.ts') 
 var erc20Abi = require('../abi/ERC20.json')
 
-var externalContractAddresses = {
+const externalContractAddressesMStable = {
     Masset: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
     MassetValidationHelper: "0xabcc93c3be238884cc3309c19afd128fafc16911",
   };
 
-var externalAbis = {};
-for (const contractName of Object.keys(externalContractAddresses)) {
-    externalAbis[contractName] = require('./mstable/abi/' + contractName + '.json')
+const externalAbisMStable = {};
+for (const contractName of Object.keys(externalContractAddressesMStable)) {
+    externalAbisMStable[contractName] = require('./mstable/abi/' + contractName + '.json')
 }
 
 module.exports = class mStableSubpool {
@@ -27,8 +27,8 @@ module.exports = class mStableSubpool {
 
         this.externalContracts = {};
 
-        for (const contractName of Object.keys(externalContractAddresses)) {
-            this.externalContracts[contractName] = new ethers.Contract(externalContractAddresses[contractName], externalAbis[contractName])
+        for (const contractName of Object.keys(externalContractAddressesMStable)) {
+            this.externalContracts[contractName] = new ethers.Contract(externalContractAddressesMStable[contractName], externalAbisMStable[contractName])
         }
     }
 

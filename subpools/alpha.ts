@@ -6,9 +6,9 @@ var externalContractAddressesAlpha = {
     ConfigurableInterestBankConfig: "0x97a49f8eec63c0dfeb9db4c791229477962dc692",
   };
 
-var externalAbis = {};
+var externalAbisAlpha = {};
 for (const contractName of Object.keys(externalContractAddressesAlpha)) {
-    externalAbis[contractName] = require('./alpha/abi/' + contractName + '.json')
+    externalAbisAlpha[contractName] = require('./alpha/abi/' + contractName + '.json')
 }
 
 module.exports = class AlphaSubpool {
@@ -24,7 +24,7 @@ module.exports = class AlphaSubpool {
 
         this.externalContracts = {};
         for (const contractName of Object.keys(externalContractAddressesAlpha)) {
-            this.externalContracts[contractName] = new ethers.Contract(externalContractAddressesAlpha[contractName], externalAbis[contractName], this.provider);
+            this.externalContracts[contractName] = new ethers.Contract(externalContractAddressesAlpha[contractName], externalAbisAlpha[contractName], this.provider);
         }
     }
 

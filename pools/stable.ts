@@ -4,7 +4,7 @@ var Caches = require('../cache.ts')
 var erc20Abi = require('../abi/ERC20.json')
 
 // Contract addresses
-const contractAddresses = {
+const contractAddressesStable = {
     RariFundController: "0x66f4856f1bbd1eb09e1c8d9d646f5a3a193da569",
     RariFundManager: "0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a",
     RariFundToken: "0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0",
@@ -14,7 +14,7 @@ const contractAddresses = {
 
 // For every contractName require the ABI
 var abis = {};
-for (const contractName of Object.keys(contractAddresses))
+for (const contractName of Object.keys(contractAddressesStable))
     abis[contractName] = require("./stable/abi/" + contractName + ".json")
 
 // Legacy addresses
@@ -84,8 +84,8 @@ module.exports = class StablePool {
         });
 
         this.contracts = {};
-        for (const contractName of Object.keys(contractAddresses))
-            this.contracts[contractName] = new ethers.Contract(contractAddresses[contractName], abis[contractName], this.provider);
+        for (const contractName of Object.keys(contractAddressesStable))
+            this.contracts[contractName] = new ethers.Contract(contractAddressesStable[contractName], abis[contractName], this.provider);
         
         this.legacyContracts = {};
         for (const version of Object.keys(legacyContractAddresses)) {
