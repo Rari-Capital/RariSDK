@@ -133,7 +133,15 @@ module.exports = class Rari {
                 this.getAllTokens),
             dai: new DaiPool(
                 this.provider,
-                {},
+                {
+                    dYdX: subpools["dYdX"],
+                    Compound: subpools["Compound"],
+                    Aave: subpools["Aave"],
+                    mStable: subpools["mStable"],
+                    Fuse6: subpools["Fuse6"],
+                    Fuse7: subpools["Fuse7"],
+                    Fuse18: subpools["Fuse18"],
+                },
                 this.getAllTokens
             ),
         }
