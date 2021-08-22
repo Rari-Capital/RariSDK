@@ -142,7 +142,16 @@ const Testing = async () => {
             // console.log(Object.keys(await rari.pools.dai.getAllTokens()))
         
         // get legacy contracts
-            console.log(Object.keys(rari.pools.dai.legacyContracts['v1.0.0']))
+            // console.log(Object.keys(rari.pools.dai.legacyContracts['v1.0.0']))
+
+        // Get allocations in USD
+                // const allocations = await rari.pools.dai.allocations.getRawCurrencyAllocationsInUsd()
+                // Object.keys(allocations).map(val => console.log(
+                //         allocations[val].toString() / ss.constants.WeiPerEther
+                // ))
+        // Get apy
+            const apy = await rari.pools.dai.apy.getCurrentRawApy()
+            console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
 
 }
 
