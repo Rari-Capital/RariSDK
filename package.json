@@ -1,0 +1,19 @@
+{
+  "name": "@rari-capital/rari-sdk",
+  "version": "2.0.0",
+  "description": "Rari Capital SDK",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.6.1",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "ethers": "^5.4.4"
+  }
+}
