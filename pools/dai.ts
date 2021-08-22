@@ -53,7 +53,18 @@ module.exports = class DaiPool extends StablePools {
 
         this.contracts = {};
         for (const contractName of Object.keys(contractAddressesDai))
-        this.contracts[contractName] = new ethers.Contract(contractAddressesDai[contractName], DaiPool.CONTRACT_ABIS[contractName], this.provider)
+            this.contracts[contractName] = new ethers.Contract(contractAddressesDai[contractName], DaiPool.CONTRACT_ABIS[contractName], this.provider)
+
+        this.legacyContracts = {};
+        for (const version of Object.keys(legacyContractAddressesDai)) {
+            if (!this.legacyContracts[version]) this.legacyContracts[version] = {};
+
+            for (const contractName of Object.keys(legacyContractAddressesDai[version])) {
+              this.legacyContracts[version][
+                contractName
+              ] = new ethers.Contract(legacyContractAddressesDai[version][contractName], legacyAbisDai[version][contractName], this.provider);
+            }
+        }
     }
 
 }

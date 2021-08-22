@@ -139,7 +139,10 @@ const Testing = async () => {
             // console.log(Object.keys(rari.pools.dai.contracts))
 
         // getAllTokens
-            console.log(Object.keys(await rari.pools.dai.getAllTokens()))
+            // console.log(Object.keys(await rari.pools.dai.getAllTokens()))
+        
+        // get legacy contracts
+            console.log(Object.keys(rari.pools.dai.legacyContracts['v1.0.0']))
 
 }
 
