@@ -13,9 +13,9 @@ const contractAddressesStable = {
 };
 
 // For every contractName require the ABI
-var abis = {};
+var abisStable = {};
 for (const contractName of Object.keys(contractAddressesStable))
-    abis[contractName] = require("./stable/abi/" + contractName + ".json")
+    abisStable[contractName] = require("./stable/abi/" + contractName + ".json")
 
 // Legacy addresses
 const legacyContractAddresses = {
@@ -70,6 +70,9 @@ module.exports = class StablePool {
     allocations
     apy
 
+    static CONTRACT_ADDRESSES = contractAddressesStable;
+    static CONTRACT_ABIS = abisStable;
+
     constructor(provider, subpools, getAllTokens) {
         this.provider = provider;
         this.pools = subpools;
@@ -85,7 +88,7 @@ module.exports = class StablePool {
 
         this.contracts = {};
         for (const contractName of Object.keys(contractAddressesStable))
-            this.contracts[contractName] = new ethers.Contract(contractAddressesStable[contractName], abis[contractName], this.provider);
+            this.contracts[contractName] = new ethers.Contract(contractAddressesStable[contractName], abisStable[contractName], this.provider);
         
         this.legacyContracts = {};
         for (const version of Object.keys(legacyContractAddresses)) {
