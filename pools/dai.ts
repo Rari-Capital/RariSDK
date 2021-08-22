@@ -8,7 +8,7 @@ var ethers = require('ethers')
 var Caches = require('../cache.ts')
 
 // StablePool
-var StablePools = require('./stable')
+var StablePools = require('./stable.ts')
 
 // Contract Addresses
 const contractAddressesDai = {
@@ -65,6 +65,29 @@ module.exports = class DaiPool extends StablePools {
               ] = new ethers.Contract(legacyContractAddressesDai[version][contractName], legacyAbisDai[version][contractName], this.provider);
             }
         }
+
+        this.allocations.POOLS = (function() {
+            var pools = ["dYdX", "Compound", "Aave", "mStable"];
+            pools[100] = "Fuse6";
+            pools[101] = "Fuse7";
+            pools[102] = "Fuse18";
+            return pools;
+        })();
+
+        this.allocations.POOLS_BY_CURRENCY = {
+            DAI: ["dYdX", "Compound", "Aave", "Fuse6", "Fuse7", "Fuse18"],
+            mUSD: ["mStable"],
+        };
+
+        this.allocations.CURRENCIES_BY_POOL = {
+            dYdX: ["DAI"],
+            Compound: ["DAI"],
+            Aave: ["DAI"],
+            mStable: ["mUSD"],
+            Fuse6: ["DAI"],
+            Fuse7: ["DAI"],
+            Fuse18: ["DAI"],
+        };
     }
 
 }
