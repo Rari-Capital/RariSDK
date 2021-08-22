@@ -340,7 +340,7 @@ module.exports = class StablePool {
 
         this.apy = {
             getCurrentRawApy: async () => {
-                let factors:any[] = [];
+                let factors = [];
                 let totalBalanceUsdBN = ethers.constants.Zero;
 
                 // Get all Balances
