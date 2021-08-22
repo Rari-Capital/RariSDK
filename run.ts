@@ -135,8 +135,11 @@ const Testing = async () => {
             // console.log(await rari.subpools.Fuse18.getCurrencyApys())
     
     // Dai Pool
+        // get contracts
+            // console.log(Object.keys(rari.pools.dai.contracts))
+
         // getAllTokens
-            console.log(Object.keys(rari.pools.dai.contracts))
+            console.log(Object.keys(await rari.pools.dai.getAllTokens()))
 
 }
 
