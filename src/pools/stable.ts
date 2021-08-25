@@ -410,7 +410,14 @@ module.exports = class StablePool {
                     );
                 };
                 return apyBN;
-            }
+            },
+            getCurrentApy: async function () {
+                var rawFundApy = await self.apy.getCurrentRawApy();
+                var fee = await self.contracts.RariFundManager.getInterestFeeRate();
+                return rawFundApy.sub(
+                    rawFundApy.mul(fee).div(ethers.constants.WeiPerEther)
+                )
+            },
         }
     }
     
