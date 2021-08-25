@@ -2,7 +2,7 @@
   "name": "@rari-capital/rari-sdk",
   "version": "2.0.0",
   "description": "Rari Capital SDK",
-  "main": "/src/index.ts",
+  "main": "./src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
