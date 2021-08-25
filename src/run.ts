@@ -81,8 +81,14 @@ const Testing = async () => {
                 // const apy = await rari.pools.stable.apy.getCurrentRawApy()
                 // console.log(((apy.mul(ss.BigNumber.from(100)) ).toString() / 1e18).toFixed(2))
             // get current apy
-                const response = await rari.pools.stable.apy.getCurrentApy()
-                console.log(response.toString())
+                // const response = await rari.pools.stable.apy.getCurrentApy()
+                // console.log(response.toString())
+                // const response2 = await rari.pools.dai.apy.getCurrentApy()
+                // console.log(response2.toString())
+            // calculateApy 
+                //const response = await rari.pools.stable.apy.calculateApy
+                console.log( await rari.pools.stable.rspt.getExchangeRate() )
+                console.log( await rari.pools.dai.rspt.getExchangeRate() )
 
 
     // dYdX 

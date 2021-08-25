@@ -70,7 +70,8 @@ module.exports = class StablePool {
     balances
     allocations
     apy
-
+    rspt
+    poolToken
     static CONTRACT_ADDRESSES = contractAddressesStable;
     static CONTRACT_ABIS = abisStable;
 
@@ -418,6 +419,46 @@ module.exports = class StablePool {
                     rawFundApy.mul(fee).div(ethers.constants.WeiPerEther)
                 )
             },
+            calculateApy: function (
+                startTimestamp,
+                startRsptExchangeRate,
+                endTimestamp,
+                endRsptExchangeRate
+            ) {
+                const SECONDS_PER_YEAR = 365 * 86400
+                var timeDiff = endTimestamp - startTimestamp
+                const division = (endRsptExchangeRate.toString() / startRsptExchangeRate.toString()) 
+                const response = (division ** (SECONDS_PER_YEAR / timeDiff) -1) * 1e18
+                return Math.trunc(response)
+            },
+            getApyOverBlocks: async function (fromBlock = 0, toBlock) {
+                var blockNumber = (await self.provider.getBlock()).number 
+                var fromBlock = fromTimestamp !== undefined 
+                    ? Math.max(fromTimestamp, 10365607)
+                    : 10365607;
+                var toBlock = 
+                    toBlock !== undefined && toBlock !== "latest"
+                    ? Math.min(toBlock, blockNumber)
+                    : blockNumber;
+                var fromTimestamp = (await self.provider.getBlock(fromBlock)).timestamp;
+                var toTimestamp = (await self.provider.getBlock(toBlock)).timestamp;
+                var startRsptExchangeRate = await self.poolToken.getExchangeRate(fromBlock);
+                return 
+            }
+        }
+
+        this.rspt = this.poolToken = {
+            getExchangeRate: async function (blockNumber) {
+                if (!blockNumber) blockNumber =  (await self.provider.getBlock()).number;
+
+                var balance = await self.contracts.RariFundManager.callStatic.getFundBalance({ blockTag: blockNumber });
+                var supply = await self.contracts.RariFundToken.callStatic.totalSupply({blockTag: blockNumber});
+
+                return balance.toString() / supply.toString()
+            },
+            balanceOf: async function (account) {
+                return await self.contracts.RariFundToken.callStatic.balanceOf(account)
+            }
         }
     }
     
