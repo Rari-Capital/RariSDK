@@ -458,7 +458,10 @@ module.exports = class StablePool {
             },
             balanceOf: async function (account) {
                 return await self.contracts.RariFundToken.callStatic.balanceOf(account)
-            }
+            },
+            transfer: async function (recipient, amount, options) {
+                return await self.contracts.RariFundToken.transfer(recipient, amount, {options})
+            } 
         }
     }
     
