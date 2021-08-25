@@ -92,7 +92,9 @@ const Testing = async () => {
                 // console.log( await rari.pools.stable.rspt.getExchangeRate() )
                 // console.log( await rari.pools.dai.rspt.getExchangeRate() )
             // balance of 
-                console.log((await rari.pools.stable.rspt.balanceOf('0x907206d1fb31aeb9e36fdc98ce09f5b088be56bf')).toString() )
+                //console.log((await rari.pools.stable.rspt.balanceOf('0x907206d1fb31aeb9e36fdc98ce09f5b088be56bf')).toString() )
+        // Fees
+            console.log( (await rari.pools.stable.fees.getInterestFeeRate() ).toString())
 
 
     // dYdX 

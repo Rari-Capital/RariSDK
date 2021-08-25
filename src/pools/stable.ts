@@ -72,6 +72,7 @@ module.exports = class StablePool {
     apy
     rspt
     poolToken
+    fees
     static CONTRACT_ADDRESSES = contractAddressesStable;
     static CONTRACT_ABIS = abisStable;
 
@@ -431,21 +432,7 @@ module.exports = class StablePool {
                 const response = (division ** (SECONDS_PER_YEAR / timeDiff) -1) * 1e18
                 return Math.trunc(response)
             },
-            getApyOverBlocks: async function (fromBlock = 0, toBlock) {
-                var blockNumber = (await self.provider.getBlock()).number 
-                var fromBlock = fromTimestamp !== undefined 
-                    ? Math.max(fromTimestamp, 10365607)
-                    : 10365607;
-                var toBlock = 
-                    toBlock !== undefined && toBlock !== "latest"
-                    ? Math.min(toBlock, blockNumber)
-                    : blockNumber;
-                var fromTimestamp = (await self.provider.getBlock(fromBlock)).timestamp;
-                var toTimestamp = (await self.provider.getBlock(toBlock)).timestamp;
-                var startRsptExchangeRate = await self.poolToken.getExchangeRate(fromBlock);
-                return 
-            }
-        }
+        };
 
         this.rspt = this.poolToken = {
             getExchangeRate: async function (blockNumber) {
@@ -462,7 +449,14 @@ module.exports = class StablePool {
             transfer: async function (recipient, amount, options) {
                 return await self.contracts.RariFundToken.transfer(recipient, amount, {options})
             } 
+        };
+
+        this.fees = {
+            getInteresFeeRate: async function () {
+                return await self.contracts.RariFundManager.callStatic.getInterestFeeRate();
+            }
         }
+
     }
     
   internalTokens = {
