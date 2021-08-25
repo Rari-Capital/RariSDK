@@ -5,7 +5,7 @@ const turboGethURL = `https://turbogeth.crows.sh`;
 // Ethers
 const { ethers: ss } = require('ethers')
 
-const rari = new Rari(turboGethURL);
+const rari = new Rari("http://127.0.0.1:8545/");
 
 //const blocks = rari.provider.getBlock(10000).then(res => console.log(res))
 
@@ -94,7 +94,9 @@ const Testing = async () => {
             // balance of 
                 //console.log((await rari.pools.stable.rspt.balanceOf('0x907206d1fb31aeb9e36fdc98ce09f5b088be56bf')).toString() )
         // Fees
-            console.log( (await rari.pools.stable.fees.getInterestFeeRate() ).toString())
+            //console.log( (await rari.pools.stable.fees.getInterestFeeRate() ).toString())
+        // Deposits
+            console.log( (await rari.pools.stable.deposits.getDepositCurrencies()))
 
 
     // dYdX 
