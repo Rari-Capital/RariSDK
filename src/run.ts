@@ -96,7 +96,10 @@ const Testing = async () => {
         // Fees
             //console.log( (await rari.pools.stable.fees.getInterestFeeRate() ).toString())
         // Deposits
-            console.log( (await rari.pools.stable.deposits.getDepositCurrencies()))
+            // Get depositable currencies
+                // console.log( (await rari.pools.stable.deposits.getDepositCurrencies()))
+            // Get accepted direct deposits
+                console.log( await rari.pools.stable.deposits.getDirectDepositCurrencies())
 
 
     // dYdX 

@@ -467,6 +467,9 @@ module.exports = class StablePool {
                     if (currencyCodes.indexOf(currencyCode) < 0) currencyCodes.push(currencyCode)
                 }
                 return currencyCodes;
+            },
+            getDirectDepositCurrencies: async function () {
+                return await self.contracts.RariFundManager.callStatic.getAcceptedCurrencies();
             }
         }
 
