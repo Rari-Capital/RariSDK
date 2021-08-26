@@ -1279,7 +1279,10 @@ module.exports = class StablePool {
                   if (currencyCodes.indexOf(currencyCode) < 0)
                     currencyCodes.push(currencyCode);
                 return currencyCodes; 
-            }
+            },
+            getWithdrawalCurrenciesWithoutSlippage: async function () {
+                return await self.allocations.getRawCurrencyAllocations();
+            },
 
         }
     }

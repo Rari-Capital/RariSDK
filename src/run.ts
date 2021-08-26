@@ -105,7 +105,9 @@ const Testing = async () => {
                 // console.log( (await rari.pools.stable.deposits.validateDeposit("DAI", ss.constants.One, "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65", true)) )
         // Withdrawals
             // Get withdrawable currencies
-                console.log( await rari.pools.stable.withdrawals.getWithdrawalCurrencies() )
+                // console.log( await rari.pools.stable.withdrawals.getWithdrawalCurrencies() )
+                console.log( await rari.pools.stable.withdrawals.getWithdrawalCurrenciesWithoutSlippage() )
+        
 
 
     // dYdX 
