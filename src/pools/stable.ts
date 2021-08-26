@@ -1,8 +1,10 @@
-var { ethers: ethers} = require('ethers')
+var ethers = require('ethers')
 var Caches = require('../cache.ts')
 var axios = require('axios')
-
+const hey = require('../0x.ts')
 var erc20Abi = require('../abi/ERC20.json')
+
+var MStablePool = require('../subpools/mstable.ts')
 
 // Contract addresses
 const contractAddressesStable = {
@@ -470,9 +472,802 @@ module.exports = class StablePool {
             },
             getDirectDepositCurrencies: async function () {
                 return await self.contracts.RariFundManager.callStatic.getAcceptedCurrencies();
-            }
-        }
+            },
+            validateDeposit: async function (
+                currencyCode,
+                amount,
+                sender,
+                getSlippage
+            ) {
+                // Input validation
+                if (!sender) throw new Error("Sender parameter not set.");
+                const allTokens = await self.getAllTokens();
+                if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
+                if (!amount || amount.lte(ethers.constants.Zero)) throw new Error("Deposit amount must be greater than 0!");
+                const accountBalanceBN = await ( currencyCode == "ETH" 
+                    ? self.provider.getBalance(sender)
+                    : allTokens[currencyCode].contract.balanceOf(sender)
+                );
 
+                if(amount.gt(accountBalanceBN))  throw new Error("Not enough balance in your account to make a deposit of this amount.");
+
+
+                // Get currencies we can directly deposit (no swap needed)
+                const directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
+                    "acceptedCurrencies",
+                    self.contracts.RariFundManager.callStatic.getAcceptedCurrencies
+                );
+                
+                // Check if theres something
+                if(!directlyDepositableCurrencyCodes|| directlyDepositableCurrencyCodes.length === 0) throw new Error("No directly depositable currencies found.");
+
+                // If currencyCode is directly depositable, return amount that would be added to users balance, null, and no slippage (because theres no swap)
+                if(directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0) {
+                    const allBalances = await self.cache.getOrUpdate(
+                        "allBalances",
+                        self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                    );
+
+                    const amountUsdBN = amount.mul(ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                        .div(
+                            ethers.BigNumber.from(10)
+                            .pow(
+                                ethers.BigNumber.from(self.internalTokens[currencyCode].decimals)
+                            )
+                        )
+
+                    return [amountUsdBN.toString(), null, ethers.constants.Zero]
+                } else {
+                // If currency Code is not directly depositable we try swapping.
+                // First with mStable (if currencyCode is supported), then with 0xSwap
+
+                    // Get mStable output currency if possible
+                    let mStableOutputCurrency = null;
+                    let mStableOutputAmountAfterFeeBN = null;
+
+                    // if currency we want to depost, is mUSD or if its supported by mStable exchange
+                    if (currencyCode === "mUSD" || MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+                        // for every acceptedCurrency
+                        for (let acceptedCurrency of directlyDepositableCurrencyCodes) {
+                            // if accepted currency is mUSD or if its supported by the exchange
+                            if ( acceptedCurrency === "mUSD" || MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(acceptedCurrency) >= 0) {
+                                // if currency we want to deposit is mUSD
+                                if (currencyCode === "mUSD") {
+                                    // try to get validation to exchange token for the accepted token
+                                    try {
+                                        var redeemValidity = await self.pools["mStable"].externalContracts.MassetValidationHelper.getRedeemValidity(
+                                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                             amount, 
+                                             self.internalTokens[acceptedCurrency].address
+                                        )
+                                    } catch (err) {
+                                        console.error("Failed to check mUSD redeem validity: ", err);
+                                        continue
+                                    }
+
+                                    if (!redeemValidity || !redeemValidity["0"]) continue;
+                                    mStableOutputAmountAfterFeeBN = ethers.BigNumber.from(redeemValidity["2"]);
+                                // If currency we want to deposit is not mUSD but its still supported by mStable exchange
+                                } else {
+                                    // try to get validation to exchange token. This returns validation (boolean), and maxExchangeable amount
+                                    try {
+                                        var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.getMaxSwap(
+                                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                            self.internalTokens[currencyCode].address,
+                                            self.internalTokens[acceptedCurrency].address
+                                        )
+                                    } catch (err) {
+                                        console.error("Failed to check mUSD max swap:", err);
+                                        continue
+                                    }
+
+                                    // if validation is false continue (as in stop executing for loop iteration) 
+                                    if (!maxSwap || !maxSwap["0"] ||amount.gt(ethers.BigNumber.from(maxSwap["2"])) )
+                                        continue;
+                                    
+                                    
+                                    // if validation is true
+
+                                    // define outputAmountBeforeFeedBN as 
+                                    // amount * accepted currency decimals / decimals of the currency we want to use
+                                    var outputAmountBeforeFeesBN = amount
+                                    .mul(
+                                        self.internalTokens[acceptedCurrency].decimals >= 18 
+                                        ? ethers.constants.WeiPerEther
+                                        : ethers.BigNumber.from(10 ** self.internalTokens[acceptedCurrency].decimals)
+                                    )
+                                    .div(
+                                        self.internalTokens[currencyCode].decimals >= 18 
+                                        ? ethers.constants.WeiPerEther
+                                        : ethers.BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                    );
+                
+                                    // if acceptedCurrency is mUSD there is no fee so
+                                    // mStableOutputAmountAfterFeeBN is the same as outputAmountBeforeFeesBN
+                                    if (acceptedCurrency === "mUSD")
+                                        mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
+                                    else {
+                                    // if acceptedCurrency is not mUSD
+                                    // get the swap fee
+                                        var swapFeeBN = await self.pools[
+                                            "mStable"
+                                        ].getMUsdSwapFeeBN();
+
+                                        // mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN - outputAmountBeforeFeesNM * swapFee / 10^18
+                                        mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN.sub(
+                                            outputAmountBeforeFeesBN
+                                            .mul(swapFeeBN)
+                                            .div(ethers.constanst.WeiPerEther)
+                                        );
+                                    }
+                                }
+
+                                mStableOutputCurrency = acceptedCurrency;
+                                break;
+                            }
+                        }
+                    }
+
+                    // if mStableOutputCurrency is not null, it meant its exchangeable by mStable
+                    if (mStableOutputCurrency !== null) {
+                        // Get USD amount added to sender's fund balance
+                        var allBalances = await self.cache.getOrUpdate(
+                            "allBalances",
+                            self.contracts.RariFundProxy.getRawFundBalancesAndPrices()
+                        )
+
+                        // mStableOutputAmountAfterFee is turned into dollars
+                        const outputAmountUsdBN = mStableOutputAmountAfterFeeBN
+                            .mul(
+                                ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)])
+                            )
+                            .div(
+                                (ethers.BigNumber.from(10)).pow(self.internalTokens[mStableOutputCurrency].decimals)
+                            )
+
+                        return [
+                            outputAmountUsdBN,
+                            null,
+                            getSlippage
+                                ? await self.deposits.getDepositSlippage(
+                                    currencyCode,
+                                    amount,
+                                    outputAmountUsdBN
+                                )
+                                : null,
+                        ];
+                    } else {
+                        // if its not exchangeable by mStable use 0x
+                        // Turn currency we want to use int first accepted currency
+                        var acceptedCurrency = directlyDepositableCurrencyCodes[0];
+                        // Get orders from 0x swap API
+                        try {
+                            var [
+                                orders,
+                                inputFilledAmountBN,
+                                protocolFee,
+                                takerAssetFilledAmountBN,
+                                makerAssetFilledAmountBN,
+                                gasPrice,
+                            ] = await hey.get0xSwapOrders(
+                                currencyCode === "ETH"
+                                 ? "WETH"
+                                 : allTokens[currencyCode].address,
+                                allTokens[acceptedCurrency].address,
+                                amount
+                            );
+                        } catch (err) {
+                            throw new Error("Failed to get swap orders from 0x API: " + err);
+                        }
+
+                        // Get USD amount added to senders fund balance
+                        var allBalances = await self.cache.getOrUpdate(
+                            "allBalances",
+                            self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                        );
+
+                        var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN.mul(
+                            ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(acceptedCurrency)])
+                        ).div(
+                            ethers.BigNumber.from(10).pow(ethers.BigNumber.from(self.internalTokens[acceptedCurrency].decimals))
+                        );
+
+                        // Make sure input amount is completely filled
+                        if (inputFilledAmountBN.lt(amount))
+                        throw new Error(
+                        "Unable to find enough liquidity to exchange " +
+                            currencyCode +
+                            " before depositing."
+                        );
+
+                        // Multiply protocol fee by 1.5 to account for user upping the gas price
+                        var protocolFeeBN = ethers.BigNumber.from(protocolFee).mul(ethers.BigNumber.from(15)).div(ethers.BigNumber.from(10));
+                            
+                        // Make sure we have enough ETH for protocol fee
+                        var ethBalanceBN = currencyCode === "ETH" 
+                            ? accountBalanceBN
+                            : ethers.BigNumber.from(await ethers.provider.getBalance(sender))
+
+                        if (protocolFeeBN.gt(currencyCode === "ETH" ? ethBalanceBN.sub(amount) : ethBalanceBN ))
+                            throw new Error( "ETH balance too low to cover 0x exchange protocol fee." );
+                        
+                        return [
+                            makerAssetFilledAmountBN,
+                            protocolFeeBN,
+                            getSlippage
+                                ? await self.deposits.getDepositSlippage(currencyCode, amount, makerAssetFilledAmountUsdBN)
+                                : null
+                        ]
+                    }
+                }
+            },
+            getDepositSlippage: async function (currencyCode, amount, usdAmount) {
+                if (self.POOL_TOKEN_SYMBOL === "RYPT") {
+                    var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
+                        "acceptedCurrencies",
+                        self.contracts.RariFundManager.callStatic.getAcceptedCurrencies
+                    );
+                    if (directlyDepositableCurrencyCodes && directlyDepositableCurrencyCodes.length > 0 && directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0 ) {
+                        var allBalances = await self.cache.getOrUpdate(
+                            "allBalances",
+                            self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                        );
+
+                        return ethers.constants.WeiPerEther.sub(
+                            usdAmount.mul(
+                                ethers.BigNumber.from(10)
+                                .pow(ethers.BigNumber.from(self.internalTokens[currencyCode].decimals))
+                            ).div(
+                                amount
+                                .mul(ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                                .div(ethers.constants.WeiPerEther)
+                            )
+                        )
+                    }
+                } else if (self.POOL_TOKEN_SYMBOL === "RSPT") {
+                    if(currencyCode === "USDC") {
+                        return ethers.constants.WeiPerEther
+                        .sub(usdAmount
+                            .mul(ethers.BigNumber.from(1e6))
+                            .div(amount)
+                        ).toString()
+                    }
+                } else if (self.POOL_TOKEN_SYMBOL === "RDPT") {
+                    if (currencyCode === "DAI") {
+                        return ethers.constants.WeiPerEther
+                        .sub(usdAmount
+                            .mul(ethers.constants.WeiPerEther)
+                            .div(amount)
+                        ).toString();
+                    }
+                } else {
+                    throw "Not implemented for " + self.POOL_TOKEN_SYMBOL;
+                }
+
+                // Get tokens
+                var allTokens = await self.getAllTokens();
+                if( currencyCode !== "ETH" && !allTokens[currencyCode]) {
+                    throw new Error("Invalid currency code!")
+                }
+
+                // Try cache
+                if (self.cache._raw.coinGeckoUsdPrices 
+                    && self.cache._raw.coinGeckoUsdPrices.value
+                    && self.cache._raw.coinGeckoUsdPrices.value["USDC"]
+                    && self.cache._raw.coinGeckoUsdPrices.value[currencyCode]
+                    &&  new Date().getTime() / 1000 <= (self.cache._raw.coinGeckoUsdPrices.lastUpdated + self.cache._raw.coinGeckoUsdPrices.timeout)
+                ) {
+                    if (self.POOL_TOKEN_SYMBOL === "RSPT") {
+                        usdAmount = 
+                            parseFloat(usdAmount.toString())  *
+                            self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+                    } else if (self.POOL_TOKEN_SYMBOL === "RDPT") {
+                        usdAmount =
+                            parseFloat(usdAmount.toString()) *
+                            self.cache._raw.coinGeckoUsdPrices.value["DAI"];
+                    } else {
+                        usdAmount = parseFloat(usdAmount.toString())
+                    }
+
+                    return ethers.constants.WeiPerEther.sub(ethers.BigNumber.from(
+                        Math.trunc(
+                            usdAmount * (10 ** (currencyCode === "ETH" ? 18 : allTokens[currencyCode].decimals) 
+                            / (parseFloat(amount.toString()) * self.cache._raw.coinGeckoUsdPrices.value[currencyCode]))
+                        )
+                    ));
+                }
+
+                // Build currency code arraw
+                var currencyCodes = [...self.allocations.CURRENCIES];
+                if (currencyCodes.indexOf(currencyCode) < 0) {
+                    currencyCodes.push(currencyCode)
+                }
+
+                // Get CoinGecko IDs
+                var decoded = await self.cache.getOrUpdate(
+                    "coinGeckoList",
+                    async function () {
+                      return (
+                        await axios.get("https://api.coingecko.com/api/v3/coins/list")
+                      ).data;
+                    }
+                  );
+                  if (!decoded)
+                    throw new Error("Failed to decode coins list from CoinGecko");
+                  var currencyCodesByCoinGeckoIds = {};
+          
+                  for (const currencyCode of currencyCodes) {
+                    var filtered = decoded.filter(
+                      (coin) => coin.symbol.toLowerCase() === currencyCode.toLowerCase()
+                    );
+                    if (!filtered)
+                      throw new Error("Failed to get currency IDs from CoinGecko");
+                    for (const coin of filtered)
+                      currencyCodesByCoinGeckoIds[coin.id] = currencyCode;
+                  }
+
+                // Get prices
+                var decoded = (
+                    await axios.get("https://api.coingecko.com/api/v3/simple/price", {
+                    params: {
+                        vs_currencies: "usd",
+                        ids: Object.keys(currencyCodesByCoinGeckoIds).join(","),
+                        include_market_cap: true,
+                    },
+                    })
+                ).data;
+                if (!decoded)
+                    throw new Error("Failed to decode USD exchange rates from CoinGecko");
+                var prices = {};
+                var maxMarketCaps = {};
+        
+                for (const key of Object.keys(decoded))
+                    if (
+                    prices[currencyCodesByCoinGeckoIds[key]] === undefined ||
+                    decoded[key].usd_market_cap >
+                        maxMarketCaps[currencyCodesByCoinGeckoIds[key]]
+                    ) {
+                    maxMarketCaps[currencyCodesByCoinGeckoIds[key]] =
+                        decoded[key].usd_market_cap;
+                    prices[currencyCodesByCoinGeckoIds[key]] = decoded[key].usd;
+                    }
+
+                // Update cache
+                self.cache.update("coinGeckoUsdPrices", prices);
+
+                
+                // Return slippage
+                if (
+                    self.cache._raw.coinGeckoUsdPrices.value["USDC"] &&
+                    self.cache._raw.coinGeckoUsdPrices.value[currencyCode]
+                ) {
+                    if (self.POOL_TOKEN_SYMBOL === "RSPT")
+                    usdAmount =
+                        parseFloat(usdAmount.toString()) *
+                        self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+                    else if (self.POOL_TOKEN_SYMBOL === "RDPT")
+                    usdAmount =
+                        parseFloat(usdAmount.toString()) *
+                        self.cache._raw.coinGeckoUsdPrices.value["DAI"];
+                    else usdAmount = parseFloat(usdAmount.toString());
+                    return ethers.constants.WeiPerETher
+                    .sub(
+                        ethers.BigNumber.from(
+                        Math.trunc(
+                            usdAmount *
+                            (10 **
+                                (currencyCode === "ETH"
+                                ? 18
+                                : allTokens[currencyCode].decimals) /
+                                (parseFloat(amount.toString()) *
+                                self.cache._raw.coinGeckoUsdPrices.value[currencyCode]))
+                        )
+                        )
+                    );
+                } else throw new Error("Failed to get currency prices from CoinGecko");
+            },
+            deposit: async function (currencyCode, amount, minUsdAmount, options) {
+                // Input validation
+                if (!options || !options.from)
+                throw new Error("Options parameter not set or from address not set.");
+                var allTokens = await self.getAllTokens();
+                if (currencyCode !== "ETH" && !allTokens[currencyCode])
+                throw new Error("Invalid currency code!");
+                if (!amount || amount.lte(ethers.constants.Zero))
+                throw new Error("Deposit amount must be greater than 0!");
+                var accountBalanceBN = ethers.BigNumber.from(
+                await (currencyCode == "ETH"
+                    ? self.provider.getBalance(options.from)
+                    : allTokens[currencyCode].contract.methods
+                        .balanceOf(options.from)
+                        .call())
+                );
+                if (amount.gt(accountBalanceBN))
+                throw new Error(
+                    "Not enough balance in your account to make a deposit of this amount."
+                );
+
+                // Check if currency is directly depositable
+                var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
+                    "acceptedCurrencies",
+                    self.contracts.RariFundManager.methods.getAcceptedCurrencies().call
+                );
+                if (
+                    !directlyDepositableCurrencyCodes ||
+                    directlyDepositableCurrencyCodes.length == 0
+                )
+                    throw new Error("No directly depositable currencies found.");
+                
+                if (directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0) {
+                    // Get USD amount added to sender's fund balance
+                    var allBalances = await self.cache.getOrUpdate(
+                        "allBalances",
+                        self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices()
+                        .call
+                    );
+
+                    var amountUsdBN = amount
+                    .mul(ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                    .div(
+                        ethers.BigNumber.from(10)
+                        .pow(ethers.BigNumber.from(self.internalTokens[currencyCode].decimals))
+                    )
+
+                     // Check amountUsdBN against minUsdAmount
+                    if ( typeof minUsdAmount !== "undefined" && minUsdAmount !== null && amountUsdBN.lt(minUsdAmount))
+                        return [amountUsdBN];
+
+                    // Get deposit contract
+                    var useGsn = /* amountUsdBN.gte(Web3.utils.toBN(250e18)) && myFundBalanceBN.isZero() */ false;
+                    var approvalReceipt = null;
+                    var receipt;
+
+                    var approveAndDeposit = async function () {
+                        var depositContract = self.contracts.RariFundManager;
+
+                         // Approve tokens to RariFundManager
+                        try {
+                            var allowanceBN = ethers.BigNumber.from(
+                            await allTokens[currencyCode].contract.methods
+                                .allowance(options.from, depositContract.options.address)
+                                .call()
+                            );
+                            if (allowanceBN.lt(amount)) {
+                            if (
+                                allowanceBN.gt(ethers.constants.Zero) &&
+                                currencyCode === "USDT"
+                            )
+                                await allTokens[currencyCode].contract.methods
+                                .approve(depositContract.options.address, "0")
+                                .send(options);
+                            approvalReceipt = await allTokens[currencyCode].contract.methods
+                                .approve(depositContract.options.address, amount)
+                                .send(options);
+                            }
+                        } catch (err) {
+                            throw new Error(
+                            "Failed to approve tokens: " + (err.message ? err.message : err)
+                            );
+                        }
+
+                        
+                        // Deposit tokens to RariFundManager
+                        try {
+                            receipt = await depositContract.methods
+                            .deposit(currencyCode, amount)
+                            .send(options);
+                        } catch (err) {
+                            if (useGsn) {
+                            useGsn = false;
+                            return await approveAndDeposit();
+                            }
+            
+                            throw err;
+                        }
+                    };
+
+                    await approveAndDeposit();
+                    self.cache.clear("allBalances");
+                    return [amountUsdBN, null, approvalReceipt, receipt];
+
+                } else {
+                    // Get mStable output currency if possible
+                    var mStableOutputCurrency = null;
+                    var mStableOutputAmountAfterFeeBN = null;
+                    
+                    if ( currencyCode === "mUSD" || MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode ) >= 0 ) {
+                        for (var acceptedCurrency of directlyDepositableCurrencyCodes) {
+                            if ( acceptedCurrency === "mUSD" || MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf( acceptedCurrency) >= 0 ) {
+                                if (currencyCode === "mUSD") {
+                                    try {
+                                        var redeemValidity = await self.pools[
+                                          "mStable"
+                                        ].externalContracts.MassetValidationHelper.methods
+                                          .getRedeemValidity(
+                                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                            amount,
+                                            self.internalTokens[acceptedCurrency].address
+                                          )
+                                          .call();
+                                      } catch (err) {
+                                        console.error("Failed to check mUSD redeem validity:", err);
+                                        continue;
+                                      }
+                    
+                                      if (!redeemValidity || !redeemValidity["0"]) continue;
+                                      mStableOutputAmountAfterFeeBN = ethers.BigNumber.from(
+                                        redeemValidity["2"]
+                                      );
+                                }
+                            } else {
+                                try {
+                                    var maxSwap = await self.pools[
+                                      "mStable"
+                                    ].externalContracts.MassetValidationHelper.methods
+                                      .getMaxSwap(
+                                        "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                        self.internalTokens[currencyCode].address,
+                                        self.internalTokens[acceptedCurrency].address
+                                      )
+                                      .call();
+                                  } catch (err) {
+                                    console.error("Failed to check mUSD max swap:", err);
+                                    continue;
+                                  }
+
+                                if ( !maxSwap || !maxSwap["0"] || amount.gt(ethers.BigNumber.from(maxSwap["2"])) ) continue;
+
+                                var outputAmountBeforeFeesBN = amount
+                                    .mul(
+                                        self.internalTokens[acceptedCurrency].decimals === 18 
+                                        ? ethers.constants.WeiPerEther
+                                        : ethers.BigNumber.from( 10 ** self.internalTokens[acceptedCurrency].decimals)
+                                    ).div(
+                                        self.internalTokens[currencyCode].decimals === 18 
+                                        ? ethers.constants.WeiPerEther
+                                        : ethers.BigNumber.from( 10 ** self.internalTokens[currencyCode].decimals)
+                                    );
+                                
+                                if (acceptedCurrency === "mUSD") mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
+                                else {
+                                    var swapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
+
+                                    mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(swapFeeBN).div(ethers.constants.WeiPerEther));
+                                }
+                            }
+                            
+                            mStableOutputCurrency = acceptedCurrency;
+                            break;
+                        }
+                    }
+                    // Ideally mStable, but 0x works too
+                    if (mStableOutputCurrency !== null) {
+
+                        // Get USD amount added to sender's fund balance
+                        var allBalances = await self.cache.getOrUpdate("allBalances", self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices);
+                        var outputAmountUsdBN = mStableOutputAmountAfterFeeBN
+                                .mul(ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
+                                .div(ethers.BigNumber.from(10)
+                                        .pow( ethers.BigNumber.from(self.internalTokens[mStableOutputCurrency].decimals) )
+                                    );
+
+                        // Check outputAmountUsdBN against minUsdAmount
+                        if (typeof minUsdAmount !== "undefined" && minUsdAmount !== null && outputAmountUsdBN.lt(minUsdAmount)) return [outputAmountUsdBN];
+
+                        // Approve tokens to RariFundProxy
+                        try {
+                            var allowanceBN = ethers.BigNumber.from(
+                                await self.internalTokens[currencyCode].contract.callStatic.allowance(options.from, self.contracts.RariFundProxy.options.address)
+                            );
+
+                            if (allowanceBN.lt(amount)) {
+                                if (allowanceBN.gt(ethers.constants.Zero) && currencyCode === "USDT") {
+                                    await self.internalTokens[currencyCode].contract
+                                    .approve(self.contracts.RariFundProxy.options.address, "0", options)
+                                }
+                            var approvalReceipt = await self.internalTokens[currencyCode].contract
+                                .approve(self.contracts.RariFundProxy.options.address, amount, options)
+                            }
+                        } catch (err) {
+                            throw new Error(
+                            "Failed to approve tokens to RariFundProxy: " +
+                                (err.message ? err.message : err)
+                            );
+                        }
+
+                        // Exchange and deposit tokens via mStable via RariFundProxy
+                        try {
+                            var receipt = await self.contracts.RariFundProxy.exchangeAndDeposit(currencyCode, amount, mStableOutputCurrency, options);
+                        } catch (err) {
+                            throw new Error("RariFundProxy.exchangeAndDeposit failed: " + (err.message ? err.message : err));
+                        }
+            
+                        self.cache.clear("allBalances");
+                        return [
+                            mStableOutputAmountAfterFeeBN,
+                            null,
+                            approvalReceipt,
+                            receipt,
+                        ];
+                    } else {
+                        // Use first accepted currency for 0x
+                        var acceptedCurrency = directlyDepositableCurrencyCodes[0];
+
+                        // Get orders from 0x swap API
+                        try {
+                            var [
+                            orders,
+                            inputFilledAmountBN,
+                            protocolFee,
+                            takerAssetFilledAmountBN,
+                            makerAssetFilledAmountBN,
+                            gasPrice,
+                            ] = await hey.get0xSwapOrders(
+                            currencyCode === "ETH"
+                                ? "WETH"
+                                : allTokens[currencyCode].address,
+                            allTokens[acceptedCurrency].address,
+                            amount
+                            );
+                        } catch (err) {
+                            throw new Error("Failed to get swap orders from 0x API: " + err);
+                        }
+                        
+                        // Get USD amount added to sender's fund balance
+                        var allBalances = await self.cache.getOrUpdate(
+                            "allBalances",
+                            self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                        );
+
+                        var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN
+                        .mul(
+                          ethers.BigNumber.from(
+                            allBalances["4"][
+                              self.allocations.CURRENCIES.indexOf(acceptedCurrency)
+                            ]
+                          )
+                        )
+                        .div(
+                          ethers.BigNumber.from(10)
+                            .pow(
+                              ethers.BigNumber.from(
+                                self.internalTokens[acceptedCurrency].decimals
+                              )
+                            )
+                        );
+
+                        
+                        // Make sure input amount is completely filled
+                        if (inputFilledAmountBN.lt(amount))
+                        throw new Error(
+                        "Unable to find enough liquidity to exchange " +
+                            currencyCode +
+                            " before depositing."
+                        );
+
+                        
+                        // Multiply protocol fee by 1.5 to account for user upping the gas price
+                        var protocolFeeBN = ethers.BigNumber.from(protocolFee).mul(ethers.BigNumber.from(15)).div(ethers.BigNumber.from(10));
+
+                        // Make sure we have enough ETH for the protocol fee
+                        var ethBalanceBN =
+                        currencyCode == "ETH"
+                        ? accountBalanceBN
+                        : ethers.BigNumber.from(await self.provider.getBalance(options.from));
+
+                        if ( protocolFeeBN.gt( currencyCode === "ETH" ? ethBalanceBN.sub(amount) : ethBalanceBN ) ) {
+                            throw new Error( "ETH balance too low to cover 0x exchange protocol fee.");
+                        }
+
+
+                        // Check makerAssetFilledAmountUsdBN against minUsdAmount
+                        if ( typeof minUsdAmount !== "undefined" && minUsdAmount !== null && makerAssetFilledAmountUsdBN.lt(minUsdAmount) )
+                            return [makerAssetFilledAmountUsdBN];
+
+                        // Approve tokens to RariFundProxy if token is not ETH
+                        if (currencyCode !== "ETH") {
+                            try {
+                                var allowanceBN = ethers.BigNumber.from(
+                                    await allTokens[currencyCode].contract
+                                        .allowance(
+                                        options.from,
+                                        self.contracts.RariFundProxy.options.address
+                                        )
+                                    );
+                                if (allowanceBN.lt(amount)) {
+                                  if (
+                                    allowanceBN.gt(ethers.constants.Zero) &&
+                                    currencyCode === "USDT"
+                                  )
+                                    await allTokens[currencyCode].contract.methods
+                                      .approve(
+                                        self.contracts.RariFundProxy.options.address,
+                                        "0"
+                                      )
+                                      .send(options);
+                                  var approvalReceipt = await allTokens[
+                                    currencyCode
+                                  ].contract.methods
+                                    .approve(
+                                      self.contracts.RariFundProxy.options.address,
+                                      amount
+                                    )
+                                    .send(options);
+                                }
+                            } catch (err) {
+                                throw new Error( "Failed to approve tokens to RariFundProxy: " + (err.message ? err.message : err));
+                            }
+                        }
+
+                                    
+                        // Build array of orders and signatures
+                        var signatures = [];
+                        for (var j = 0; j < orders.length; j++) {
+                            signatures[j] = orders[j].signature;
+            
+                            orders[j] = {
+                            makerAddress: orders[j].makerAddress,
+                            takerAddress: orders[j].takerAddress,
+                            feeRecipientAddress: orders[j].feeRecipientAddress,
+                            senderAddress: orders[j].senderAddress,
+                            makerAssetAmount: orders[j].makerAssetAmount,
+                            takerAssetAmount: orders[j].takerAssetAmount,
+                            makerFee: orders[j].makerFee,
+                            takerFee: orders[j].takerFee,
+                            expirationTimeSeconds: orders[j].expirationTimeSeconds,
+                            salt: orders[j].salt,
+                            makerAssetData: orders[j].makerAssetData,
+                            takerAssetData: orders[j].takerAssetData,
+                            makerFeeAssetData: orders[j].makerFeeAssetData,
+                            takerFeeAssetData: orders[j].takerFeeAssetData,
+                            };
+                        }
+
+                        
+                        // Exchange and deposit tokens via RariFundProxy
+                        try {
+                            var receipt = await self.contracts.RariFundProxy.methods
+                            .exchangeAndDeposit(
+                                currencyCode === "ETH"
+                                ? "0x0000000000000000000000000000000000000000"
+                                : allTokens[currencyCode].address,
+                                amount,
+                                acceptedCurrency,
+                                orders,
+                                signatures,
+                                takerAssetFilledAmountBN
+                            )
+                            .send(
+                                Object.assign(
+                                {
+                                    value:
+                                    currencyCode === "ETH"
+                                        ? protocolFeeBN.add(amount).toString()
+                                        : protocolFeeBN.toString(),
+                                    gasPrice: gasPrice,
+                                },
+                                options
+                                )
+                            );
+                        } catch (err) {
+                            throw new Error(
+                            "RariFundProxy.exchangeAndDeposit failed: " +
+                                (err.message ? err.message : err)
+                            );
+                        }
+
+                        
+                        self.cache.clear("allBalances");
+                        return [
+                        makerAssetFilledAmountUsdBN,
+                        protocolFeeBN,
+                        approvalReceipt,
+                        receipt,
+                        ];
+                    }
+                }
+            }   
+        }
     }
     
   internalTokens = {
