@@ -209,7 +209,7 @@ module.exports = class StablePool {
                 };
                 var allBalances = await self.cache.getOrUpdate("allBalances", self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices)
                 
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     const currencyCode = allBalances["0"][i]
                     const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i])
                     allocationsByCurrency[currencyCode] = contractBalanceBN;
@@ -235,7 +235,7 @@ module.exports = class StablePool {
                 };
                 const allBalances = await self.cache.getOrUpdate("allBalances", self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices )
 
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     const currencyCode = allBalances["0"][i];
                     const priceInUsdBN = ethers.BigNumber.from(allBalances["4"][i]);
                     const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
@@ -278,7 +278,7 @@ module.exports = class StablePool {
                     self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
                 )
 
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     const currencyCode = allBalances["0"][i];
                     const priceInUsdBN = ethers.BigNumber.from(allBalances["4"][i]);
                     const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
@@ -315,7 +315,7 @@ module.exports = class StablePool {
                     self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
                 );
 
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     const currencyCode = allBalances["0"][i];
                     const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
                     currencies[currencyCode] = { _cash: contractBalanceBN };
@@ -337,7 +337,7 @@ module.exports = class StablePool {
                     "allBalances", 
                     self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
                 );
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     prices[allBalances["0"][i]] = ethers.BigNumber.from(allBalances["4"][i]);
                 }
                 return prices;
@@ -356,7 +356,7 @@ module.exports = class StablePool {
                 );
 
                 // Get raw balance
-                for (let i = 0; i < allBalances["0"].length; i++) {
+                for (var i = 0; i < allBalances["0"].length; i++) {
                     const currencyCode = allBalances["0"][i];
                     const priceInUsdBN = ethers.BigNumber.from(allBalances["4"][i]);
                     const contractBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
@@ -397,7 +397,7 @@ module.exports = class StablePool {
                 console.log(totalBalanceUsdBN.isZero())
                 if (totalBalanceUsdBN.isZero()) {
                     let maxApyBN = ethers.constants.Zero;
-                    for (let i = 0; i < factors.length; i++ ){
+                    for (var i = 0; i < factors.length; i++ ){
                         if(factors[i][1].gt(maxApyBN)) 
                             maxApyBN = factors[i][1];
                         }
@@ -405,7 +405,7 @@ module.exports = class StablePool {
                 }
 
                 let apyBN = ethers.constants.Zero
-                for (let i =0; i < factors.length; i++){
+                for (var i =0; i < factors.length; i++){
                     apyBN = apyBN.add(
                         factors[i][0]
                         .mul(
@@ -1283,7 +1283,961 @@ module.exports = class StablePool {
             getWithdrawalCurrenciesWithoutSlippage: async function () {
                 return await self.allocations.getRawCurrencyAllocations();
             },
+            getMaxWithdrawalAmount: async function (currencyCode, senderUsdBalance) {
+                var allTokens = await self.getAllTokens();
+                if (currencyCode !== "ETH" && !allTokens[currencyCode])
+                  throw new Error("Invalid currency code!");
+                if (!senderUsdBalance || senderUsdBalance.lte(ethers.constants.Zero))
+                  return [ethers.constants.Zero];
+        
+                // Get user fund balance
+                if (senderUsdBalance === undefined)
+                  senderUsdBalance = ethers.BigNumber.from(
+                    await self.contracts.RariFundManager.callStatic
+                      .balanceOf(sender)
+                  );
+        
+                // Check balances to find withdrawal source
+                var allBalances = await self.cache.getOrUpdate(
+                  "allBalances",
+                  self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices()
+                    .call
+                );
+        
+                // See how much we can withdraw directly if token is supported by the fund
+                var i = allBalances["0"].indexOf(currencyCode);
+                var tokenRawFundBalanceBN = ethers.constants.Zero;
+        
+                if (i >= 0) {
+                  tokenRawFundBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
+                  for (var j = 0; j < allBalances["3"][i].length; j++)
+                    tokenRawFundBalanceBN.iadd(ethers.BigNumber.from(allBalances["3"][i][j]));
+                }
+        
+                if (tokenRawFundBalanceBN.gt(ethers.constants.Zero)) {
+                  var maxWithdrawalAmountBN = senderUsdBalance
+                    .mul(
+                      ethers.BigNumber.from(10)
+                        .pow(
+                          ethers.BigNumber.from(self.internalTokens[currencyCode].decimals)
+                        )
+                    )
+                    .div(
+                      ethers.BigNumber.from(
+                        allBalances["4"][
+                          self.allocations.CURRENCIES.indexOf(currencyCode)
+                        ]
+                      )
+                    );
+        
+                  if (
+                    maxWithdrawalAmountBN
+                      .mul(
+                        ethers.BigNumber.from(
+                          allBalances["4"][
+                            self.allocations.CURRENCIES.indexOf(currencyCode)
+                          ]
+                        )
+                      )
+                      .div(
+                        ethers.BigNumber.from(10)
+                          .pow(
+                            ethers.BigNumber.from(self.internalTokens[currencyCode].decimals)
+                          )
+                      )
+                      .gt(senderUsdBalance)
+                  )
+                    maxWithdrawalAmountBN = maxWithdrawalAmountBN.sub(ethers.constants.One);
+        
+                  // If tokenRawFundBalanceBN >= maxWithdrawalAmountBN, return maxWithdrawalAmountBN
+                  if (tokenRawFundBalanceBN.gte(maxWithdrawalAmountBN))
+                    return [maxWithdrawalAmountBN];
+                }
+        
+                // Otherwise, exchange as few currencies as possible (ideally those with the lowest balances)
+                var amountInputtedUsdBN = ethers.constants.Zero;
+                var amountWithdrawnBN = ethers.constants.Zero;
+                var totalProtocolFeeBN = ethers.constants.Zero;
+        
+                // Withdraw as much as we can of the output token first
+                if (tokenRawFundBalanceBN.gt(ethers.constants.Zero)) {
+                  amountInputtedUsdBN = amountInputtedUsdBN.add(
+                    tokenRawFundBalanceBN
+                      .mul(
+                        ethers.BigNumber.from(
+                          allBalances["4"][
+                            self.allocations.CURRENCIES.indexOf(currencyCode)
+                          ]
+                        )
+                      )
+                      .div(
+                        ethers.BigNumber.from(10)
+                          .pow(
+                            ethers.BigNumber.from(self.internalTokens[currencyCode].decimals)
+                          )
+                      )
+                  );
+                  amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
+                }
+        
+                // Get input candidates
+                var inputCandidates = [];
+        
+                for (var i:any = 0; i < allBalances["0"].length; i++) {
+                  var inputCurrencyCode = allBalances["0"][i];
+                  if (inputCurrencyCode !== currencyCode) {
+                    var rawFundBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
+                    for (var j = 0; j < allBalances["3"][i].length; j++)
+                      rawFundBalanceBN.iadd(ethers.BigNumber.from(allBalances["3"][i][j]));
+        
+                    if (rawFundBalanceBN.gt(ethers.constants.Zero)) {
+                      inputCandidates.push({
+                        currencyCode: inputCurrencyCode,
+                        rawFundBalanceBN,
+                      });
+                    }
+                  }
+                }
+        
+                // Calculate max inputs
+                function updateMaxInputs() {
+                  var inputCandidates2 = [];
+        
+                  for (const inputCandidate of inputCandidates) {
+                    // Calculate inputAmountBN as maximum of sender USD balance left and rawFundBalanceBN
+                    var usdAmountLeft = senderUsdBalance.sub(amountInputtedUsdBN);
+                    var maxInputAmountLeftBN = usdAmountLeft
+                      .mul(
+                        ethers.BigNumber.from(10)
+                          .pow(
+                            ethers.BigNumber.from(
+                              self.internalTokens[inputCandidate.currencyCode].decimals
+                            )
+                          )
+                      )
+                      .div(
+                        ethers.BigNumber.from(
+                          allBalances["4"][
+                            self.allocations.CURRENCIES.indexOf(
+                              inputCandidate.currencyCode
+                            )
+                          ]
+                        )
+                      );
+                    if (
+                      maxInputAmountLeftBN
+                        .mul(
+                          ethers.BigNumber.from(
+                            allBalances["4"][
+                              self.allocations.CURRENCIES.indexOf(
+                                inputCandidate.currencyCode
+                              )
+                            ]
+                          )
+                        )
+                        .div(
+                          ethers.BigNumber.from(10)
+                            .pow(
+                              ethers.BigNumber.from(
+                                self.internalTokens[inputCandidate.currencyCode]
+                                  .decimals
+                              )
+                            )
+                        )
+                        .gt(usdAmountLeft)
+                    )
+                      maxInputAmountLeftBN = maxInputAmountLeftBN.sub(ethers.constants.One);
+                    var inputAmountBN = maxInputAmountLeftBN.lt(inputCandidate.rawFundBalanceBN) ? maxInputAmountLeftBN : inputCandidate.rawFundBalanceBN;
+        
+                    if (inputAmountBN.gt(ethers.constants.Zero))
+                      inputCandidates2.push({
+                        currencyCode: inputCandidate.currencyCode,
+                        rawFundBalanceBN: inputCandidate.rawFundBalanceBN,
+                        inputAmountBN,
+                      });
+                  }
+        
+                  inputCandidates = inputCandidates2;
+                }
+        
+                updateMaxInputs();
+        
+                // TODO: Sort candidates from lowest to highest inputAmountUsdBN (or highest to lowest inputAmountUsdBN?)
+                /* inputCandidates.sort((a, b) =>
+                  a.inputAmountUsdBN.gt(b.inputAmountUsdBN) ? 1 : -1
+                ); */
+        
+                // mStable
+                if (
+                  currencyCode === "mUSD" ||
+                  MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >=
+                    0
+                ) {
+                  var mStableSwapFeeBN = null;
+        
+                  for (var i:any = 0; i < inputCandidates.length; i++) {
+                    if (
+                      inputCandidates[i].currencyCode !== "mUSD" &&
+                      MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(
+                        inputCandidates[i].currencyCode
+                      ) < 0
+                    )
+                      continue;
+        
+                    var mStableInputAmountBN = inputCandidates[i].inputAmountBN;
+                    var mStableOutputAmountAfterFeesBN = ethers.constants.Zero;
+        
+                    // Check max swap/redeem validity
+                    if (inputCandidates[i].currencyCode === "mUSD") {
+                      try {
+                        var redeemValidity = await self.pools[
+                          "mStable"
+                        ].externalContracts.MassetValidationHelper
+                          .getRedeemValidity(
+                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                            mStableInputAmountBN,
+                            self.internalTokens[currencyCode].address
+                          )
+                      } catch (err) {
+                        console.error("Failed to check mUSD redeem validity:", err);
+                        continue;
+                      }
+        
+                      if (!redeemValidity || !redeemValidity["0"]) continue;
+                      mStableOutputAmountAfterFeesBN = ethers.BigNumber.from(
+                        redeemValidity["2"]
+                      );
+                    } else {
+                      try {
+                        var maxSwap = await self.pools[
+                          "mStable"
+                        ].externalContracts.MassetValidationHelper
+                          .getMaxSwap(
+                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                            self.internalTokens[inputCandidates[i].currencyCode]
+                              .address,
+                            self.internalTokens[currencyCode].address
+                          )
+                      } catch (err) {
+                        console.error("Failed to check mUSD max swap:", err);
+                        continue;
+                      }
+        
+                      if (
+                        !maxSwap ||
+                        !maxSwap["0"] ||
+                        ethers.BigNumber.from(maxSwap["2"]).lte(ethers.constants.Zero)
+                      )
+                        continue;
+                      mStableInputAmountBN =
+                        mStableInputAmountBN.lt(ethers.BigNumber.from(maxSwap["2"])) ? mStableInputAmountBN : ethers.BigNumber.from(maxSwap["2"])
+                      var outputAmountBeforeFeesBN = mStableInputAmountBN
+                        .mul(
+                          ethers.BigNumber.from(10).pow(ethers.BigNumber.from(self.internalTokens[currencyCode].decimals))
+                        )
+                        .div(
+                          ethers.BigNumber.from(10).pow(ethers.BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals))
+                        );
+        
+                      if (currencyCode === "mUSD")
+                        mStableOutputAmountAfterFeesBN = outputAmountBeforeFeesBN;
+                      else {
+                        if (mStableSwapFeeBN === null)
+                          mStableSwapFeeBN = await self.pools[
+                            "mStable"
+                          ].getMUsdSwapFeeBN();
+                        mStableOutputAmountAfterFeesBN = outputAmountBeforeFeesBN.sub(
+                          outputAmountBeforeFeesBN
+                            .mul(mStableSwapFeeBN)
+                            .div(ethers.constants.WeiPerEther)
+                        );
+                      }
+                    }
+        
+                    amountInputtedUsdBN = amountInputtedUsdBN.add(
+                      mStableInputAmountBN
+                        .mul(
+                          ethers.BigNumber.from(
+                            allBalances["4"][
+                              self.allocations.CURRENCIES.indexOf(
+                                inputCandidates[i].currencyCode
+                              )
+                            ]
+                          )
+                        )
+                        .div(
+                          ethers.BigNumber.from(10)
+                            .pow(
+                              ethers.BigNumber.from(
+                                self.internalTokens[inputCandidates[i].currencyCode]
+                                  .decimals
+                              )
+                            )
+                        )
+                    );
+                    amountWithdrawnBN= amountWithdrawnBN.add(mStableOutputAmountAfterFeesBN);
+        
+                    // Update inputCandidates
+                    updateMaxInputs();
+        
+                    // Stop if we have filled the USD amount
+                    if (amountInputtedUsdBN.gt(senderUsdBalance))
+                      throw new Error(
+                        "Amount inputted in USD greater than sender USD fund balance"
+                      );
+                    if (
+                      amountInputtedUsdBN.gte(
+                        senderUsdBalance.sub(ethers.BigNumber.from(10).mul(ethers.BigNumber.from(16)))
+                      )
+                    )
+                      break;
+                  }
+                }
+        
+                // Use 0x if necessary
+                // Deal with amountInputtedUsdBN.lt(senderUsdBalance) not being accurate better than 1 cent margin of error
+                if (
+                  amountInputtedUsdBN.lt(senderUsdBalance.sub(ethers.BigNumber.from(10).mul(ethers.BigNumber.from(16)))) &&
+                  inputCandidates.length > 0
+                ) {
+                  // Get orders from 0x swap API for each input currency candidate
+                  for (var i:any = 0; i < inputCandidates.length; i++) {
+                    try {
+                      var [
+                        orders,
+                        inputFilledAmountBN,
+                        protocolFee,
+                        takerAssetFilledAmountBN,
+                        makerAssetFilledAmountBN,
+                        gasPrice,
+                      ] = await hey.get0xSwapOrders(
+                        self.internalTokens[inputCandidates[i].currencyCode].address,
+                        currencyCode === "ETH"
+                          ? "WETH"
+                          : allTokens[currencyCode].address,
+                        inputCandidates[i].inputAmountBN
+                      );
+                    } catch (err) {
+                      if (err === "Insufficient liquidity") {
+                        inputCandidates.splice(i, 1);
+                        i--;
+                        continue;
+                      }
+        
+                      throw new Error("Failed to get swap orders from 0x API: " + err);
+                    }
+        
+                    inputCandidates[i].inputFillAmountBN = inputFilledAmountBN;
+                    inputCandidates[i].protocolFeeBN = ethers.BigNumber.from(protocolFee).mul(ethers.BigNumber.from(15)).div(ethers.BigNumber.from(10)); // Multiply protocol fee by 1.5 to account for user upping the gas price
+                    inputCandidates[i].takerAssetFillAmountBN = takerAssetFilledAmountBN;
+                    inputCandidates[i].makerAssetFillAmountBN = makerAssetFilledAmountBN;
+                    inputCandidates[i].takerAssetFillAmountUsdBN = takerAssetFilledAmountBN
+                      .mul(
+                        ethers.BigNumber.from(
+                          allBalances["4"][
+                            self.allocations.CURRENCIES.indexOf(
+                              inputCandidates[i].currencyCode
+                            )
+                          ]
+                        )
+                      )
+                      .div(
+                        ethers.BigNumber.from(10)
+                          .pow(
+                            ethers.BigNumber.from(
+                              self.internalTokens[inputCandidates[i].currencyCode]
+                                .decimals
+                            )
+                          )
+                      );
+                  }
+        
+                  // Sort candidates from highest to lowest output per USD burned
+                  inputCandidates.sort((a, b) =>
+                    b.makerAssetFillAmountBN
+                      .mul(ethers.constants.WeiPerEther)
+                      .div(b.takerAssetFillAmountUsdBN)
+                      .gt(
+                        a.makerAssetFillAmountBN
+                          .mul(ethers.constants.WeiPerEther)
+                          .div(a.takerAssetFillAmountUsdBN)
+                      )
+                      ? 1
+                      : -1
+                  );
+        
+                  // Loop through input currency candidates until we fill the withdrawal
+                  for (var i:any = 0; i < inputCandidates.length; i++) {
+                    // Is this order enough to cover the rest of the withdrawal?
+                    var usdAmountLeft = senderUsdBalance.sub(amountInputtedUsdBN);
+                    var inputFillAmountUsdBN = inputCandidates[i].inputFillAmountBN
+                      .mul(
+                        ethers.BigNumber.from(
+                          allBalances["4"][
+                            self.allocations.CURRENCIES.indexOf(
+                              inputCandidates[i].currencyCode
+                            )
+                          ]
+                        )
+                      )
+                      .div(
+                        ethers.BigNumber.from(10)
+                          .pow(
+                            ethers.BigNumber.from(
+                              self.internalTokens[inputCandidates[i].currencyCode]
+                                .decimals
+                            )
+                          )
+                      );
+                    if (
+                      inputFillAmountUsdBN.gte(usdAmountLeft.sub(ethers.BigNumber.from(10).mul(ethers.BigNumber.from(16))))
+                    ) {
+                      // If order is enough to cover the rest of the withdrawal, cover it and stop looping through input candidates
+                      var thisInputAmountBN = inputCandidates[i].inputFillAmountBN
+                        .mul(usdAmountLeft)
+                        .div(inputFillAmountUsdBN);
+                      var thisOutputAmountBN = inputCandidates[i].makerAssetFillAmountBN
+                        .mul(usdAmountLeft)
+                        .div(inputFillAmountUsdBN);
+        
+                      amountInputtedUsdBN.iadd(
+                        thisInputAmountBN
+                          .mul(
+                            ethers.BigNumber.from(
+                              allBalances["4"][
+                                self.allocations.CURRENCIES.indexOf(
+                                  inputCandidates[i].currencyCode
+                                )
+                              ]
+                            )
+                          )
+                          .div(
+                            ethers.BigNumber.from(10)
+                              .pow(
+                                ethers.BigNumber.from(
+                                  self.internalTokens[inputCandidates[i].currencyCode]
+                                    .decimals
+                                )
+                              )
+                          )
+                      );
+                      amountWithdrawnBN = amountWithdrawnBN.add(thisOutputAmountBN);
+                      totalProtocolFeeBN = totalProtocolFeeBN.add(inputCandidates[i].protocolFeeBN);
+        
+                      break;
+                    } else {
+                      // Otherwise, add the whole order and keep looping through input candidates
+                      amountInputtedUsdBN.iadd(
+                        inputCandidates[i].inputFillAmountBN
+                          .mul(
+                            ethers.BigNumber.from(
+                              allBalances["4"][
+                                self.allocations.CURRENCIES.indexOf(
+                                  inputCandidates[i].currencyCode
+                                )
+                              ]
+                            )
+                          )
+                          .div(
+                            ethers.BigNumber.from(10)
+                              .pow(
+                                ethers.BigNumber.from(
+                                  self.internalTokens[inputCandidates[i].currencyCode]
+                                    .decimals
+                                )
+                              )
+                          )
+                      );
+                      amountWithdrawnBN = amountWithdrawnBN.add(inputCandidates[i].makerAssetFillAmountBN);
+                      totalProtocolFeeBN = totalProtocolFeeBN.add(inputCandidates[i].protocolFeeBN);
+                    }
+        
+                    // Stop if we have filled the USD amount
+                    if (amountInputtedUsdBN.gt(senderUsdBalance))
+                      throw new Error(
+                        "Amount inputted in USD greater than sender USD fund balance"
+                      );
+                    if (
+                      amountInputtedUsdBN.gte(
+                        senderUsdBalance.sub(ethers.BigNumber.from(10).mul(ethers.BigNumber.from(16)))
+                      )
+                    )
+                      break;
+                  }
+        
+                  // Make sure input amount is completely filled
+                  if (
+                    amountInputtedUsdBN.lt(senderUsdBalance.sub(ethers.BigNumber.from(10).mul(ethers.BigNumber.from(16))))
+                  )
+                    throw new Error(
+                      "Unable to find enough liquidity to exchange withdrawn tokens to " +
+                        currencyCode +
+                        "."
+                    );
+                }
+        
+                // Return amountWithdrawnBN and totalProtocolFeeBN
+                return [amountWithdrawnBN, totalProtocolFeeBN];
+              },
+            validateWithdrawal: async function (
+                currencyCode,
+                amount,
+                sender,
+                getSlippage
+            ) {
+                var allTokens = await self.getAllTokens();
+                if (currencyCode !== "ETH" && !allTokens[currencyCode])
+                    throw new Error("Invalid currency code!");
+                if (!amount || amount.lte(ethers.constants.Zero))
+                    throw new Error("Withdrawal amount must be greater than 0!");
 
+                // Check balances to find withdrawal source
+                var allBalances = await self.cache.getOrUpdate(
+                    "allBalances",
+                    self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
+                );
+
+                // See how much we can withdraw directly if token is supported by the fund
+                var i: any = allBalances["0"].indexOf(currencyCode);
+                var tokenRawFundBalanceBN = ethers.constants.Zero;
+
+                    
+                if (i >= 0) {
+                    tokenRawFundBalanceBN = ethers.BigNumber.from(allBalances["1"][i]);
+                    for (var j = 0; j < allBalances["3"][i].length; j++)
+                    tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(ethers.BigNumber.from(allBalances["3"][i][j]));
+                }
+
+                if (tokenRawFundBalanceBN.gte(amount)) {
+                    var amountUsdBN = amount
+                        .mul(
+                            ethers.BigNumber.from( allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)])
+                        )
+                        .div(
+                            ethers.BigNumber.from(10).pow(ethers.BigNumber.from(self.internalTokens[currencyCode].decimals))
+                        )
+
+                    // Check amountUsdBN against user fund balance
+                    var senderUsdBalance = ethers.BigNumber.from(
+                        await self.contracts.RariFundManager.callStatic
+                        .balanceOf(sender)
+                    );
+
+                    if (amountUsdBN.gt(senderUsdBalance))
+                    throw new Error(
+                      "Requested withdrawal amount is greater than the sender's " +
+                        self.POOL_NAME +
+                        " balance. Please click the max button and try again (or reload and try again later if the issue persists)."
+                    );
+        
+                    // Return amountUsdBN
+                    return [amountUsdBN, null, ethers.constants.Zero];
+                } else {
+                    // Otherwise, exchange as few currencies as possible (ideally those with the lowest balances)
+                    var amountInputtedUsdBN = ethers.constants.Zero;
+                    var amountWithdrawnBN = ethers.constants.Zero;
+                    var totalProtocolFeeBN = ethers.constants.Zero;
+
+                    // Withdraw as much as we can of the output token first
+                    if (tokenRawFundBalanceBN.gt(ethers.constants.Zero)) {
+                        amountInputtedUsdBN = amountInputtedUsdBN.add(
+                        tokenRawFundBalanceBN
+                            .mul(
+                                ethers.BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)])
+                            )
+                            .div(
+                                ethers.BigNumber.from(10).pow(ethers.BigNumber.from(self.internalTokens[currencyCode].decimals))
+                            )
+                        );
+                        amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
+                    }
+
+                    // Get input candidates
+                    var inputCandidates = [];
+
+                    for (var i:any = 0; i < allBalances["0"].length; i++) {
+                    if (allBalances["0"][i] !== currencyCode) {
+                      var rawFundBalanceBN = ethers.constants.Zero;
+                      for (var j = 0; j < allBalances["3"][i].length; j++)
+                        rawFundBalanceBN = rawFundBalanceBN.add(ethers.BigNumber.from(allBalances["3"][i][j]));
+                      if (rawFundBalanceBN.gt(ethers.constants.Zero))
+                        inputCandidates.push({
+                          currencyCode: allBalances["0"][i],
+                          rawFundBalanceBN,
+                        });
+                    }}
+
+                    // mStable
+                    if (
+                        currencyCode === "mUSD" ||
+                        MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(
+                          currencyCode
+                        ) >= 0
+                      ) {
+                            var mStableSwapFeeBN = null;
+                            for (var i: any = 0; i < inputCandidates.length; i++) {
+                                if (
+                                    inputCandidates[i].currencyCode !== "mUSD" &&
+                                    MStablePool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(
+                                      inputCandidates[i].currencyCode
+                                    ) < 0
+                                  ) continue
+                            }
+
+                            // Get swap fee and calculate input amount needed to fill output amount
+                            if (currencyCode !== "mUSD" && mStableSwapFeeBN === null) {
+                                mStableSwapFeeBN = await self.pools[
+                                    "mStable"
+                                  ].getMUsdSwapFeeBN();
+
+                                var inputAmountBN = amount
+                                    .sub(amountWithdrawnBN)
+                                    .mul(ethers.constants.WeiPerEther)
+                                    .div(ethers.constants.WeiPerEther.sub(mStableSwapFeeBN))
+                                    .mul(
+                                        self.internalTokens[inputCandidates[i].currencyCode].decimals === 18 
+                                        ? ethers.constants.WeiPerEther 
+                                        : ethers.BigNumber.from( 10 ** self.internalTokens[inputCandidates[i].currencyCode].decimals) 
+                                    ).div(
+                                        allTokens[currencyCode].decimals === 18 
+                                        ? ethers.constants.WeiPerEther 
+                                        : ethers.BigNumber.from( 10 ** allTokens[currencyCode].decimals) 
+                                    );
+
+                                var outputAmountBeforeFeesBN = inputAmountBN
+                                    .mul(
+                                        allTokens[currencyCode].decimals === 18 
+                                        ? ethers.constants.WeiPerEther 
+                                        : ethers.BigNumber.from( 10 ** allTokens[currencyCode].decimals) 
+                                    )
+                                    .div(
+                                        self.internalTokens[inputCandidates[i].currencyCode].decimals === 18 
+                                        ? ethers.constants.WeiPerEther 
+                                        : ethers.BigNumber.from( 10 ** self.internalTokens[inputCandidates[i].currencyCode].decimals) 
+                                    );
+
+                                var outputAmountBN =
+                                currencyCode === "mUSD"
+                                    ? outputAmountBeforeFeesBN
+                                    : outputAmountBeforeFeesBN.sub(
+                                        outputAmountBeforeFeesBN
+                                        .mul(mStableSwapFeeBN)
+                                        .div(ethers.constants.WeiPerEther)
+                                    );
+
+                                var tries = 0;
+                                while (outputAmountBN.lt(amount.sub(amountWithdrawnBN))) {
+                                    if (tries >= 1000)
+                                      throw new Error(
+                                        "Failed to get increment order input amount to achieve desired output amount."
+                                      );
+                                    inputAmountBN = inputAmountBN.add(ethers.constants.One); // Make sure we have enough input amount to receive amount.sub(amountWithdrawnBN)
+                                    outputAmountBeforeFeesBN = inputAmountBN
+                                      .mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(allTokens[currencyCode].decimals)))
+                                      .div(
+                                        ethers.BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals)
+                                        );
+                                    outputAmountBN =
+                                      currencyCode === "mUSD"
+                                        ? outputAmountBeforeFeesBN
+                                        : outputAmountBeforeFeesBN.sub(
+                                            outputAmountBeforeFeesBN
+                                              .mul(mStableSwapFeeBN)
+                                              .div(ethers.constants.WeiPerEther)
+                                          );
+                                    tries++;
+                                }
+
+                                if (inputAmountBN.gt(inputCandidates[i].rawFundBalanceBN)) {
+                                    inputAmountBN = inputCandidates[i].rawFundBalanceBN;
+                                    outputAmountBeforeFeesBN = inputAmountBN
+                                      .mul(ethers.BigNumber.from(10).pow(allTokens[currencyCode].decimals))
+                                      .div(
+                                        ethers.BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals)
+                                      );
+                                    outputAmountBN =
+                                      currencyCode === "mUSD"
+                                        ? outputAmountBeforeFeesBN
+                                        : outputAmountBeforeFeesBN.sub(
+                                            outputAmountBeforeFeesBN
+                                              .mul(mStableSwapFeeBN)
+                                              .div(ethers.constants.WeiPerEther)
+                                          );
+                                }
+
+                                // Check max swap/redeem validity
+                                if (inputCandidates[i].currencyCode === "mUSD") {
+                                    try {
+                                        var redeemValidity = await self.pools[
+                                          "mStable"
+                                        ].externalContracts.MassetValidationHelper
+                                          .getRedeemValidity(
+                                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                            inputAmountBN,
+                                            self.internalTokens[currencyCode].address
+                                          )
+                                      } catch (err) {
+                                        console.error("Failed to check mUSD redeem validity:", err);
+                                        //@ts-ignore
+                                        continue
+                                      }
+
+                                      //@ts-ignore
+                                      if (!redeemValidity || !redeemValidity["0"]) continue;
+                                      if (!outputAmountBN.eq(ethers.BigNumber.from(redeemValidity["2"])))
+                                        throw new Error(
+                                          "Predicted mStable output amount and output amount returned by getRedeemValidity not equal."
+                                        );
+                                } else {
+                                    try {
+                                        var maxSwap = await self.pools[
+                                          "mStable"
+                                        ].externalContracts.MassetValidationHelper
+                                          .getMaxSwap(
+                                            "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+                                            self.internalTokens[inputCandidates[i].currencyCode]
+                                              .address,
+                                            self.internalTokens[currencyCode].address
+                                          )
+                                      } catch (err) {
+                                        console.error("Failed to check mUSD max swap:", err);
+                                        //@ts-ignore
+                                        continue;
+                                      }
+
+                                      if (
+                                        !maxSwap ||
+                                        !maxSwap["0"] ||
+                                        ethers.BigNumber.from(maxSwap["2"]).lt(inputAmountBN)
+                                      )
+                                      //@ts-ignore
+                                        continue;
+                                }
+
+                                amountInputtedUsdBN = amountInputtedUsdBN.add(
+                                    inputAmountBN
+                                      .mul(
+                                        ethers.BigNumber.from(
+                                          allBalances["4"][
+                                            self.allocations.CURRENCIES.indexOf(
+                                              inputCandidates[i].currencyCode
+                                            )
+                                          ]
+                                        )
+                                      ).div(
+                                        ethers.BigNumber.from(10)
+                                          .pow(
+                                            ethers.BigNumber.from(
+                                              self.internalTokens[inputCandidates[i].currencyCode]
+                                                .decimals
+                                            )
+                                          )
+                                      )
+                                )
+
+                                amountWithdrawnBN = amountWithdrawnBN.add(outputAmountBN);
+                                inputCandidates[i].rawFundBalanceBN = inputCandidates[i].rawFundBalanceBN.sub(inputAmountBN);
+                                if (inputCandidates[i].rawFundBalanceBN.isZero()) {
+                                    inputCandidates.splice(i, 1);
+                                    i--;
+                                }
+
+                                // Stop if we have filled the withdrawal
+                                //@ts-ignore
+                                if (amountWithdrawnBN.gte(amount)) break;
+                            }
+                    }
+
+                    // Use 0x if necessary
+                    if (amountWithdrawnBN.lt(amount)) {
+                    
+                        // Get orders from 0x swap API for each input currency candidate
+                        for (var i:any = 0; i < inputCandidates.length; i++) {
+                            try {
+                                var [
+                                  orders,
+                                  inputFilledAmountBN,
+                                  protocolFee,
+                                  takerAssetFilledAmountBN,
+                                  makerAssetFilledAmountBN,
+                                  gasPrice,
+                                ] = await hey.get0xSwapOrders(
+                                  self.internalTokens[inputCandidates[i].currencyCode].address,
+                                  currencyCode === "ETH"
+                                    ? "WETH"
+                                    : allTokens[currencyCode].address,
+                                  inputCandidates[i].rawFundBalanceBN,
+                                  amount.sub(amountWithdrawnBN)
+                                );
+                              } catch (err) {
+                                if (err === "Insufficient liquidity") {
+                                  inputCandidates.splice(i, 1);
+                                  i--;
+                                  continue;
+                                }
+                
+                                throw new Error(
+                                  "Failed to get swap orders from 0x API: " + err
+                                );
+                              }
+
+                            inputCandidates[i].inputFillAmountBN = inputFilledAmountBN;
+                            inputCandidates[i].protocolFeeBN = ethers.BigNumber.from(protocolFee)
+                                .mul(ethers.BigNumber.from(15))
+                                .div(ethers.BigNumber.from(10)); // Multiply protocol fee by 1.5 to account for user upping the gas price
+
+                            inputCandidates[i].takerAssetFillAmountBN = takerAssetFilledAmountBN;
+                            inputCandidates[i].makerAssetFillAmountBN = makerAssetFilledAmountBN;
+                            inputCandidates[i].takerAssetFillAmountUsdBN = takerAssetFilledAmountBN
+                                .mul(
+                                  ethers.BigNumber.from(
+                                    allBalances["4"][
+                                      self.allocations.CURRENCIES.indexOf(
+                                        inputCandidates[i].currencyCode
+                                      )
+                                    ]
+                                  )
+                                )
+                                .div(
+                                    ethers.BigNumber.from(10)
+                                    .pow(
+                                      ethers.BigNumber.from(
+                                        self.internalTokens[inputCandidates[i].currencyCode]
+                                          .decimals
+                                      )
+                                    )
+                                );
+                        }
+
+                        // Sort candidates from highest to lowest output per USD burned
+                        inputCandidates.sort((a, b) =>
+                            b.makerAssetFillAmountBN
+                            .mul(ethers.constants.WeiPerEther)
+                            .div(b.takerAssetFillAmountUsdBN)
+                            .gt(
+                                a.makerAssetFillAmountBN
+                                .mul(ethers.constants.WeiPerEther)
+                                .div(a.takerAssetFillAmountUsdBN)
+                            )
+                            ? 1
+                            : -1
+                        );
+
+                        
+                        // Loop through input currency candidates until we fill the withdrawal
+                        for (var i:any = 0; i < inputCandidates.length; i++) {
+                            if (inputCandidates[i].makerAssetFillAmountBN.gte( amount.sub(amountWithdrawnBN))) {
+                                 // If order is enough to cover the rest of the withdrawal, cover it and stop looping through input candidates
+                                var thisOutputAmountBN = amount.sub(amountWithdrawnBN);
+                                var thisInputAmountBN = inputCandidates[i].inputFillAmountBN
+                                    .mul(thisOutputAmountBN)
+                                    .div(inputCandidates[i].makerAssetFillAmountBN);
+
+                                var tries = 0;
+                                while (
+                                inputCandidates[i].makerAssetFillAmountBN
+                                    .mul(thisInputAmountBN)
+                                    .div(inputCandidates[i].inputFillAmountBN)
+                                    .lt(thisOutputAmountBN)
+                                ) {
+                                if (tries >= 1000)
+                                    throw new Error(
+                                    "Failed to get increment order input amount to achieve desired output amount."
+                                    );
+                                thisInputAmountBN.iadd(ethers.constants.One); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+                                tries++;
+                                }
+
+
+                                amountInputtedUsdBN = amountInputtedUsdBN.add(
+                                    thisInputAmountBN
+                                      .mul(
+                                        ethers.BigNumber.from(
+                                          allBalances["4"][
+                                            self.allocations.CURRENCIES.indexOf(
+                                              inputCandidates[i].currencyCode
+                                            )
+                                          ]
+                                        )
+                                      )
+                                      .div(
+                                        ethers.BigNumber.from(10)
+                                          .pow(
+                                            ethers.BigNumber.from(
+                                              self.internalTokens[inputCandidates[i].currencyCode]
+                                                .decimals
+                                            )
+                                          )
+                                      )
+                                    );
+                                amountWithdrawnBN = amountWithdrawnBN.add(thisOutputAmountBN);
+                                totalProtocolFeeBN = totalProtocolFeeBN.add(inputCandidates[i].protocolFeeBN);
+
+                                break
+                            } else {
+                                // Otherwise, add the whole order and keep looping through input candidates
+                                amountInputtedUsdBN = amountInputtedUsdBN.add(
+                                    inputCandidates[i].inputFillAmountBN
+                                    .mul(
+                                        ethers.BigNumber.from(
+                                        allBalances["4"][
+                                            self.allocations.CURRENCIES.indexOf(
+                                            inputCandidates[i].currencyCode
+                                            )
+                                        ]
+                                        )
+                                    )
+                                    .div(
+                                        ethers.BigNumber.from(10)
+                                        .pow(
+                                            ethers.BigNumber.from(
+                                            self.internalTokens[inputCandidates[i].currencyCode]
+                                                .decimals
+                                            )
+                                        )
+                                    )
+                                );
+
+                                amountWithdrawnBN= amountWithdrawnBN.add(inputCandidates[i].makerAssetFillAmountBN);
+                                totalProtocolFeeBN = totalProtocolFeeBN.add(inputCandidates[i].protocolFeeBN);
+                            }
+
+                            // Stop if we have filled the withdrawal
+                            if (amountWithdrawnBN.gte(amount)) break;
+                        }
+
+                        // Make sure input amount is completely filled
+                        if (amountWithdrawnBN.lt(amount))
+                            throw new Error("Unable to find enough liquidity to exchange withdrawn tokens to " +currencyCode +".");
+                    }
+
+                    // Check amountInputtedUsdBN against user fund balance
+                    var senderUsdBalance = ethers.BigNumber.from(
+                        await self.contracts.RariFundManager.calStatic.balanceOf(sender)
+                    );
+
+                    if (amountInputtedUsdBN.gt(senderUsdBalance))
+                    throw new Error(
+                      "Requested withdrawal amount is greater than the sender's " +
+                        self.POOL_NAME +
+                        " balance. Please click the max button and try again (or reload and try again later if the issue persists)."
+                    );
+
+                    // Return amountInputtedUsdBN
+                    return [
+                        amountInputtedUsdBN,
+                        totalProtocolFeeBN,
+                        getSlippage
+                        ? await self.withdrawals.getWithdrawalSlippage(
+                            currencyCode,
+                            amount,
+                            amountInputtedUsdBN
+                            )
+                        : null,
+                    ];
+                }
+            },
+            
         }
     }
     
