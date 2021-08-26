@@ -5,6 +5,7 @@ const turboGethURL = `https://turbogeth.crows.sh`;
 // Ethers
 const { ethers: ss } = require('ethers')
 
+const erc20Abii = require('./abi/ERC20.json')
 const rari = new Rari("http://127.0.0.1:8545/");
 
 //const blocks = rari.provider.getBlock(10000).then(res => console.log(res))
@@ -99,7 +100,9 @@ const Testing = async () => {
             // Get depositable currencies
                 // console.log( (await rari.pools.stable.deposits.getDepositCurrencies()))
             // Get accepted direct deposits
-                console.log( await rari.pools.stable.deposits.getDirectDepositCurrencies())
+                // console.log( await rari.pools.stable.deposits.getDirectDepositCurrencies())
+            // validate deposits
+                console.log( (await rari.pools.stable.deposits.validateDeposit("DAI", ss.constants.One, "0x15d34aaf54267db7d7c367839aaf71a00a2c6a65", true)) )
 
 
     // dYdX 
