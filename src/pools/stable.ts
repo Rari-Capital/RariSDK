@@ -76,6 +76,7 @@ module.exports = class StablePool {
     poolToken
     fees
     deposits
+    withdrawals
     static CONTRACT_ADDRESSES = contractAddressesStable;
     static CONTRACT_ABIS = abisStable;
 
@@ -458,7 +459,7 @@ module.exports = class StablePool {
             getInterestFeeRate: async function () {
                 return await self.contracts.RariFundManager.callStatic.getInterestFeeRate();
             }
-        }
+        };
 
         this.deposits = {
             getDepositCurrencies: async function () {
@@ -1267,6 +1268,19 @@ module.exports = class StablePool {
                     }
                 }
             }   
+        };
+
+        this.withdrawals = {
+            getWithdrawalCurrencies: async function () {
+                var currencyCodes = self.allocations.CURRENCIES.slice();
+                currencyCodes.push("ETH");
+                var allTokens = await self.getAllTokens();
+                for (const currencyCode of Object.keys(allTokens))
+                  if (currencyCodes.indexOf(currencyCode) < 0)
+                    currencyCodes.push(currencyCode);
+                return currencyCodes; 
+            }
+
         }
     }
     
