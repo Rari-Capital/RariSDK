@@ -18,6 +18,8 @@ module.exports = class mStableSubpool {
     cache
     externalContracts
 
+    static SUPPORTED_EXCHANGE_CURRENCIES = ["USDC", "USDT", "TUSD"];
+
     constructor(provider) {
         this.provider = provider
         this.cache = new Caches({
