@@ -85,7 +85,7 @@ module.exports = class Rari {
                             "mUSD"
                         ].indexOf(token.symbol) < 0 
                     ) {
-                        token.contract = new ethers.Contract(token.address, erc20Abi);
+                        token.contract = new ethers.Contract(token.address, erc20Abi, self.provider);
                         allTokens[token.symbol] = token;
                     }
                 return allTokens;
