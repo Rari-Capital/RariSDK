@@ -1,19 +1,24 @@
 {
-  "name": "@rari-capital/rari-sdk",
-  "version": "2.0.0",
-  "description": "Rari Capital SDK",
-  "main": "./src/index.ts",
+  "name": "rari-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "files": [
+    "/lib/"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^16.6.1",
-    "typescript": "^4.3.5"
-  },
   "dependencies": {
-    "axios": "^0.21.1",
-    "ethers": "^5.4.4"
+    "axios": "^0.21.4",
+    "ethers": "^5.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^16.7.10",
+    "typescript": "^4.4.2"
   }
 }
