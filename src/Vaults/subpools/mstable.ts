@@ -26,6 +26,11 @@ export default class mStableSubpool {
   cache;
   externalContracts;
 
+  static EXTERNAL_CONTRACT_ADDRESSES = externalContractAddressesMStable;
+  static EXTERNAL_CONTRACT_ABIS = externalAbisMStable;
+
+  static SUPPORTED_EXCHANGE_CURRENCIES = ["USDC", "USDT", "TUSD"];
+
   constructor(provider) {
     this.provider = provider;
     this.cache = new Caches({
