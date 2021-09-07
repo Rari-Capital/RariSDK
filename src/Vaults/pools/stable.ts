@@ -1,5 +1,11 @@
+// Axios
 import axios from "axios";
+
+// Ethers
 import { Contract, BigNumber, constants } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
+
+// Cache
 import RariCache from "../cache.js";
 
 // ERC20ABI
@@ -137,10 +143,11 @@ export default class StablePool {
     fees
     deposits
     withdrawals
+    history
     static CONTRACT_ADDRESSES = contractAddressesStable;
     static CONTRACT_ABIS = abisStable;
 
-    constructor(provider, subpools, getAllTokens) {
+    constructor(provider: JsonRpcProvider, subpools, getAllTokens) {
         this.provider = provider;
         this.pools = subpools;
         this.getAllTokens = getAllTokens;
@@ -520,6 +527,355 @@ export default class StablePool {
                 return await self.contracts.RariFundManager.callStatic.getInterestFeeRate();
             }
         };
+
+        this.history = {
+            getApyHistory: async function (
+              fromTimestamp,
+              toTimestamp,
+              intervalSeconds = 86400
+            ) {
+              if (fromTimestamp === undefined || fromTimestamp === "latest")
+                fromTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (toTimestamp === undefined || toTimestamp === "latest")
+                toTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (!intervalSeconds) intervalSeconds = 86400;
+      
+              try {
+                return (
+                  await axios.get(self.API_BASE_URL + "apys", {
+                    params: { fromTimestamp, toTimestamp, intervalSeconds },
+                  })
+                ).data;
+              } catch (error) {
+                throw new Error("Error in Rari API: " + error);
+              }
+            },
+            getTotalSupplyHistory: async function (
+              fromTimestamp: string | number = "latest",
+              toTimestamp: string | number= "latest",
+              intervalSeconds = 86400
+            ) {
+              if (fromTimestamp === undefined || fromTimestamp === "latest")
+                fromTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (toTimestamp === undefined || toTimestamp === "latest")
+                toTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (!intervalSeconds) intervalSeconds = 86400;
+      
+              try {
+                return (
+                  await axios.get(self.API_BASE_URL + "balances", {
+                    params: { fromTimestamp, toTimestamp, intervalSeconds },
+                  })
+                ).data;
+              } catch (error) {
+                throw new Error("Error in Rari API: " + error);
+              }
+            },
+            getBalanceHistoryOf: async function (
+              account,
+              fromBlock,
+              toBlock,
+              intervalBlocks = 6500
+            ) {
+              if (!account) throw new Error("No account specified");
+              if (fromBlock === undefined) fromBlock = "latest";
+              if (toBlock === undefined) toBlock = "latest";
+              if (!intervalBlocks) intervalBlocks = 6500;
+      
+              try {
+                return (
+                  await axios.get(self.API_BASE_URL + "balances/" + account, {
+                    params: { fromBlock, toBlock, intervalBlocks },
+                  })
+                ).data;
+              } catch (error) {
+                throw new Error("Error in Rari API: " + error);
+              }
+            },
+            getPoolTokenExchangeRateHistory: async function (
+              fromTimestamp,
+              toTimestamp,
+              intervalSeconds = 86400
+            ) {
+              if (fromTimestamp === undefined || fromTimestamp === "latest")
+                fromTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (toTimestamp === undefined || toTimestamp === "latest")
+                toTimestamp = Math.trunc(new Date().getTime() / 1000);
+              if (!intervalSeconds) intervalSeconds = 86400;
+      
+              try {
+                return (
+                  await axios.get(
+                    self.API_BASE_URL +
+                      self.POOL_TOKEN_SYMBOL.toLowerCase() +
+                      "/rates",
+                    {
+                      params: { fromTimestamp, toTimestamp, intervalSeconds },
+                    }
+                  )
+                ).data;
+              } catch (error) {
+                throw new Error("Error in Rari API: " + error);
+              }
+            },
+            getRsptExchangeRateHistory: this.history.getPoolTokenExchangeRateHistory,
+            getPredictedDailyRawFundApyHistoryLastYear: async function () {
+              // TODO: Get results from app.rari.capital
+            },
+            getPredictedDailyFundApyHistoryLastYear: async function () {
+              var history = await self.history.getDailyRawFundApyHistoryLastYear();
+              for (const timestamp of Object.keys(history))
+                history[timestamp] -=
+                  (history[timestamp] *
+                    parseFloat(
+                      await self.contracts.RariFundManager.methods
+                        .getInterestFeeRate()
+                        .call()
+                    )) /
+                  1e18;
+            },
+            getPredictedDailyRawFundReturnHistoryLastYear: async function (
+              principal
+            ) {
+              var apyHistory = await self.history.getPredictedDailyRawFundApyHistoryLastYear();
+              var returns = {};
+              for (const timestamp of Object.keys(apyHistory))
+                returns[timestamp] = principal *=
+                  1 + apyHistory[timestamp] / 100 / 365;
+              return returns;
+            },
+            getPredictedDailyFundReturnHistoryLastYear: async function (principal) {
+              var apyHistory = await self.history.getPredictedDailyFundApyHistoryLastYear();
+              var returns = {};
+              for (const timestamp of Object.keys(apyHistory))
+                returns[timestamp] = principal *=
+                  1 + apyHistory[timestamp] / 100 / 365;
+              return returns;
+            },
+            getPoolAllocationHistory: async function (fromBlock, toBlock, filter) {
+              var events = [];
+              if (toBlock >= 10909705 && fromBlock <= 11821040)
+                events = await self.legacyContracts[
+                  "v2.0.0"
+                ].RariFundController.getPastEvents("PoolAllocation", {
+                  fromBlock: Math.max(fromBlock, 10909705),
+                  toBlock: Math.min(toBlock, 11821040),
+                  filter,
+                });
+              if (toBlock >= 11821040)
+                events = events.concat(
+                  await self.contracts.RariFundController.getPastEvents(
+                    "PoolAllocation",
+                    {
+                      fromBlock: Math.max(fromBlock, 11821040),
+                      toBlock,
+                      filter,
+                    }
+                  )
+                );
+              return events;
+            },
+            getCurrencyExchangeHistory: async function (fromBlock, toBlock, filter) {
+              var events = [];
+              if (toBlock >= 10926182 && fromBlock <= 11821040)
+                events = await self.legacyContracts[
+                  "v2.0.0"
+                ].RariFundController.getPastEvents("CurrencyTrade", {
+                  fromBlock: Math.max(fromBlock, 10926182),
+                  toBlock: Math.min(toBlock, 11821040),
+                  filter,
+                });
+              if (toBlock >= 11821040)
+                events = events.concat(
+                  await self.contracts.RariFundController.getPastEvents(
+                    "CurrencyTrade",
+                    {
+                      fromBlock: Math.max(fromBlock, 11821040),
+                      toBlock,
+                      filter,
+                    }
+                  )
+                );
+              return events;
+            },
+            getDepositHistory: async function (fromBlock, toBlock, filter) {
+              var events = [];
+              if (toBlock >= 10365607 && fromBlock <= 10457338)
+                events = await self.legacyContracts[
+                  "v1.0.0"
+                ].RariFundManager.getPastEvents("Deposit", {
+                  fromBlock: Math.max(fromBlock, 10365607),
+                  toBlock: Math.min(toBlock, 10457338),
+                  filter,
+                });
+              if (toBlock >= 10458405 && fromBlock <= 10889999)
+                events = events.concat(
+                  await self.legacyContracts["v1.1.0"].RariFundManager.getPastEvents(
+                    "Deposit",
+                    {
+                      fromBlock: Math.max(fromBlock, 10458405),
+                      toBlock: Math.min(toBlock, 10889999),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 10922173)
+                events = events.concat(
+                  await self.contracts.RariFundManager.getPastEvents("Deposit", {
+                    fromBlock: Math.max(fromBlock, 10922173),
+                    toBlock,
+                    filter,
+                  })
+                );
+              return events;
+            },
+            getWithdrawalHistory: async function (fromBlock, toBlock, filter) {
+              var events = [];
+              if (toBlock >= 10365668 && fromBlock <= 10365914)
+                events = await self.legacyContracts[
+                  "v1.0.0"
+                ].RariFundManager.getPastEvents("Withdrawal", {
+                  fromBlock: Math.max(fromBlock, 10365668),
+                  toBlock: Math.min(toBlock, 10365914),
+                  filter,
+                });
+              if (toBlock >= 10468624 && fromBlock <= 10890985)
+                events = events.concat(
+                  await self.legacyContracts["v1.1.0"].RariFundManager.getPastEvents(
+                    "Withdrawal",
+                    {
+                      fromBlock: Math.max(fromBlock, 10468624),
+                      toBlock: Math.min(toBlock, 10890985),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 10932051)
+                events = events.concat(
+                  await self.contracts.RariFundManager.getPastEvents("Withdrawal", {
+                    fromBlock: Math.max(fromBlock, 10932051),
+                    toBlock,
+                    filter,
+                  })
+                );
+              return events;
+            },
+            getPreDepositExchangeHistory: async function (
+              fromBlock,
+              toBlock,
+              filter
+            ) {
+              var events = [];
+              if (toBlock >= 10365738 && fromBlock <= 10395897)
+                events = await self.legacyContracts[
+                  "v1.0.0"
+                ].RariFundProxy.getPastEvents("PreDepositExchange", {
+                  fromBlock: Math.max(fromBlock, 10365738),
+                  toBlock: Math.min(toBlock, 10395897),
+                  filter,
+                });
+              if (toBlock >= 10458408 && fromBlock <= 10489095)
+                events = events.concat(
+                  await self.legacyContracts["v1.1.0"].RariFundProxy.getPastEvents(
+                    "PreDepositExchange",
+                    {
+                      fromBlock: Math.max(fromBlock, 10458408),
+                      toBlock: Math.min(toBlock, 10489095),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 10499014 && fromBlock <= 10833530)
+                events = events.concat(
+                  await self.legacyContracts["v1.2.0"].RariFundProxy.getPastEvents(
+                    "PreDepositExchange",
+                    {
+                      fromBlock: Math.max(fromBlock, 10499014),
+                      toBlock: Math.min(toBlock, 10833530),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 10967766)
+                events = events.concat(
+                  await self.contracts.RariFundProxy.getPastEvents(
+                    "PreDepositExchange",
+                    { fromBlock: Math.max(fromBlock, 10967766), toBlock, filter }
+                  )
+                );
+              return events;
+            },
+            getPostWithdrawalExchangeHistory: async function (
+              fromBlock,
+              toBlock,
+              filter
+            ) {
+              var events = [];
+              if (toBlock >= 10365914 && fromBlock <= 10365914)
+                events = await self.legacyContracts[
+                  "v1.0.0"
+                ].RariFundToken.getPastEvents("PostWithdrawalExchange", {
+                  fromBlock: Math.max(fromBlock, 10365914),
+                  toBlock: Math.min(toBlock, 10365914),
+                  filter,
+                });
+              if (toBlock >= 10545467 && fromBlock <= 10545467)
+                events = events.concat(
+                  await self.legacyContracts["v1.2.0"].RariFundProxy.getPastEvents(
+                    "PostWithdrawalExchange",
+                    {
+                      fromBlock: Math.max(fromBlock, 10545467),
+                      toBlock: Math.min(toBlock, 10545467),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 10932051 && fromBlock <= 10932051)
+                events = events.concat(
+                  await self.legacyContracts["v2.0.0"].RariFundProxy.getPastEvents(
+                    "PostWithdrawalExchange",
+                    {
+                      fromBlock: Math.max(fromBlock, 10932051),
+                      toBlock: Math.min(toBlock, 10932051),
+                      filter,
+                    }
+                  )
+                );
+              if (toBlock >= 11141845)
+                events = events.concat(
+                  self.contracts.RariFundProxy.getPastEvents(
+                    "PostWithdrawalExchange",
+                    {
+                      fromBlock: Math.max(fromBlock, 11141845),
+                      toBlock,
+                      filter,
+                    }
+                  )
+                );
+              return events;
+            },
+            getPoolTokenTransferHistory: async function (fromBlock, toBlock, filter) {
+              var events = [];
+              if (toBlock >= 10365607 && fromBlock <= 10890985)
+                events = await self.legacyContracts[
+                  "v1.0.0"
+                ].RariFundToken.getPastEvents("Transfer", {
+                  fromBlock: Math.max(fromBlock, 10365607),
+                  toBlock: Math.min(toBlock, 10890985),
+                  filter,
+                });
+              if (toBlock >= 10909582)
+                events = events.concat(
+                  await self.contracts.RariFundToken.getPastEvents("Transfer", {
+                    fromBlock: Math.max(fromBlock, 10909582),
+                    toBlock,
+                    filter,
+                  })
+                );
+              return events;
+            },
+            getRsptTransferHistory: this.history.getPoolTokenTransferHistory,
+          };
     }
     
   internalTokens = {
