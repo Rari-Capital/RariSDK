@@ -3,7 +3,7 @@ import { Contract, getDefaultProvider, BigNumber, utils  } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 // Cache
-import Caches from "./cache";
+import Cache from "./cache";
 
 // Subpools
 import AaveSubpool from "./subpools/aave";
@@ -22,9 +22,10 @@ import DaiPool from "./pools/dai";
 import erc20Abi from "./abi/ERC20.json";
 
 export default class Vaults {
-  provider;
-  cache;
-  price;
+  provider: JsonRpcProvider;
+  cache: Cache;
+  utils: typeof utils;
+  price: any; // Response from coingecko
   getEthUsdPriceBN;
   getAllTokens;
   subpools;
@@ -32,7 +33,8 @@ export default class Vaults {
 
   constructor(web3Provider: string) {
     this.provider = new JsonRpcProvider(web3Provider);
-    this.cache = new Caches({ allTokens: 8600, ethUSDPrice: 300 });
+    this.cache = new Cache({ allTokens: 8600, ethUSDPrice: 300 });
+    this.utils = utils
 
     for (const currencyCode of Object.keys(this.internalTokens))
       this.internalTokens[currencyCode].contract = new Contract(
