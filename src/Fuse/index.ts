@@ -28,6 +28,13 @@ type MinifiedContracts = {
     }
 }
 
+type interestRateModelType = 
+                JumpRateModel |
+                JumpRateModelV2 |
+                DAIInterestRateModelV2 |
+                WhitePaperInterestRateModel |
+                null
+
 type cERC20Conf = {
     underlying: string // underlying ERC20
     comptroller: string // Address of the comptroller
@@ -205,7 +212,7 @@ export default class Fuse {
     constructor(web3Provider: string) {
         this.provider = new JsonRpcProvider(web3Provider)
         this.Contract = Contract
-        this.utils = utils
+        this.utils = utils 
         this.compoundContracts = Compound.contracts;
         this.openOracleContracts = openOracle.contracts;
         this.oracleContracts = Oracle.contracts;
@@ -890,7 +897,7 @@ export default class Fuse {
             return [deployedCErc20Delegator.options.address, implementationAddress];
         };
 
-        this.identifyInterestRateModel = async function (interestRateModelAddress: string) {
+        this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<interestRateModelType> {
             // Get interest rate model type from runtime bytecode hash and init class
             const interestRateModels: { [key:string]: any}  = {
               JumpRateModel: JumpRateModel,
@@ -899,12 +906,7 @@ export default class Fuse {
               WhitePaperInterestRateModel: WhitePaperInterestRateModel,
             };
 
-            type interestRateModelType = 
-                JumpRateModel |
-                JumpRateModelV2 |
-                DAIInterestRateModelV2 |
-                WhitePaperInterestRateModel |
-                null
+            
             
       
             const runtimeBytecodeHash = utils.keccak256( await this.provider.getCode(interestRateModelAddress) );
