@@ -1,5 +1,6 @@
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { Contract } from "ethers";
-import Caches from "../cache";
+import Cache from "../cache";
 
 // ABIs
 import BankABI from "./alpha/abi/Bank.json";
@@ -16,13 +17,13 @@ const externalAbisAlpha = {
 };
 
 export default class AlphaSubpool {
-  provider;
-  cache;
+  provider: JsonRpcProvider;
+  cache: Cache;
   externalContracts;
 
-  constructor(provider) {
+  constructor(provider: JsonRpcProvider) {
     this.provider = provider;
-    this.cache = new Caches({
+    this.cache = new Cache({
       alphaIBEthApy: 300,
     });
 
