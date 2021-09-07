@@ -20,6 +20,7 @@ import DaiPool from "./pools/dai";
 
 // ERC20ABI
 import erc20Abi from "./abi/ERC20.json";
+import Governance from "./governance/governance";
 
 export default class Vaults {
   provider: JsonRpcProvider;
@@ -32,6 +33,7 @@ export default class Vaults {
   getAllTokens;
   subpools;
   pools;
+  governance;
 
   constructor(web3Provider: string) {
     this.provider = new JsonRpcProvider(web3Provider);
@@ -163,6 +165,8 @@ export default class Vaults {
         this.getAllTokens,
       ),
     };
+
+    this.governance = new Governance(this.provider)
   }
 
   internalTokens = {
