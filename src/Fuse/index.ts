@@ -930,7 +930,7 @@ export default class Fuse {
             return interestRateModel;
         };
 
-        this.getInterestRateModel = async function (assetAddress: string) {
+        this.getInterestRateModel = async function (assetAddress: string): Promise<interestRateModelType | undefined> {
             // Get interest rate model address from asset address
             const assetContract = new Contract(
               JSON.parse(this.compoundContracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
@@ -939,7 +939,7 @@ export default class Fuse {
             );
             const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel()
       
-            const interestRateModel = await this.identifyInterestRateModel( interestRateModelAddress);
+            const interestRateModel: interestRateModelType = await this.identifyInterestRateModel( interestRateModelAddress);
 
             if (interestRateModel) {
                 
