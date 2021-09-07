@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Contract, getDefaultProvider, BigNumber, utils  } from "ethers";
+import { Contract, getDefaultProvider, BigNumber, utils, constants  } from "ethers";
 import { JsonRpcProvider } from "@ethersproject/providers";
 
 // Cache
@@ -25,6 +25,8 @@ export default class Vaults {
   provider: JsonRpcProvider;
   cache: Cache;
   utils: typeof utils;
+  constants: typeof constants;
+  Contract: typeof Contract;
   price: any; // Response from coingecko
   getEthUsdPriceBN;
   getAllTokens;
@@ -35,6 +37,8 @@ export default class Vaults {
     this.provider = new JsonRpcProvider(web3Provider);
     this.cache = new Cache({ allTokens: 8600, ethUSDPrice: 300 });
     this.utils = utils
+    this.constants = constants
+    this.Contract = Contract
 
     for (const currencyCode of Object.keys(this.internalTokens))
       this.internalTokens[currencyCode].contract = new Contract(
