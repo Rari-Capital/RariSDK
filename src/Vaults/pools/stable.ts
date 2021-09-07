@@ -2402,12 +2402,10 @@ export default class StablePool {
                                         )
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD redeem validity:", err);
-                                      //@ts-ignore
-                                      continue
                                     }
 
-                                    //@ts-ignore
-                                    if (!redeemValidity || !redeemValidity["0"]) continue;
+                                    //if (!redeemValidity || !redeemValidity["0"]) break;
+
                                     if (!outputAmountBN.eq(BigNumber.from(redeemValidity["2"])))
                                       throw new Error(
                                         "Predicted mStable output amount and output amount returned by getRedeemValidity not equal."
@@ -2425,17 +2423,15 @@ export default class StablePool {
                                         )
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD max swap:", err);
-                                      //@ts-ignore
-                                      continue;
+                                      //continue;
                                     }
 
-                                    if (
-                                      !maxSwap ||
-                                      !maxSwap["0"] ||
-                                      BigNumber.from(maxSwap["2"]).lt(inputAmountBN)
-                                    )
-                                    //@ts-ignore
-                                      continue;
+                                    // if (
+                                    //   !maxSwap ||
+                                    //   !maxSwap["0"] ||
+                                    //   BigNumber.from(maxSwap["2"]).lt(inputAmountBN)
+                                    // )
+                                     // continue;
                               }
 
                               amountInputtedUsdBN = amountInputtedUsdBN.add(
@@ -2468,7 +2464,7 @@ export default class StablePool {
 
                               // Stop if we have filled the withdrawal
                               //@ts-ignore
-                              if (amountWithdrawnBN.gte(amount)) break;
+                              //if (amountWithdrawnBN.gte(amount)) break;
                           }
                   }
 
