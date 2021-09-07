@@ -83,6 +83,7 @@ export default class Fuse {
     provider: JsonRpcProvider
     Contract: typeof Contract
     utils: typeof utils
+    BigNumber: typeof BigNumber
     contracts: {
         [key: string]: Contract
     }
@@ -213,6 +214,7 @@ export default class Fuse {
         this.provider = new JsonRpcProvider(web3Provider)
         this.Contract = Contract
         this.utils = utils 
+        this.BigNumber = BigNumber
         this.compoundContracts = Compound.contracts;
         this.openOracleContracts = openOracle.contracts;
         this.oracleContracts = Oracle.contracts;
