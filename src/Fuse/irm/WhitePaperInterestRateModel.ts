@@ -80,7 +80,7 @@ export default class WhitePaperInterestRateModel {
     return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
   }
 
-  getSupplyRate(utilizationRate: BigNumber) {
+  getSupplyRate(utilizationRate: BigNumber): BigNumber {
     if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
 
     const oneMinusReserveFactor = toBN(1e18).sub(this.reserveFactorMantissa);
