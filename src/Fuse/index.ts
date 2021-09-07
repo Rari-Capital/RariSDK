@@ -1,6 +1,6 @@
 // Ethers
 import { BigNumber, Contract, utils, ContractFactory, constants, ethers} from "ethers";
-import { Web3Provider, ExternalProvider, JsonRpcFetchFunc, JsonRpcProvider} from "@ethersproject/providers";
+import { JsonRpcProvider} from "@ethersproject/providers";
 // Axios
 import axios from 'axios';
 

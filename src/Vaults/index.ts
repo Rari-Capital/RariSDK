@@ -1,5 +1,7 @@
 import axios from "axios";
 import { Contract, getDefaultProvider, BigNumber, utils  } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
+
 // Cache
 import Caches from "./cache";
 
@@ -18,6 +20,7 @@ import DaiPool from "./pools/dai";
 
 // ERC20ABI
 import erc20Abi from "./abi/ERC20.json";
+
 export default class Vaults {
   provider;
   cache;
@@ -27,8 +30,8 @@ export default class Vaults {
   subpools;
   pools;
 
-  constructor(web3Provider) {
-    this.provider = getDefaultProvider(web3Provider, "homestead");
+  constructor(web3Provider: string) {
+    this.provider = new JsonRpcProvider(web3Provider);
     this.cache = new Caches({ allTokens: 8600, ethUSDPrice: 300 });
 
     for (const currencyCode of Object.keys(this.internalTokens))
