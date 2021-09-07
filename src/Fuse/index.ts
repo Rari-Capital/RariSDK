@@ -84,6 +84,7 @@ export default class Fuse {
     Contract: typeof Contract
     utils: typeof utils
     BigNumber: typeof BigNumber
+    constants: typeof constants
     contracts: {
         [key: string]: Contract
     }
@@ -215,6 +216,7 @@ export default class Fuse {
         this.Contract = Contract
         this.utils = utils 
         this.BigNumber = BigNumber
+        this.constants = constants
         this.compoundContracts = Compound.contracts;
         this.openOracleContracts = openOracle.contracts;
         this.oracleContracts = Oracle.contracts;
