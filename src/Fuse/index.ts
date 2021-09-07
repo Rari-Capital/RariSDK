@@ -268,8 +268,6 @@ export default class Fuse {
             whitelist: string[] // An array of whitelisted addresses
           ) {
 
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
-
                 // 1. Deploy new price oracle via SDK if requested
                 if (Fuse.ORACLES.indexOf(priceOracle) >= 0) {
                     try {
@@ -363,7 +361,6 @@ export default class Fuse {
             conf: ComptrollerConf, // This conf depends on which comptroller model we're deploying
             options: any
         )  {
-              await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
                 let deployArgs: any[] = [];
 
@@ -485,7 +482,6 @@ export default class Fuse {
             implementationAddress: string, // Address of comptroller if its already deployed
             options: any
           ) {
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
             let deployedComptroller
             // 1. Deploy comptroller if necessary
@@ -540,8 +536,6 @@ export default class Fuse {
             bypassPriceFeedCheck: any // ?
           ) {
 
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
-
             // Deploy new interest rate model via SDK if requested
             if (
               [
@@ -590,8 +584,6 @@ export default class Fuse {
             conf: interestRateModelConf, 
             options: any
         ) {
-
-          await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
             // Default model = JumpRateModel
             if (!model) {
@@ -660,7 +652,6 @@ export default class Fuse {
             options: any,
             bypassPriceFeedCheck: boolean
           ) {
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
             // BigNumbers
             const reserveFactorBN = BigNumber.from(reserveFactor)
@@ -739,7 +730,6 @@ export default class Fuse {
             options: any,
             implementationAddress?: string,
           ) {
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
             // Check conf.initialExchangeRateMantissa
             if (
@@ -819,7 +809,6 @@ export default class Fuse {
             bypassPriceFeedCheck: boolean,
             implementationAddress?: string // cERC20Delegate implementation
           ) {
-            await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
             // Check conf.initialExchangeRateMantissa
             if (
@@ -909,10 +898,6 @@ export default class Fuse {
               DAIInterestRateModelV2: DAIInterestRateModelV2,
               WhitePaperInterestRateModel: WhitePaperInterestRateModel,
             };
-
-            
-            
-      
             const runtimeBytecodeHash = utils.keccak256( await this.provider.getCode(interestRateModelAddress) );
             let interestRateModel: interestRateModelType = null;
       
@@ -966,7 +951,6 @@ export default class Fuse {
             },
             options: any
         ) {
-          await this.provider.send("hardhat_impersonateAccount", [accountToImpersonate])
 
 
             // Get price feed
