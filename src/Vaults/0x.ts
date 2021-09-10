@@ -20,7 +20,7 @@ export const get0xSwapOrders = (
   inputTokenAddress: string,
   outputTokenAddress: string,
   maxInputAmountBN: BigNumber,
-  maxMakerAssetFillAmountBN?: BigNumber,
+  maxMakerAssetFillAmountBN?: BigNumber | null,
 ): Promise<ZeroXSwapOrders> => {
   return new Promise(async function (resolve, reject) {
     let decoded: ZeroxAPIResponse;
