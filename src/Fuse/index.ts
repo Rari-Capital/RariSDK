@@ -84,9 +84,6 @@ type interestRateModelConf = {
 
 export default class Fuse {
     provider: JsonRpcProvider
-    Contract: typeof Contract
-    utils: typeof utils
-    BigNumber: typeof BigNumber
     constants: typeof constants
     contracts: {
         [key: string]: Contract
@@ -216,9 +213,6 @@ export default class Fuse {
 
     constructor(web3Provider: JsonRpcProvider | Web3Provider) {
         this.provider = web3Provider
-        this.Contract = Contract
-        this.utils = utils 
-        this.BigNumber = BigNumber
         this.constants = constants
         this.compoundContracts = Compound.contracts;
         this.openOracleContracts = openOracle.contracts;

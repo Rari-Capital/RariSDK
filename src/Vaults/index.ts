@@ -28,9 +28,6 @@ import KeeperDAOSubpool from "./subpools/keeperdao";
 export default class Vaults {
   provider: JsonRpcProvider;
   cache: Cache;
-  utils: typeof utils;
-  constants: typeof constants;
-  Contract: typeof Contract;
   price: any; // Response from coingecko
   getEthUsdPriceBN;
   getAllTokens;
@@ -41,9 +38,6 @@ export default class Vaults {
   constructor(web3Provider: JsonRpcProvider | Web3Provider) {
     this.provider = web3Provider
     this.cache = new Cache({ allTokens: 8600, ethUSDPrice: 300 });
-    this.utils = utils
-    this.constants = constants
-    this.Contract = Contract
 
     
 
