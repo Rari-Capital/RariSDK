@@ -35,8 +35,22 @@ export default class Governance {
     provider: JsonRpcProvider
     cache: Cache
     contracts: {[key: string]: Contract}
-    rgt
+    rgt: {
+      distributions,
+      getExchangeRate
+      sushiSwapDistributions,
+      vesting: {
+        PRIVATE_VESTING_START_TIMESTAMP,
+        PRIVATE_VESTING_PERIOD,
+        getUnclaimed: (account: any) => Promise<BigNumber>,
+        claim,
+        claimAll,
+        getClaimFee: (timestamp: number) => BigNumber
 
+      },
+      balanceOf,
+      transfer
+    }
     API_BASE_URL = "https://api.rari.capital/governance/";
     static CONTRACT_ADDRESSES = contractAddresses;
     static CONTRACT_ABIS = abis;
@@ -183,10 +197,8 @@ export default class Governance {
                     .div(constants.WeiPerEther);
                   return rgtDistributedPastHourPerUsdInUsd.mul(BigNumber.from(24 * 365));
                 },
-                getUnclaimed: async function (account) {
-                  return BigNumber.from(
-                    await self.contracts.RariGovernanceTokenDistributor.getUnclaimedRgt(account)
-                  );
+                getUnclaimed: async function (account: string): Promise<BigNumber> {
+                  return await self.contracts.RariGovernanceTokenDistributor.getUnclaimedRgt(account)
                 },
                 claim: async function (amount, options) {
                   return await self.contracts.RariGovernanceTokenDistributor.claimRgt(amount)
@@ -216,7 +228,8 @@ export default class Governance {
             sushiSwapDistributions: {
                 DISTRIBUTION_START_BLOCK: 11909000,
                 DISTIBUTION_PERIOD: 6500 * 365 * 3,
-                DISTRIBUTION_PERIOD_END: self.rgt.DISTRIBUTION_PERIOD + self.rgt.DISTRIBUTION_START_BLOCK,
+                //@ts-ignore
+                DISTRIBUTION_PERIOD_END: this.DISTRIBUTION_PERIOD + this.DISTRIBUTION_START_BLOCK,
                 FINAL_RGT_DISTRIBUTION: utils.parseUnits("568717819057309757517546")
                     .mul(BigNumber.from(80))
                     .div(BigNumber.from(100)),
@@ -416,10 +429,8 @@ export default class Governance {
             vesting: {
                 PRIVATE_VESTING_START_TIMESTAMP: 1603202400,
                 PRIVATE_VESTING_PERIOD: 2 * 365 * 86400,
-                getUnclaimed: async function (account) {
-                  return BigNumber.from(
-                    await self.contracts.RariGovernanceTokenVesting.getUnclaimedPrivateRgt(account)
-                  );
+                getUnclaimed: async function (account: string): Promise<BigNumber> {
+                  return await self.contracts.RariGovernanceTokenVesting.getUnclaimedPrivateRgt(account)
                 },
                 claim: async function (amount, options) {
                   return await self.contracts.RariGovernanceTokenVesting.claimPrivateRgt(amount)
@@ -427,7 +438,7 @@ export default class Governance {
                 claimAll: async function (options) {
                   return await self.contracts.RariGovernanceTokenVesting.claimAllPrivateRgt()
                 },
-                getClaimFee: function (timestamp) {
+                getClaimFee: function (timestamp: number): BigNumber {
                   var initialClaimFee = constants.WeiPerEther;
                   if (timestamp <= self.rgt.vesting.PRIVATE_VESTING_START_TIMESTAMP)
                     return initialClaimFee;
@@ -444,9 +455,9 @@ export default class Governance {
             balanceOf: async function (account) {
                 return await self.contracts.RariGovernanceToken.balanceOf(account)
               },
-              transfer: async function (recipient, amount, options) {
-                return await self.contracts.RariGovernanceToken.transfer(recipient, amount)
-              },
+            transfer: async function (recipient, amount, options) {
+              return await self.contracts.RariGovernanceToken.transfer(recipient, amount)
+            },
         }
 
 
