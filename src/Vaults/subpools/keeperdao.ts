@@ -1,7 +1,7 @@
 /* eslint-disable */
 
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { constants, BigNumber } from 'ethers';
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { constants, BigNumber } from "ethers";
 
 export default class KeeperDAOSubpool {
   provider: JsonRpcProvider;

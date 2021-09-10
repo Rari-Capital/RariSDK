@@ -12,14 +12,14 @@ class RariCache {
       const self = this;
       if (this._raw[key].updating)
         return await new Promise(async function (resolve) {
-          if (typeof self._raw[key].onUpdate === 'undefined') self._raw[key].onUpdate = [];
+          if (typeof self._raw[key].onUpdate === "undefined") self._raw[key].onUpdate = [];
           self._raw[key].onUpdate.push(resolve);
         });
       this._raw[key].updating = true;
       this._raw[key].value = await asyncMethod();
       this._raw[key].lastUpdated = now;
       this._raw[key].updating = false;
-      if (typeof this._raw[key].onUpdate !== 'undefined' && this._raw[key].onUpdate.length > 0) {
+      if (typeof this._raw[key].onUpdate !== "undefined" && this._raw[key].onUpdate.length > 0) {
         for (const onUpdate of this._raw[key].onUpdate) onUpdate(this._raw[key].value);
         this._raw[key].onUpdate = [];
       }

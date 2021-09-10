@@ -1,7 +1,7 @@
-import { BigNumberish, BigNumber } from 'ethers';
-import { createContract, toBN } from '../utils/web3';
-import { contracts } from '../contracts/compound-protocol.min.json';
-import { Web3Provider } from '@ethersproject/providers';
+import { BigNumberish, BigNumber } from "ethers";
+import { createContract, toBN } from "../utils/web3";
+import { contracts } from "../contracts/compound-protocol.min.json";
+import { Web3Provider } from "@ethersproject/providers";
 
 export interface JumpRateModelInterface {
   JumpRateModel;
@@ -9,8 +9,8 @@ export interface JumpRateModelInterface {
 
 export default class JumpRateModel {
   static RUNTIME_BYTECODE_HASHES = [
-    '0x00f083d6c0022358b6b3565c026e815cfd6fc9dcd6c3ad1125e72cbb81f41b2a',
-    '0x47d7a0e70c9e049792bb96abf3c7527c7543154450c6267f31b52e2c379badc7',
+    "0x00f083d6c0022358b6b3565c026e815cfd6fc9dcd6c3ad1125e72cbb81f41b2a",
+    "0x47d7a0e70c9e049792bb96abf3c7527c7543154450c6267f31b52e2c379badc7",
   ];
 
   initialized: boolean | undefined;
@@ -24,7 +24,7 @@ export default class JumpRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts['contracts/JumpRateModel.sol:JumpRateModel'].abi,
+      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider,
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
@@ -34,7 +34,7 @@ export default class JumpRateModel {
 
     const cTokenContract = createContract(
       assetAddress,
-      JSON.parse(contracts['contracts/CTokenInterfaces.sol:CTokenInterface'].abi),
+      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
       provider,
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -56,7 +56,7 @@ export default class JumpRateModel {
   ) {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts['contracts/JumpRateModel.sol:JumpRateModel'].abi,
+      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider,
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
@@ -100,7 +100,7 @@ export default class JumpRateModel {
       !this.baseRatePerBlock ||
       !this.jumpMultiplierPerBlock
     )
-      throw new Error('Interest rate model class not initialized.');
+      throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
       return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
     } else {
@@ -111,7 +111,7 @@ export default class JumpRateModel {
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
-    if (!this.initialized || !this.reserveFactorMantissa) throw new Error('Interest rate model class not initialized.');
+    if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
     const oneMinusReserveFactor = toBN(1e18).sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
     const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(toBN(1e18));

@@ -1,25 +1,25 @@
-import axios from 'axios';
+import axios from "axios";
 
 // ABIs
-import ERC20ABI from '../abi/ERC20.json';
-import RariGovernanceToken from './abi/RariGovernanceToken.json';
-import RariGovernanceTokenDistributor from './abi/RariGovernanceTokenDistributor.json';
-import RariGovernanceTokenVesting from './abi/RariGovernanceTokenVesting.json';
-import RariGovernanceTokenUniswapDistributor from './abi/RariGovernanceTokenUniswapDistributor.json';
+import ERC20ABI from "../abi/ERC20.json";
+import RariGovernanceToken from "./abi/RariGovernanceToken.json";
+import RariGovernanceTokenDistributor from "./abi/RariGovernanceTokenDistributor.json";
+import RariGovernanceTokenVesting from "./abi/RariGovernanceTokenVesting.json";
+import RariGovernanceTokenUniswapDistributor from "./abi/RariGovernanceTokenUniswapDistributor.json";
 
 // Ethers
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { Contract } from '@ethersproject/contracts';
-import { utils, BigNumber, constants } from 'ethers';
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { Contract } from "@ethersproject/contracts";
+import { utils, BigNumber, constants } from "ethers";
 
 // Cache
-import Cache from '../cache';
+import Cache from "../cache";
 
 export const contractAddresses = {
-  RariGovernanceToken: '0xD291E7a03283640FDc51b121aC401383A46cC623',
-  RariGovernanceTokenDistributor: '0x9C0CaEb986c003417D21A7Daaf30221d61FC1043',
-  RariGovernanceTokenUniswapDistributor: '0x1FA69a416bCF8572577d3949b742fBB0a9CD98c7',
-  RariGovernanceTokenVesting: '0xA54B473028f4ba881F1eD6B670af4103e8F9B98a',
+  RariGovernanceToken: "0xD291E7a03283640FDc51b121aC401383A46cC623",
+  RariGovernanceTokenDistributor: "0x9C0CaEb986c003417D21A7Daaf30221d61FC1043",
+  RariGovernanceTokenUniswapDistributor: "0x1FA69a416bCF8572577d3949b742fBB0a9CD98c7",
+  RariGovernanceTokenVesting: "0xA54B473028f4ba881F1eD6B670af4103e8F9B98a",
 };
 
 export const abis = {
@@ -29,7 +29,7 @@ export const abis = {
   RariGovernanceTokenVesting,
 };
 
-export const LP_TOKEN_CONTRACT = '0x18a797c7c70c1bf22fdee1c09062aba709cacf04';
+export const LP_TOKEN_CONTRACT = "0x18a797c7c70c1bf22fdee1c09062aba709cacf04";
 
 export default class Governance {
   provider: JsonRpcProvider;
@@ -50,7 +50,7 @@ export default class Governance {
     balanceOf;
     transfer;
   };
-  API_BASE_URL = 'https://api.rari.capital/governance/';
+  API_BASE_URL = "https://api.rari.capital/governance/";
   static CONTRACT_ADDRESSES = contractAddresses;
   static CONTRACT_ABIS = abis;
 
@@ -68,11 +68,11 @@ export default class Governance {
     const distributionStartBlock = 11094200;
     const distributionPeriod = 390000;
     const distributionEndBlock = distributionStartBlock - distributionPeriod;
-    const finalRGTDistribution = BigNumber.from('8750000000000000000000000');
+    const finalRGTDistribution = BigNumber.from("8750000000000000000000000");
 
     this.rgt = {
       getExchangeRate: async function () {
-        return await self.cache.getOrUpdate('rgtUsdPrice', async function () {
+        return await self.cache.getOrUpdate("rgtUsdPrice", async function () {
           /* try {
                       return Web3.utils.toBN(Math.trunc((await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=rgt")).data.rgt.usd * 1e18));
                     } catch (error) {
@@ -81,7 +81,7 @@ export default class Governance {
 
           try {
             var data = (
-              await axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2', {
+              await axios.post("https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2", {
                 query: `{
                         ethRgtPair: pair(id: "0xdc2b82bc1106c9c5286e59344896fb0ceb932f53") {
                           token0Price
@@ -96,7 +96,7 @@ export default class Governance {
 
             return utils.parseUnits((data.data.ethRgtPair.token0Price * data.data.ethUsdtPair.token1Price).toString());
           } catch (error) {
-            throw new Error('Error retrieving data from The Graph API: ' + error);
+            throw new Error("Error retrieving data from The Graph API: " + error);
           }
         });
       },
@@ -114,33 +114,33 @@ export default class Governance {
           if (blocks < 6500 * 15)
             return constants.WeiPerEther.mul(blocksBN.pow(BigNumber.from(2)))
               .div(BigNumber.from(2730))
-              .add(BigNumber.from('1450000000000000000000').mul(blocksBN).div(BigNumber.from(273)));
+              .add(BigNumber.from("1450000000000000000000").mul(blocksBN).div(BigNumber.from(273)));
           if (blocks < 6500 * 30)
-            return BigNumber.from('14600000000000000000000')
+            return BigNumber.from("14600000000000000000000")
               .mul(blocksBN)
               .div(BigNumber.from(273))
               .sub(
-                BigNumber.from('2000000000000000000')
+                BigNumber.from("2000000000000000000")
                   .mul(blocksBN.pow(BigNumber.from(2)))
                   .div(BigNumber.from(17745)),
               )
-              .sub(BigNumber.from('1000000000000000000000000').div(BigNumber.from(7)));
+              .sub(BigNumber.from("1000000000000000000000000").div(BigNumber.from(7)));
           if (blocks < 6500 * 45)
             return constants.WeiPerEther.mul(blocksBN.pow(BigNumber.from(2)))
               .div(BigNumber.from(35490))
-              .add(BigNumber.from('39250000000000000000000000').div(BigNumber.from(7)))
-              .sub(BigNumber.from('950000000000000000000').mul(blocksBN).div(BigNumber.from(273)));
+              .add(BigNumber.from("39250000000000000000000000").div(BigNumber.from(7)))
+              .sub(BigNumber.from("950000000000000000000").mul(blocksBN).div(BigNumber.from(273)));
           return constants.WeiPerEther.mul(blocksBN.pow(BigNumber.from(2)))
             .div(BigNumber.from(35490))
-            .add(BigNumber.from('34750000000000000000000000').div(BigNumber.from(7)))
-            .sub(BigNumber.from('50000000000000000000').mul(blocksBN).div(BigNumber.from(39)));
+            .add(BigNumber.from("34750000000000000000000000").div(BigNumber.from(7)))
+            .sub(BigNumber.from("50000000000000000000").mul(blocksBN).div(BigNumber.from(39)));
         },
         getCurrentApy: async function (blockNumber, tvl) {
           if (blockNumber === undefined && tvl === undefined) {
             try {
-              return BigNumber.from((await axios.get(self.API_BASE_URL + 'rgt/apy')).data);
+              return BigNumber.from((await axios.get(self.API_BASE_URL + "rgt/apy")).data);
             } catch (error) {
-              throw new Error('Error retrieving data from Rari API: ' + error);
+              throw new Error("Error retrieving data from Rari API: " + error);
             }
           } else {
             // Get APY from difference in distribution over last 270 blocks (estimating a 1 hour time difference)
@@ -177,7 +177,7 @@ export default class Governance {
           return await self.contracts.RariGovernanceTokenDistributor.claimAllRgt();
         },
         getClaimFee: function (blockNumber) {
-          var initialClaimFee = utils.parseUnits('0.33');
+          var initialClaimFee = utils.parseUnits("0.33");
           if (blockNumber <= self.rgt.distributions.DISTRIBUTION_START_BLOCK) return initialClaimFee;
           var distributionEndBlock =
             self.rgt.distributions.DISTRIBUTION_START_BLOCK + self.rgt.distributions.DISTRIBUTION_PERIOD;
@@ -199,7 +199,7 @@ export default class Governance {
         //@ts-ignore
         DISTRIBUTION_PERIOD_END: this.DISTRIBUTION_PERIOD + this.DISTRIBUTION_START_BLOCK,
         FINAL_RGT_DISTRIBUTION: utils
-          .parseUnits('568717819057309757517546')
+          .parseUnits("568717819057309757517546")
           .mul(BigNumber.from(80))
           .div(BigNumber.from(100)),
         LP_TOKEN_CONTRACT,
@@ -220,9 +220,9 @@ export default class Governance {
         getCurrentApy: async function (blockNumber, totalStakedUsd) {
           if (blockNumber === undefined && totalStakedUsd === undefined) {
             try {
-              return BigNumber.from((await axios.get(self.API_BASE_URL + 'rgt/sushiswap/apy')).data);
+              return BigNumber.from((await axios.get(self.API_BASE_URL + "rgt/sushiswap/apy")).data);
             } catch (error) {
-              throw new Error('Error retrieving data from Rari API: ' + error);
+              throw new Error("Error retrieving data from Rari API: " + error);
             }
           } else {
             // Predicted APY if we have't started the distribution period or we don't have enough data
@@ -262,10 +262,10 @@ export default class Governance {
         },
         getLpTokenData: async function () {
           // TODO: RGT price getter function from Coingecko
-          return await self.cache.getOrUpdate('lpTokenData', async function () {
+          return await self.cache.getOrUpdate("lpTokenData", async function () {
             try {
               return (
-                await axios.post('https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork', {
+                await axios.post("https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork", {
                   query: `{
                                 ethRgtPair: pair(id: "0x18a797c7c70c1bf22fdee1c09062aba709cacf04") {
                                 reserveUSD
@@ -277,7 +277,7 @@ export default class Governance {
                 })
               ).data;
             } catch (error) {
-              throw new Error('Error retrieving data from The Graph API: ' + error);
+              throw new Error("Error retrieving data from The Graph API: " + error);
             }
           });
         },

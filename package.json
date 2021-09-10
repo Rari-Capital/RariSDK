@@ -1,5 +1,5 @@
 {
-  "name": "rari-sdk-sharad-v2",
+  "name": "rari-sdk",
   "version": "1.0.0",
   "description": "",
   "main": "./lib/cjs/index.js",

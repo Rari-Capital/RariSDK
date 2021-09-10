@@ -1,10 +1,10 @@
-import { BigNumber, BigNumberish } from 'ethers';
-import { createContract, toBN } from '../utils/web3';
-import { contracts } from '../contracts/compound-protocol.min.json';
-import { Web3Provider } from '@ethersproject/providers';
+import { BigNumber, BigNumberish } from "ethers";
+import { createContract, toBN } from "../utils/web3";
+import { contracts } from "../contracts/compound-protocol.min.json";
+import { Web3Provider } from "@ethersproject/providers";
 
 export default class JumpRateModelV2 {
-  static RUNTIME_BYTECODE_HASH = '0xc6df64d77d18236fa0e3a1bb939e979d14453af5c8287891decfb67710972c3c';
+  static RUNTIME_BYTECODE_HASH = "0xc6df64d77d18236fa0e3a1bb939e979d14453af5c8287891decfb67710972c3c";
 
   initialized: boolean | undefined;
   baseRatePerBlock: BigNumber | undefined;
@@ -16,7 +16,7 @@ export default class JumpRateModelV2 {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts['contracts/JumpRateModel.sol:JumpRateModel'].abi,
+      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider,
     );
 
@@ -27,7 +27,7 @@ export default class JumpRateModelV2 {
 
     const cTokenContract = createContract(
       assetAddress,
-      JSON.parse(contracts['contracts/CTokenInterfaces.sol:CTokenInterface'].abi),
+      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
       provider,
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -49,7 +49,7 @@ export default class JumpRateModelV2 {
   ) {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts['contracts/JumpRateModel.sol:JumpRateModel'].abi,
+      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider,
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
@@ -93,7 +93,7 @@ export default class JumpRateModelV2 {
       !this.baseRatePerBlock ||
       !this.jumpMultiplierPerBlock
     )
-      throw new Error('Interest rate model class not initialized.');
+      throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
       return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
     } else {
@@ -104,7 +104,7 @@ export default class JumpRateModelV2 {
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
-    if (!this.initialized || !this.reserveFactorMantissa) throw new Error('Interest rate model class not initialized.');
+    if (!this.initialized || !this.reserveFactorMantissa) throw new Error("Interest rate model class not initialized.");
     const oneMinusReserveFactor = toBN(1e18).sub(this.reserveFactorMantissa);
     const borrowRate = this.getBorrowRate(utilizationRate);
     const rateToPool = borrowRate.mul(oneMinusReserveFactor).div(toBN(1e18));

@@ -1,4 +1,4 @@
-import { constants } from 'ethers';
+import { constants } from "ethers";
 
 export default class YVault {
   provider;

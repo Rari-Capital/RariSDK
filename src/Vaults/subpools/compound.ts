@@ -1,6 +1,6 @@
-import Caches from '../cache';
-import axios from 'axios';
-import { utils } from 'ethers';
+import Caches from "../cache";
+import axios from "axios";
+import { utils } from "ethers";
 
 export default class CompoundSubpool {
   provider;
@@ -14,8 +14,8 @@ export default class CompoundSubpool {
   }
 
   async getCurrencySupplierAndCompApys() {
-    return await this.cache.getOrUpdate('compoundCurrencySupplierAndCompApys', async function () {
-      const data = (await axios.get('https://api.compound.finance/api/v2/ctoken')).data;
+    return await this.cache.getOrUpdate("compoundCurrencySupplierAndCompApys", async function () {
+      const data = (await axios.get("https://api.compound.finance/api/v2/ctoken")).data;
 
       let apyBNs = {};
 

@@ -1,62 +1,62 @@
 // Axios
-import axios from 'axios';
+import axios from "axios";
 
 // Ethers
-import { Contract, BigNumber, constants } from 'ethers';
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { Contract, BigNumber, constants } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 // Cache
-import RariCache from '../cache.js';
+import RariCache from "../cache.js";
 
 // ERC20ABI
-import erc20Abi from '../abi/ERC20.json';
+import erc20Abi from "../abi/ERC20.json";
 
-import { get0xSwapOrders } from '../0x.js';
+import { get0xSwapOrders } from "../0x.js";
 
 // Current ABIs
-import RariFundControllerABI from './stable/abi/RariFundController.json';
-import RariFundManagerABI from './stable/abi/RariFundManager.json';
-import RariFundTokenABI from './stable/abi/RariFundToken.json';
-import RariFundPriceConsumerABI from './stable/abi/RariFundPriceConsumer.json';
-import RariFundProxyABI from './stable/abi/RariFundProxy.json';
+import RariFundControllerABI from "./stable/abi/RariFundController.json";
+import RariFundManagerABI from "./stable/abi/RariFundManager.json";
+import RariFundTokenABI from "./stable/abi/RariFundToken.json";
+import RariFundPriceConsumerABI from "./stable/abi/RariFundPriceConsumer.json";
+import RariFundProxyABI from "./stable/abi/RariFundProxy.json";
 
 // Legacy ABIs (v1.0.0)
-import RariFundManagerABIv100 from './stable/abi/legacy/v1.0.0/RariFundManager.json';
-import RariFundTokenABIv100 from './stable/abi/legacy/v1.0.0/RariFundToken.json';
-import RariFundProxyABIv100 from './stable/abi/legacy/v1.0.0/RariFundProxy.json';
+import RariFundManagerABIv100 from "./stable/abi/legacy/v1.0.0/RariFundManager.json";
+import RariFundTokenABIv100 from "./stable/abi/legacy/v1.0.0/RariFundToken.json";
+import RariFundProxyABIv100 from "./stable/abi/legacy/v1.0.0/RariFundProxy.json";
 
 // Legacy ABIs (v1.1.0)
-import RariFundManagerABIv110 from './stable/abi/legacy/v1.1.0/RariFundManager.json';
-import RariFundControllerABIv110 from './stable/abi/legacy/v1.1.0/RariFundController.json';
-import RariFundProxyABIv110 from './stable/abi/legacy/v1.1.0/RariFundProxy.json';
+import RariFundManagerABIv110 from "./stable/abi/legacy/v1.1.0/RariFundManager.json";
+import RariFundControllerABIv110 from "./stable/abi/legacy/v1.1.0/RariFundController.json";
+import RariFundProxyABIv110 from "./stable/abi/legacy/v1.1.0/RariFundProxy.json";
 
 // Legacy ABIs (v1.2.0)
-import RariFundProxyABIv120 from './stable/abi/legacy/v1.2.0/RariFundProxy.json';
+import RariFundProxyABIv120 from "./stable/abi/legacy/v1.2.0/RariFundProxy.json";
 
 // Legacy ABIs (v2.0.0)
-import RariFundManagerABIv200 from './stable/abi/legacy/v2.0.0/RariFundManager.json';
-import RariFundControllerABIv200 from './stable/abi/legacy/v2.0.0/RariFundController.json';
-import RariFundProxyABIv200 from './stable/abi/legacy/v2.0.0/RariFundProxy.json';
+import RariFundManagerABIv200 from "./stable/abi/legacy/v2.0.0/RariFundManager.json";
+import RariFundControllerABIv200 from "./stable/abi/legacy/v2.0.0/RariFundController.json";
+import RariFundProxyABIv200 from "./stable/abi/legacy/v2.0.0/RariFundProxy.json";
 
 // Legacy ABIs (v2.2.0)
-import RariFundProxyABIv220 from './stable/abi/legacy/v2.2.0/RariFundProxy.json';
+import RariFundProxyABIv220 from "./stable/abi/legacy/v2.2.0/RariFundProxy.json";
 
 // Legacy ABIs (v2.4.0)
-import RariFundProxyABIv240 from './stable/abi/legacy/v2.4.0/RariFundProxy.json';
+import RariFundProxyABIv240 from "./stable/abi/legacy/v2.4.0/RariFundProxy.json";
 
 // Legacy ABIs (v2.5.0)
-import RariFundControllerABIv250 from './stable/abi/legacy/v2.5.0/RariFundController.json';
+import RariFundControllerABIv250 from "./stable/abi/legacy/v2.5.0/RariFundController.json";
 
 // Mstable
-import MStableSubpool from '../subpools/mstable.js';
+import MStableSubpool from "../subpools/mstable.js";
 
 // Contract addresses
 const contractAddressesStable = {
-  RariFundController: '0x66f4856f1bbd1eb09e1c8d9d646f5a3a193da569',
-  RariFundManager: '0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a',
-  RariFundToken: '0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0',
-  RariFundPriceConsumer: '0xFE98A52bCAcC86432E7aa76376751DcFAB202244',
-  RariFundProxy: '0x4a785fa6fcd2e0845a24847beb7bddd26f996d4d',
+  RariFundController: "0x66f4856f1bbd1eb09e1c8d9d646f5a3a193da569",
+  RariFundManager: "0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a",
+  RariFundToken: "0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0",
+  RariFundPriceConsumer: "0xFE98A52bCAcC86432E7aa76376751DcFAB202244",
+  RariFundProxy: "0x4a785fa6fcd2e0845a24847beb7bddd26f996d4d",
 };
 
 const abisStable = {
@@ -69,70 +69,70 @@ const abisStable = {
 
 // Legacy addresses
 const legacyContractAddresses = {
-  'v1.0.0': {
-    RariFundManager: '0x686ac9d046418416d3ed9ea9206f3dace4943027',
-    RariFundToken: '0x9366B7C00894c3555c7590b0384e5F6a9D55659f',
-    RariFundProxy: '0x27C4E34163b5FD2122cE43a40e3eaa4d58eEbeaF',
+  "v1.0.0": {
+    RariFundManager: "0x686ac9d046418416d3ed9ea9206f3dace4943027",
+    RariFundToken: "0x9366B7C00894c3555c7590b0384e5F6a9D55659f",
+    RariFundProxy: "0x27C4E34163b5FD2122cE43a40e3eaa4d58eEbeaF",
   },
-  'v1.1.0': {
-    RariFundController: '0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb',
-    RariFundManager: '0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464',
-    RariFundProxy: '0x318cfd99b60a63d265d2291a4ab982073fbf245d',
+  "v1.1.0": {
+    RariFundController: "0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb",
+    RariFundManager: "0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464",
+    RariFundProxy: "0x318cfd99b60a63d265d2291a4ab982073fbf245d",
   },
-  'v1.2.0': {
-    RariFundProxy: '0xb6b79D857858004BF475e4A57D4A446DA4884866',
+  "v1.2.0": {
+    RariFundProxy: "0xb6b79D857858004BF475e4A57D4A446DA4884866",
   },
-  'v2.0.0': {
-    RariFundController: '0xEe7162bB5191E8EC803F7635dE9A920159F1F40C',
-    RariFundManager: '0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a',
-    RariFundProxy: '0xD4be7E211680e12c08bbE9054F0dA0D646c45228',
+  "v2.0.0": {
+    RariFundController: "0xEe7162bB5191E8EC803F7635dE9A920159F1F40C",
+    RariFundManager: "0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a",
+    RariFundProxy: "0xD4be7E211680e12c08bbE9054F0dA0D646c45228",
   },
-  'v2.2.0': {
-    RariFundProxy: '0xB202cAd3965997f2F5E67B349B2C5df036b9792e',
+  "v2.2.0": {
+    RariFundProxy: "0xB202cAd3965997f2F5E67B349B2C5df036b9792e",
   },
-  'v2.4.0': {
-    RariFundProxy: '0xe4deE94233dd4d7c2504744eE6d34f3875b3B439',
+  "v2.4.0": {
+    RariFundProxy: "0xe4deE94233dd4d7c2504744eE6d34f3875b3B439",
   },
-  'v2.5.0': {
-    RariFundController: '0x369855b051d1b2dbee88a792dcfc08614ff4e262',
+  "v2.5.0": {
+    RariFundController: "0x369855b051d1b2dbee88a792dcfc08614ff4e262",
   },
 };
 
 // Legacy addresses
 const legacyAbis = {
-  'v1.0.0': {
+  "v1.0.0": {
     RariFundManager: RariFundManagerABIv100,
     RariFundToken: RariFundTokenABIv100,
     RariFundProxy: RariFundProxyABIv100,
   },
-  'v1.1.0': {
+  "v1.1.0": {
     RariFundController: RariFundControllerABIv110,
     RariFundManager: RariFundManagerABIv110,
     RariFundProxy: RariFundProxyABIv110,
   },
-  'v1.2.0': {
+  "v1.2.0": {
     RariFundProxy: RariFundProxyABIv120,
   },
-  'v2.0.0': {
+  "v2.0.0": {
     RariFundController: RariFundControllerABIv200,
     RariFundManager: RariFundManagerABIv200,
     RariFundProxy: RariFundProxyABIv200,
   },
-  'v2.2.0': {
+  "v2.2.0": {
     RariFundProxy: RariFundProxyABIv220,
   },
-  'v2.4.0': {
+  "v2.4.0": {
     RariFundProxy: RariFundProxyABIv240,
   },
-  'v2.5.0': {
+  "v2.5.0": {
     RariFundController: RariFundControllerABIv250,
   },
 };
 
 export default class StablePool {
-  API_BASE_URL = 'https://api.rari.capital/pools/stable/';
-  POOL_NAME = 'Rari Stable Pool';
-  POOL_TOKEN_SYMBOL = 'RSPT';
+  API_BASE_URL = "https://api.rari.capital/pools/stable/";
+  POOL_NAME = "Rari Stable Pool";
+  POOL_TOKEN_SYMBOL = "RSPT";
   provider;
   pools;
   getAllTokens;
@@ -196,40 +196,40 @@ export default class StablePool {
       getTotalSupply: async () => {
         return await self.contracts.RariFundManager.callStatic.getFundBalance();
       },
-      getTotalInterestAccrued: async (fromBlock = 0, toBlock = 'latest') => {
+      getTotalInterestAccrued: async (fromBlock = 0, toBlock = "latest") => {
         if (!fromBlock) fromBlock = 0;
-        if (toBlock === undefined) toBlock = 'latest';
+        if (toBlock === undefined) toBlock = "latest";
 
-        if (fromBlock === 0 && toBlock === 'latest')
+        if (fromBlock === 0 && toBlock === "latest")
           return await self.contracts.RariFundManager.callStatic.getInterestAccrued();
         else
           try {
-            return (await axios.get(self.API_BASE_URL + 'interest', { params: { fromBlock, toBlock } })).data;
+            return (await axios.get(self.API_BASE_URL + "interest", { params: { fromBlock, toBlock } })).data;
           } catch (e) {
-            throw new Error('Error in Rari API: ' + e);
+            throw new Error("Error in Rari API: " + e);
           }
       },
       balanceOf: async (account) => {
-        if (!account) throw new Error('No account specified');
+        if (!account) throw new Error("No account specified");
         return await self.contracts.RariFundManager.callStatic.balanceOf(account);
       },
-      interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = 'latest'): Promise<string> => {
-        if (!account) throw new Error('No account specified');
+      interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = "latest"): Promise<string> => {
+        if (!account) throw new Error("No account specified");
         if (!fromTimestamp) fromTimestamp = 0;
-        if (toTimestamp === undefined) toTimestamp = 'latest';
+        if (toTimestamp === undefined) toTimestamp = "latest";
 
         try {
           return (
-            await axios.get(self.API_BASE_URL + 'interest/' + account, { params: { fromTimestamp, toTimestamp } })
+            await axios.get(self.API_BASE_URL + "interest/" + account, { params: { fromTimestamp, toTimestamp } })
           ).data;
         } catch (e) {
-          throw new Error('Error in Rari API: ' + e);
+          throw new Error("Error in Rari API: " + e);
         }
       },
       transfer: async (recipient, amount, options) => {
-        if (!recipient) throw new Error('No recipient specified.');
+        if (!recipient) throw new Error("No recipient specified.");
         if (!amount || !BigNumber.from(amount) || !amount.gt(constants.Zero))
-          throw new Error('Amount is not a valid BN instance greater than 0.');
+          throw new Error("Amount is not a valid BN instance greater than 0.");
 
         var fundBalanceBN = BigNumber.from(await self.contracts.RariFundManager.callStatic.getFundBalance());
         var rftTotalSupplyBN = BigNumber.from(await self.contracts.RariFundToken.callStatic.totalSupply());
@@ -239,59 +239,59 @@ export default class StablePool {
     };
 
     this.allocations = {
-      CURRENCIES: ['DAI', 'USDC', 'USDT', 'TUSD', 'BUSD', 'sUSD', 'mUSD'],
+      CURRENCIES: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"],
       POOLS: (function () {
-        var pools = ['dYdX', 'Compound', 'Aave', 'mStable'];
-        pools[100] = 'Fuse3';
-        pools[101] = 'Fuse7';
-        pools[102] = 'Fuse13';
-        pools[103] = 'Fuse14';
-        pools[104] = 'Fuse15';
-        pools[105] = 'Fuse16';
-        pools[106] = 'Fuse11';
-        pools[107] = 'Fuse2';
-        pools[108] = 'Fuse18';
-        pools[109] = 'Fuse6';
+        var pools = ["dYdX", "Compound", "Aave", "mStable"];
+        pools[100] = "Fuse3";
+        pools[101] = "Fuse7";
+        pools[102] = "Fuse13";
+        pools[103] = "Fuse14";
+        pools[104] = "Fuse15";
+        pools[105] = "Fuse16";
+        pools[106] = "Fuse11";
+        pools[107] = "Fuse2";
+        pools[108] = "Fuse18";
+        pools[109] = "Fuse6";
         return pools;
       })(),
       POOLS_BY_CURRENCY: {
-        DAI: ['dYdX', 'Compound', 'Aave'],
+        DAI: ["dYdX", "Compound", "Aave"],
         USDC: [
-          'dYdX',
-          'Compound',
-          'Aave',
-          'Fuse3',
-          'Fuse7',
-          'Fuse13',
-          'Fuse14',
-          'Fuse15',
-          'Fuse16',
-          'Fuse11',
-          'Fuse2',
-          'Fuse18',
-          'Fuse6',
+          "dYdX",
+          "Compound",
+          "Aave",
+          "Fuse3",
+          "Fuse7",
+          "Fuse13",
+          "Fuse14",
+          "Fuse15",
+          "Fuse16",
+          "Fuse11",
+          "Fuse2",
+          "Fuse18",
+          "Fuse6",
         ],
-        USDT: ['Compound', 'Aave'],
-        TUSD: ['Aave'],
-        BUSD: ['Aave'],
-        sUSD: ['Aave'],
-        mUSD: ['mStable'],
+        USDT: ["Compound", "Aave"],
+        TUSD: ["Aave"],
+        BUSD: ["Aave"],
+        sUSD: ["Aave"],
+        mUSD: ["mStable"],
       },
       CURRENCIES_BY_POOL: {
-        dYdX: ['DAI', 'USDC'],
-        Compound: ['DAI', 'USDC', 'USDT'],
-        Aave: ['DAI', 'USDC', 'USDT', 'TUSD', 'BUSD', 'sUSD'],
-        mStable: ['mUSD'],
-        Fuse3: ['USDC'],
-        Fuse7: ['USDC'],
-        Fuse13: ['USDC'],
-        Fuse14: ['USDC'],
-        Fuse15: ['USDC'],
-        Fuse16: ['USDC'],
-        Fuse11: ['USDC'],
-        Fuse2: ['USDC'],
-        Fuse18: ['USDC'],
-        Fuse6: ['USDC'],
+        dYdX: ["DAI", "USDC"],
+        Compound: ["DAI", "USDC", "USDT"],
+        Aave: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"],
+        mStable: ["mUSD"],
+        Fuse3: ["USDC"],
+        Fuse7: ["USDC"],
+        Fuse13: ["USDC"],
+        Fuse14: ["USDC"],
+        Fuse15: ["USDC"],
+        Fuse16: ["USDC"],
+        Fuse11: ["USDC"],
+        Fuse2: ["USDC"],
+        Fuse18: ["USDC"],
+        Fuse6: ["USDC"],
       },
       getRawCurrencyAllocations: async () => {
         var allocationsByCurrency = {
@@ -304,16 +304,16 @@ export default class StablePool {
           mUSD: constants.Zero,
         };
         var allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          const currencyCode = allBalances['0'][i];
-          const contractBalanceBN = BigNumber.from(allBalances['1'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          const currencyCode = allBalances["0"][i];
+          const contractBalanceBN = BigNumber.from(allBalances["1"][i]);
           allocationsByCurrency[currencyCode] = contractBalanceBN;
-          const pools = allBalances['2'][i];
-          const poolBalances = allBalances['3'][i];
+          const pools = allBalances["2"][i];
+          const poolBalances = allBalances["3"][i];
 
           for (let j = 0; j < pools.length; j++) {
             const poolBalanceBN = BigNumber.from(poolBalances[j]);
@@ -333,14 +333,14 @@ export default class StablePool {
           mUSD: constants.Zero,
         };
         const allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          const currencyCode = allBalances['0'][i];
-          const priceInUsdBN = BigNumber.from(allBalances['4'][i]);
-          const contractBalanceBN = BigNumber.from(allBalances['1'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          const currencyCode = allBalances["0"][i];
+          const priceInUsdBN = BigNumber.from(allBalances["4"][i]);
+          const contractBalanceBN = BigNumber.from(allBalances["1"][i]);
           const contractBalanceUsdBN = contractBalanceBN
             .mul(priceInUsdBN)
             .div(
@@ -350,8 +350,8 @@ export default class StablePool {
             );
           allocationsByCurrency[currencyCode] = contractBalanceUsdBN;
 
-          const pools = allBalances['2'][i];
-          const poolBalances = allBalances['3'][i];
+          const pools = allBalances["2"][i];
+          const poolBalances = allBalances["3"][i];
 
           for (var j = 0; j < pools.length; j++) {
             const poolBalanceBN = BigNumber.from(poolBalances[j]);
@@ -375,14 +375,14 @@ export default class StablePool {
         for (const poolName of self.allocations.POOLS)
           if (poolName !== undefined) allocationsByPool[poolName] = constants.Zero;
         const allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          const currencyCode = allBalances['0'][i];
-          const priceInUsdBN = BigNumber.from(allBalances['4'][i]);
-          const contractBalanceBN = BigNumber.from(allBalances['1'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          const currencyCode = allBalances["0"][i];
+          const priceInUsdBN = BigNumber.from(allBalances["4"][i]);
+          const contractBalanceBN = BigNumber.from(allBalances["1"][i]);
           const contractBalanceUsdBN = contractBalanceBN
             .mul(priceInUsdBN)
             .div(
@@ -391,8 +391,8 @@ export default class StablePool {
                 : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals),
             );
           allocationsByPool._cash = allocationsByPool._cash.add(contractBalanceUsdBN);
-          const pools = allBalances['2'][i];
-          const poolBalances = allBalances['3'][i];
+          const pools = allBalances["2"][i];
+          const poolBalances = allBalances["3"][i];
 
           for (let j = 0; j < pools.length; j++) {
             const pool = pools[j];
@@ -413,16 +413,16 @@ export default class StablePool {
       getRawAllocations: async () => {
         const currencies = {};
         const allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          const currencyCode = allBalances['0'][i];
-          const contractBalanceBN = BigNumber.from(allBalances['1'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          const currencyCode = allBalances["0"][i];
+          const contractBalanceBN = BigNumber.from(allBalances["1"][i]);
           currencies[currencyCode] = { _cash: contractBalanceBN };
-          const pools = allBalances['2'][i];
-          const poolBalances = allBalances['3'][i];
+          const pools = allBalances["2"][i];
+          const poolBalances = allBalances["3"][i];
 
           for (let j = 0; j < pools.length; j++) {
             const pool = pools[j];
@@ -435,11 +435,11 @@ export default class StablePool {
       getCurrencyUsdPrices: async () => {
         const prices = {};
         const allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          prices[allBalances['0'][i]] = BigNumber.from(allBalances['4'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          prices[allBalances["0"][i]] = BigNumber.from(allBalances["4"][i]);
         }
         return prices;
       },
@@ -452,15 +452,15 @@ export default class StablePool {
 
         // Get all Balances
         const allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
         // Get raw balance
-        for (var i = 0; i < allBalances['0'].length; i++) {
-          const currencyCode = allBalances['0'][i];
-          const priceInUsdBN = BigNumber.from(allBalances['4'][i]);
-          const contractBalanceBN = BigNumber.from(allBalances['1'][i]);
+        for (var i = 0; i < allBalances["0"].length; i++) {
+          const currencyCode = allBalances["0"][i];
+          const priceInUsdBN = BigNumber.from(allBalances["4"][i]);
+          const contractBalanceBN = BigNumber.from(allBalances["1"][i]);
 
           const contractBalanceUsdBN = contractBalanceBN
             .mul(priceInUsdBN)
@@ -472,8 +472,8 @@ export default class StablePool {
 
           factors.push([contractBalanceUsdBN, constants.Zero]);
           totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
-          const pools = allBalances['2'][i];
-          const poolBalances = allBalances['3'][i];
+          const pools = allBalances["2"][i];
+          const poolBalances = allBalances["3"][i];
 
           for (let j = 0; j < pools.length; j++) {
             const pool = pools[j];
@@ -524,24 +524,24 @@ export default class StablePool {
         const response = (division ** (SECONDS_PER_YEAR / timeDiff) - 1) * 1e18;
         return Math.trunc(response);
       },
-      getApyOverTime: async function (fromTimestamp = 0, toTimestamp: any = 'latest') {
+      getApyOverTime: async function (fromTimestamp = 0, toTimestamp: any = "latest") {
         fromTimestamp = fromTimestamp !== undefined ? Math.max(fromTimestamp, 1593499687) : 1593499687;
 
         toTimestamp =
-          toTimestamp !== undefined && toTimestamp !== 'latest'
+          toTimestamp !== undefined && toTimestamp !== "latest"
             ? Math.min(toTimestamp, new Date().getTime() / 1000)
             : Math.trunc(new Date().getTime() / 1000);
 
         try {
           return BigNumber.from(
             (
-              await axios.get(self.API_BASE_URL + 'apy', {
+              await axios.get(self.API_BASE_URL + "apy", {
                 params: { fromTimestamp, toTimestamp },
               })
             ).data,
           );
         } catch (error) {
-          throw new Error('Error in Rari API: ' + error);
+          throw new Error("Error in Rari API: " + error);
         }
       },
     };
@@ -571,74 +571,74 @@ export default class StablePool {
 
     this.history = {
       getApyHistory: async function (fromTimestamp, toTimestamp, intervalSeconds = 86400) {
-        if (fromTimestamp === undefined || fromTimestamp === 'latest')
+        if (fromTimestamp === undefined || fromTimestamp === "latest")
           fromTimestamp = Math.trunc(new Date().getTime() / 1000);
-        if (toTimestamp === undefined || toTimestamp === 'latest')
+        if (toTimestamp === undefined || toTimestamp === "latest")
           toTimestamp = Math.trunc(new Date().getTime() / 1000);
         if (!intervalSeconds) intervalSeconds = 86400;
 
         try {
           return (
-            await axios.get(self.API_BASE_URL + 'apys', {
+            await axios.get(self.API_BASE_URL + "apys", {
               params: { fromTimestamp, toTimestamp, intervalSeconds },
             })
           ).data;
         } catch (error) {
-          throw new Error('Error in Rari API: ' + error);
+          throw new Error("Error in Rari API: " + error);
         }
       },
       getTotalSupplyHistory: async function (
-        fromTimestamp: string | number = 'latest',
-        toTimestamp: string | number = 'latest',
+        fromTimestamp: string | number = "latest",
+        toTimestamp: string | number = "latest",
         intervalSeconds = 86400,
       ) {
-        if (fromTimestamp === undefined || fromTimestamp === 'latest')
+        if (fromTimestamp === undefined || fromTimestamp === "latest")
           fromTimestamp = Math.trunc(new Date().getTime() / 1000);
-        if (toTimestamp === undefined || toTimestamp === 'latest')
+        if (toTimestamp === undefined || toTimestamp === "latest")
           toTimestamp = Math.trunc(new Date().getTime() / 1000);
         if (!intervalSeconds) intervalSeconds = 86400;
 
         try {
           return (
-            await axios.get(self.API_BASE_URL + 'balances', {
+            await axios.get(self.API_BASE_URL + "balances", {
               params: { fromTimestamp, toTimestamp, intervalSeconds },
             })
           ).data;
         } catch (error) {
-          throw new Error('Error in Rari API: ' + error);
+          throw new Error("Error in Rari API: " + error);
         }
       },
       getBalanceHistoryOf: async function (account, fromBlock, toBlock, intervalBlocks = 6500) {
-        if (!account) throw new Error('No account specified');
-        if (fromBlock === undefined) fromBlock = 'latest';
-        if (toBlock === undefined) toBlock = 'latest';
+        if (!account) throw new Error("No account specified");
+        if (fromBlock === undefined) fromBlock = "latest";
+        if (toBlock === undefined) toBlock = "latest";
         if (!intervalBlocks) intervalBlocks = 6500;
 
         try {
           return (
-            await axios.get(self.API_BASE_URL + 'balances/' + account, {
+            await axios.get(self.API_BASE_URL + "balances/" + account, {
               params: { fromBlock, toBlock, intervalBlocks },
             })
           ).data;
         } catch (error) {
-          throw new Error('Error in Rari API: ' + error);
+          throw new Error("Error in Rari API: " + error);
         }
       },
       getPoolTokenExchangeRateHistory: async function (fromTimestamp, toTimestamp, intervalSeconds = 86400) {
-        if (fromTimestamp === undefined || fromTimestamp === 'latest')
+        if (fromTimestamp === undefined || fromTimestamp === "latest")
           fromTimestamp = Math.trunc(new Date().getTime() / 1000);
-        if (toTimestamp === undefined || toTimestamp === 'latest')
+        if (toTimestamp === undefined || toTimestamp === "latest")
           toTimestamp = Math.trunc(new Date().getTime() / 1000);
         if (!intervalSeconds) intervalSeconds = 86400;
 
         try {
           return (
-            await axios.get(self.API_BASE_URL + self.POOL_TOKEN_SYMBOL.toLowerCase() + '/rates', {
+            await axios.get(self.API_BASE_URL + self.POOL_TOKEN_SYMBOL.toLowerCase() + "/rates", {
               params: { fromTimestamp, toTimestamp, intervalSeconds },
             })
           ).data;
         } catch (error) {
-          throw new Error('Error in Rari API: ' + error);
+          throw new Error("Error in Rari API: " + error);
         }
       },
       // @ts-ignore for some reason when using this its refering to StablePool, not history.
@@ -671,7 +671,7 @@ export default class StablePool {
       getPoolAllocationHistory: async function (fromBlock: number, toBlock: number) {
         let events: any[] = [];
         if (toBlock >= 10909705 && fromBlock <= 11821040)
-          events = await self.legacyContracts['v2.0.0']['RariFundController'].queryFilter(
+          events = await self.legacyContracts["v2.0.0"]["RariFundController"].queryFilter(
             self.contracts.RariFundController.filters.PoolAllocation(),
             Math.max(fromBlock, 10909705),
             Math.min(toBlock, 11821040),
@@ -689,7 +689,7 @@ export default class StablePool {
       getCurrencyExchangeHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10926182 && fromBlock <= 11821040)
-          events = await self.legacyContracts['v2.0.0'].RariFundController.getPastEvents(
+          events = await self.legacyContracts["v2.0.0"].RariFundController.getPastEvents(
             self.contracts.RariFundController.filters.PoolAllocation(),
             {
               fromBlock: Math.max(fromBlock, 10926182),
@@ -699,7 +699,7 @@ export default class StablePool {
           );
         if (toBlock >= 11821040)
           events = events.concat(
-            await self.contracts.RariFundController.getPastEvents('CurrencyTrade', {
+            await self.contracts.RariFundController.getPastEvents("CurrencyTrade", {
               fromBlock: Math.max(fromBlock, 11821040),
               toBlock,
               filter,
@@ -710,14 +710,14 @@ export default class StablePool {
       getDepositHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10365607 && fromBlock <= 10457338)
-          events = await self.legacyContracts['v1.0.0'].RariFundManager.getPastEvents('Deposit', {
+          events = await self.legacyContracts["v1.0.0"].RariFundManager.getPastEvents("Deposit", {
             fromBlock: Math.max(fromBlock, 10365607),
             toBlock: Math.min(toBlock, 10457338),
             filter,
           });
         if (toBlock >= 10458405 && fromBlock <= 10889999)
           events = events.concat(
-            await self.legacyContracts['v1.1.0'].RariFundManager.getPastEvents('Deposit', {
+            await self.legacyContracts["v1.1.0"].RariFundManager.getPastEvents("Deposit", {
               fromBlock: Math.max(fromBlock, 10458405),
               toBlock: Math.min(toBlock, 10889999),
               filter,
@@ -725,7 +725,7 @@ export default class StablePool {
           );
         if (toBlock >= 10922173)
           events = events.concat(
-            await self.contracts.RariFundManager.getPastEvents('Deposit', {
+            await self.contracts.RariFundManager.getPastEvents("Deposit", {
               fromBlock: Math.max(fromBlock, 10922173),
               toBlock,
               filter,
@@ -736,14 +736,14 @@ export default class StablePool {
       getWithdrawalHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10365668 && fromBlock <= 10365914)
-          events = await self.legacyContracts['v1.0.0'].RariFundManager.getPastEvents('Withdrawal', {
+          events = await self.legacyContracts["v1.0.0"].RariFundManager.getPastEvents("Withdrawal", {
             fromBlock: Math.max(fromBlock, 10365668),
             toBlock: Math.min(toBlock, 10365914),
             filter,
           });
         if (toBlock >= 10468624 && fromBlock <= 10890985)
           events = events.concat(
-            await self.legacyContracts['v1.1.0'].RariFundManager.getPastEvents('Withdrawal', {
+            await self.legacyContracts["v1.1.0"].RariFundManager.getPastEvents("Withdrawal", {
               fromBlock: Math.max(fromBlock, 10468624),
               toBlock: Math.min(toBlock, 10890985),
               filter,
@@ -751,7 +751,7 @@ export default class StablePool {
           );
         if (toBlock >= 10932051)
           events = events.concat(
-            await self.contracts.RariFundManager.getPastEvents('Withdrawal', {
+            await self.contracts.RariFundManager.getPastEvents("Withdrawal", {
               fromBlock: Math.max(fromBlock, 10932051),
               toBlock,
               filter,
@@ -762,14 +762,14 @@ export default class StablePool {
       getPreDepositExchangeHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10365738 && fromBlock <= 10395897)
-          events = await self.legacyContracts['v1.0.0'].RariFundProxy.getPastEvents('PreDepositExchange', {
+          events = await self.legacyContracts["v1.0.0"].RariFundProxy.getPastEvents("PreDepositExchange", {
             fromBlock: Math.max(fromBlock, 10365738),
             toBlock: Math.min(toBlock, 10395897),
             filter,
           });
         if (toBlock >= 10458408 && fromBlock <= 10489095)
           events = events.concat(
-            await self.legacyContracts['v1.1.0'].RariFundProxy.getPastEvents('PreDepositExchange', {
+            await self.legacyContracts["v1.1.0"].RariFundProxy.getPastEvents("PreDepositExchange", {
               fromBlock: Math.max(fromBlock, 10458408),
               toBlock: Math.min(toBlock, 10489095),
               filter,
@@ -777,7 +777,7 @@ export default class StablePool {
           );
         if (toBlock >= 10499014 && fromBlock <= 10833530)
           events = events.concat(
-            await self.legacyContracts['v1.2.0'].RariFundProxy.getPastEvents('PreDepositExchange', {
+            await self.legacyContracts["v1.2.0"].RariFundProxy.getPastEvents("PreDepositExchange", {
               fromBlock: Math.max(fromBlock, 10499014),
               toBlock: Math.min(toBlock, 10833530),
               filter,
@@ -785,7 +785,7 @@ export default class StablePool {
           );
         if (toBlock >= 10967766)
           events = events.concat(
-            await self.contracts.RariFundProxy.getPastEvents('PreDepositExchange', {
+            await self.contracts.RariFundProxy.getPastEvents("PreDepositExchange", {
               fromBlock: Math.max(fromBlock, 10967766),
               toBlock,
               filter,
@@ -796,14 +796,14 @@ export default class StablePool {
       getPostWithdrawalExchangeHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10365914 && fromBlock <= 10365914)
-          events = await self.legacyContracts['v1.0.0'].RariFundToken.getPastEvents('PostWithdrawalExchange', {
+          events = await self.legacyContracts["v1.0.0"].RariFundToken.getPastEvents("PostWithdrawalExchange", {
             fromBlock: Math.max(fromBlock, 10365914),
             toBlock: Math.min(toBlock, 10365914),
             filter,
           });
         if (toBlock >= 10545467 && fromBlock <= 10545467)
           events = events.concat(
-            await self.legacyContracts['v1.2.0'].RariFundProxy.getPastEvents('PostWithdrawalExchange', {
+            await self.legacyContracts["v1.2.0"].RariFundProxy.getPastEvents("PostWithdrawalExchange", {
               fromBlock: Math.max(fromBlock, 10545467),
               toBlock: Math.min(toBlock, 10545467),
               filter,
@@ -811,7 +811,7 @@ export default class StablePool {
           );
         if (toBlock >= 10932051 && fromBlock <= 10932051)
           events = events.concat(
-            await self.legacyContracts['v2.0.0'].RariFundProxy.getPastEvents('PostWithdrawalExchange', {
+            await self.legacyContracts["v2.0.0"].RariFundProxy.getPastEvents("PostWithdrawalExchange", {
               fromBlock: Math.max(fromBlock, 10932051),
               toBlock: Math.min(toBlock, 10932051),
               filter,
@@ -819,7 +819,7 @@ export default class StablePool {
           );
         if (toBlock >= 11141845)
           events = events.concat(
-            self.contracts.RariFundProxy.getPastEvents('PostWithdrawalExchange', {
+            self.contracts.RariFundProxy.getPastEvents("PostWithdrawalExchange", {
               fromBlock: Math.max(fromBlock, 11141845),
               toBlock,
               filter,
@@ -830,14 +830,14 @@ export default class StablePool {
       getPoolTokenTransferHistory: async function (fromBlock, toBlock, filter) {
         var events = [];
         if (toBlock >= 10365607 && fromBlock <= 10890985)
-          events = await self.legacyContracts['v1.0.0'].RariFundToken.getPastEvents('Transfer', {
+          events = await self.legacyContracts["v1.0.0"].RariFundToken.getPastEvents("Transfer", {
             fromBlock: Math.max(fromBlock, 10365607),
             toBlock: Math.min(toBlock, 10890985),
             filter,
           });
         if (toBlock >= 10909582)
           events = events.concat(
-            await self.contracts.RariFundToken.getPastEvents('Transfer', {
+            await self.contracts.RariFundToken.getPastEvents("Transfer", {
               fromBlock: Math.max(fromBlock, 10909582),
               toBlock,
               filter,
@@ -852,7 +852,7 @@ export default class StablePool {
     this.deposits = {
       getDepositCurrencies: async function () {
         let currencyCodes = self.allocations.CURRENCIES.slice();
-        currencyCodes.push('ETH');
+        currencyCodes.push("ETH");
         let allTokens = await self.getAllTokens();
         for (const currencyCode of Object.keys(allTokens)) {
           if (currencyCodes.indexOf(currencyCode) < 0) currencyCodes.push(currencyCode);
@@ -864,36 +864,36 @@ export default class StablePool {
       },
       validateDeposit: async function (currencyCode, amount, sender, getSlippage) {
         // Input validation
-        if (!sender) throw new Error('Sender parameter not set.');
+        if (!sender) throw new Error("Sender parameter not set.");
         const allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
-        if (!amount || amount.lte(constants.Zero)) throw new Error('Deposit amount must be greater than 0!');
-        const accountBalanceBN = await (currencyCode == 'ETH'
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
+        if (!amount || amount.lte(constants.Zero)) throw new Error("Deposit amount must be greater than 0!");
+        const accountBalanceBN = await (currencyCode == "ETH"
           ? self.provider.getBalance(sender)
           : allTokens[currencyCode].contract.balanceOf(sender));
 
         if (amount.gt(accountBalanceBN))
-          throw new Error('Not enough balance in your account to make a deposit of this amount.');
+          throw new Error("Not enough balance in your account to make a deposit of this amount.");
 
         // Get currencies we can directly deposit (no swap needed)
         const directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
-          'acceptedCurrencies',
+          "acceptedCurrencies",
           self.contracts.RariFundManager.callStatic.getAcceptedCurrencies,
         );
 
         // Check if theres something
         if (!directlyDepositableCurrencyCodes || directlyDepositableCurrencyCodes.length === 0)
-          throw new Error('No directly depositable currencies found.');
+          throw new Error("No directly depositable currencies found.");
 
         // If currencyCode is directly depositable, return amount that would be added to users balance, null, and no slippage (because theres no swap)
         if (directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0) {
           const allBalances = await self.cache.getOrUpdate(
-            'allBalances',
+            "allBalances",
             self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
           );
 
           const amountUsdBN = amount
-            .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+            .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
             .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)));
 
           return [amountUsdBN.toString(), null, constants.Zero];
@@ -906,48 +906,48 @@ export default class StablePool {
           let mStableOutputAmountAfterFeeBN;
 
           // if currency we want to depost, is mUSD or if its supported by mStable exchange
-          if (currencyCode === 'mUSD' || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+          if (currencyCode === "mUSD" || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
             // for every acceptedCurrency
             for (let acceptedCurrency of directlyDepositableCurrencyCodes) {
               // if accepted currency is mUSD or if its supported by the exchange
               if (
-                acceptedCurrency === 'mUSD' ||
+                acceptedCurrency === "mUSD" ||
                 MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(acceptedCurrency) >= 0
               ) {
                 // if currency we want to deposit is mUSD
-                if (currencyCode === 'mUSD') {
+                if (currencyCode === "mUSD") {
                   // try to get validation to exchange token for the accepted token
                   try {
                     var redeemValidity = await self.pools[
-                      'mStable'
+                      "mStable"
                     ].externalContracts.MassetValidationHelper.getRedeemValidity(
-                      '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                      "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                       amount,
                       self.internalTokens[acceptedCurrency].address,
                     );
                   } catch (err: any) {
-                    console.error('Failed to check mUSD redeem validity: ', err);
+                    console.error("Failed to check mUSD redeem validity: ", err);
                     continue;
                   }
 
-                  if (!redeemValidity || !redeemValidity['0']) continue;
-                  mStableOutputAmountAfterFeeBN = BigNumber.from(redeemValidity['2']);
+                  if (!redeemValidity || !redeemValidity["0"]) continue;
+                  mStableOutputAmountAfterFeeBN = BigNumber.from(redeemValidity["2"]);
                   // If currency we want to deposit is not mUSD but its still supported by mStable exchange
                 } else {
                   // try to get validation to exchange token. This returns validation (boolean), and maxExchangeable amount
                   try {
-                    var maxSwap = await self.pools['mStable'].externalContracts.MassetValidationHelper.getMaxSwap(
-                      '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                    var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.getMaxSwap(
+                      "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                       self.internalTokens[currencyCode].address,
                       self.internalTokens[acceptedCurrency].address,
                     );
                   } catch (err: any) {
-                    console.error('Failed to check mUSD max swap:', err);
+                    console.error("Failed to check mUSD max swap:", err);
                     continue;
                   }
 
                   // if validation is false continue (as in stop executing for loop iteration)
-                  if (!maxSwap || !maxSwap['0'] || amount.gt(BigNumber.from(maxSwap['2']))) continue;
+                  if (!maxSwap || !maxSwap["0"] || amount.gt(BigNumber.from(maxSwap["2"]))) continue;
 
                   // if validation is true
 
@@ -967,11 +967,11 @@ export default class StablePool {
 
                   // if acceptedCurrency is mUSD there is no fee so
                   // mStableOutputAmountAfterFeeBN is the same as outputAmountBeforeFeesBN
-                  if (acceptedCurrency === 'mUSD') mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
+                  if (acceptedCurrency === "mUSD") mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
                   else {
                     // if acceptedCurrency is not mUSD
                     // get the swap fee
-                    var swapFeeBN = await self.pools['mStable'].getMUsdSwapFeeBN();
+                    var swapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
 
                     // mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN - outputAmountBeforeFeesNM * swapFee / 10^18
                     mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN.sub(
@@ -990,13 +990,13 @@ export default class StablePool {
           if (mStableOutputCurrency !== null) {
             // Get USD amount added to sender's fund balance
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.getRawFundBalancesAndPrices(),
             );
 
             // mStableOutputAmountAfterFee is turned into dollars
             const outputAmountUsdBN = mStableOutputAmountAfterFeeBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
               .div(BigNumber.from(10).pow(self.internalTokens[mStableOutputCurrency].decimals));
 
             return [
@@ -1018,37 +1018,37 @@ export default class StablePool {
                 makerAssetFilledAmountBN,
                 gasPrice,
               ] = await get0xSwapOrders(
-                currencyCode === 'ETH' ? 'WETH' : allTokens[currencyCode].address,
+                currencyCode === "ETH" ? "WETH" : allTokens[currencyCode].address,
                 allTokens[acceptedCurrency].address,
                 amount,
               );
             } catch (err: any) {
-              throw new Error('Failed to get swap orders from 0x API: ' + err);
+              throw new Error("Failed to get swap orders from 0x API: " + err);
             }
 
             // Get USD amount added to senders fund balance
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
             );
 
             var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(acceptedCurrency)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(acceptedCurrency)]))
               .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[acceptedCurrency].decimals)));
 
             // Make sure input amount is completely filled
             if (inputFilledAmountBN.lt(amount))
-              throw new Error('Unable to find enough liquidity to exchange ' + currencyCode + ' before depositing.');
+              throw new Error("Unable to find enough liquidity to exchange " + currencyCode + " before depositing.");
 
             // Multiply protocol fee by 1.5 to account for user upping the gas price
             var protocolFeeBN = BigNumber.from(protocolFee).mul(BigNumber.from(15)).div(BigNumber.from(10));
 
             // Make sure we have enough ETH for protocol fee
             var ethBalanceBN =
-              currencyCode === 'ETH' ? accountBalanceBN : BigNumber.from(await provider.getBalance(sender));
+              currencyCode === "ETH" ? accountBalanceBN : BigNumber.from(await provider.getBalance(sender));
 
-            if (protocolFeeBN.gt(currencyCode === 'ETH' ? ethBalanceBN.sub(amount) : ethBalanceBN))
-              throw new Error('ETH balance too low to cover 0x exchange protocol fee.');
+            if (protocolFeeBN.gt(currencyCode === "ETH" ? ethBalanceBN.sub(amount) : ethBalanceBN))
+              throw new Error("ETH balance too low to cover 0x exchange protocol fee.");
 
             return [
               makerAssetFilledAmountBN,
@@ -1061,9 +1061,9 @@ export default class StablePool {
         }
       },
       getDepositSlippage: async function (currencyCode, amount, usdAmount) {
-        if (self.POOL_TOKEN_SYMBOL === 'RYPT') {
+        if (self.POOL_TOKEN_SYMBOL === "RYPT") {
           var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
-            'acceptedCurrencies',
+            "acceptedCurrencies",
             self.contracts.RariFundManager.callStatic.getAcceptedCurrencies,
           );
           if (
@@ -1072,7 +1072,7 @@ export default class StablePool {
             directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0
           ) {
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
             );
 
@@ -1081,42 +1081,42 @@ export default class StablePool {
                 .mul(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)))
                 .div(
                   amount
-                    .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                    .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                     .div(constants.WeiPerEther),
                 ),
             );
           }
-        } else if (self.POOL_TOKEN_SYMBOL === 'RSPT') {
-          if (currencyCode === 'USDC') {
+        } else if (self.POOL_TOKEN_SYMBOL === "RSPT") {
+          if (currencyCode === "USDC") {
             return constants.WeiPerEther.sub(usdAmount.mul(BigNumber.from(1e6)).div(amount)).toString();
           }
-        } else if (self.POOL_TOKEN_SYMBOL === 'RDPT') {
-          if (currencyCode === 'DAI') {
+        } else if (self.POOL_TOKEN_SYMBOL === "RDPT") {
+          if (currencyCode === "DAI") {
             return constants.WeiPerEther.sub(usdAmount.mul(constants.WeiPerEther).div(amount)).toString();
           }
         } else {
-          throw 'Not implemented for ' + self.POOL_TOKEN_SYMBOL;
+          throw "Not implemented for " + self.POOL_TOKEN_SYMBOL;
         }
 
         // Get tokens
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) {
-          throw new Error('Invalid currency code!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) {
+          throw new Error("Invalid currency code!");
         }
 
         // Try cache
         if (
           self.cache._raw.coinGeckoUsdPrices &&
           self.cache._raw.coinGeckoUsdPrices.value &&
-          self.cache._raw.coinGeckoUsdPrices.value['USDC'] &&
+          self.cache._raw.coinGeckoUsdPrices.value["USDC"] &&
           self.cache._raw.coinGeckoUsdPrices.value[currencyCode] &&
           new Date().getTime() / 1000 <=
             self.cache._raw.coinGeckoUsdPrices.lastUpdated + self.cache._raw.coinGeckoUsdPrices.timeout
         ) {
-          if (self.POOL_TOKEN_SYMBOL === 'RSPT') {
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['USDC'];
-          } else if (self.POOL_TOKEN_SYMBOL === 'RDPT') {
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['DAI'];
+          if (self.POOL_TOKEN_SYMBOL === "RSPT") {
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+          } else if (self.POOL_TOKEN_SYMBOL === "RDPT") {
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["DAI"];
           } else {
             usdAmount = parseFloat(usdAmount.toString());
           }
@@ -1125,7 +1125,7 @@ export default class StablePool {
             BigNumber.from(
               Math.trunc(
                 usdAmount *
-                  (10 ** (currencyCode === 'ETH' ? 18 : allTokens[currencyCode].decimals) /
+                  (10 ** (currencyCode === "ETH" ? 18 : allTokens[currencyCode].decimals) /
                     (parseFloat(amount.toString()) * self.cache._raw.coinGeckoUsdPrices.value[currencyCode])),
               ),
             ),
@@ -1139,29 +1139,29 @@ export default class StablePool {
         }
 
         // Get CoinGecko IDs
-        var decoded = await self.cache.getOrUpdate('coinGeckoList', async function () {
-          return (await axios.get('https://api.coingecko.com/api/v3/coins/list')).data;
+        var decoded = await self.cache.getOrUpdate("coinGeckoList", async function () {
+          return (await axios.get("https://api.coingecko.com/api/v3/coins/list")).data;
         });
-        if (!decoded) throw new Error('Failed to decode coins list from CoinGecko');
+        if (!decoded) throw new Error("Failed to decode coins list from CoinGecko");
         var currencyCodesByCoinGeckoIds = {};
 
         for (const currencyCode of currencyCodes) {
           var filtered = decoded.filter((coin) => coin.symbol.toLowerCase() === currencyCode.toLowerCase());
-          if (!filtered) throw new Error('Failed to get currency IDs from CoinGecko');
+          if (!filtered) throw new Error("Failed to get currency IDs from CoinGecko");
           for (const coin of filtered) currencyCodesByCoinGeckoIds[coin.id] = currencyCode;
         }
 
         // Get prices
         var decoded = (
-          await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+          await axios.get("https://api.coingecko.com/api/v3/simple/price", {
             params: {
-              vs_currencies: 'usd',
-              ids: Object.keys(currencyCodesByCoinGeckoIds).join(','),
+              vs_currencies: "usd",
+              ids: Object.keys(currencyCodesByCoinGeckoIds).join(","),
               include_market_cap: true,
             },
           })
         ).data;
-        if (!decoded) throw new Error('Failed to decode USD exchange rates from CoinGecko');
+        if (!decoded) throw new Error("Failed to decode USD exchange rates from CoinGecko");
         var prices = {};
         var maxMarketCaps = {};
 
@@ -1175,64 +1175,64 @@ export default class StablePool {
           }
 
         // Update cache
-        self.cache.update('coinGeckoUsdPrices', prices);
+        self.cache.update("coinGeckoUsdPrices", prices);
 
         // Return slippage
         if (
-          self.cache._raw.coinGeckoUsdPrices.value['USDC'] &&
+          self.cache._raw.coinGeckoUsdPrices.value["USDC"] &&
           self.cache._raw.coinGeckoUsdPrices.value[currencyCode]
         ) {
-          if (self.POOL_TOKEN_SYMBOL === 'RSPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['USDC'];
-          else if (self.POOL_TOKEN_SYMBOL === 'RDPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['DAI'];
+          if (self.POOL_TOKEN_SYMBOL === "RSPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+          else if (self.POOL_TOKEN_SYMBOL === "RDPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["DAI"];
           else usdAmount = parseFloat(usdAmount.toString());
           return constants.WeiPerEther.sub(
             BigNumber.from(
               Math.trunc(
                 usdAmount *
-                  (10 ** (currencyCode === 'ETH' ? 18 : allTokens[currencyCode].decimals) /
+                  (10 ** (currencyCode === "ETH" ? 18 : allTokens[currencyCode].decimals) /
                     (parseFloat(amount.toString()) * self.cache._raw.coinGeckoUsdPrices.value[currencyCode])),
               ),
             ),
           );
-        } else throw new Error('Failed to get currency prices from CoinGecko');
+        } else throw new Error("Failed to get currency prices from CoinGecko");
       },
       deposit: async function (currencyCode, amount, minUsdAmount, options) {
         // Input validation
-        if (!options || !options.from) throw new Error('Options parameter not set or from address not set.');
+        if (!options || !options.from) throw new Error("Options parameter not set or from address not set.");
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
-        if (!amount || amount.lte(constants.Zero)) throw new Error('Deposit amount must be greater than 0!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
+        if (!amount || amount.lte(constants.Zero)) throw new Error("Deposit amount must be greater than 0!");
         var accountBalanceBN = BigNumber.from(
-          await (currencyCode == 'ETH'
+          await (currencyCode == "ETH"
             ? self.provider.getBalance(options.from)
             : allTokens[currencyCode].contract.methods.balanceOf(options.from).call()),
         );
         if (amount.gt(accountBalanceBN))
-          throw new Error('Not enough balance in your account to make a deposit of this amount.');
+          throw new Error("Not enough balance in your account to make a deposit of this amount.");
 
         // Check if currency is directly depositable
         var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
-          'acceptedCurrencies',
+          "acceptedCurrencies",
           self.contracts.RariFundManager.methods.getAcceptedCurrencies().call,
         );
         if (!directlyDepositableCurrencyCodes || directlyDepositableCurrencyCodes.length == 0)
-          throw new Error('No directly depositable currencies found.');
+          throw new Error("No directly depositable currencies found.");
 
         if (directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0) {
           // Get USD amount added to sender's fund balance
           var allBalances = await self.cache.getOrUpdate(
-            'allBalances',
+            "allBalances",
             self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices().call,
           );
 
           var amountUsdBN = amount
-            .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+            .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
             .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)));
 
           // Check amountUsdBN against minUsdAmount
-          if (typeof minUsdAmount !== 'undefined' && minUsdAmount !== null && amountUsdBN.lt(minUsdAmount))
+          if (typeof minUsdAmount !== "undefined" && minUsdAmount !== null && amountUsdBN.lt(minUsdAmount))
             return [amountUsdBN];
 
           // Get deposit contract
@@ -1251,16 +1251,16 @@ export default class StablePool {
                   .call(),
               );
               if (allowanceBN.lt(amount)) {
-                if (allowanceBN.gt(constants.Zero) && currencyCode === 'USDT')
+                if (allowanceBN.gt(constants.Zero) && currencyCode === "USDT")
                   await allTokens[currencyCode].contract.methods
-                    .approve(depositContract.options.address, '0')
+                    .approve(depositContract.options.address, "0")
                     .send(options);
                 approvalReceipt = await allTokens[currencyCode].contract.methods
                   .approve(depositContract.options.address, amount)
                   .send(options);
               }
             } catch (err: any) {
-              throw new Error('Failed to approve tokens: ' + (err.message ? err.message : err));
+              throw new Error("Failed to approve tokens: " + (err.message ? err.message : err));
             }
 
             // Deposit tokens to RariFundManager
@@ -1277,51 +1277,51 @@ export default class StablePool {
           };
 
           await approveAndDeposit();
-          self.cache.clear('allBalances');
+          self.cache.clear("allBalances");
           return [amountUsdBN, null, approvalReceipt, receipt];
         } else {
           // Get mStable output currency if possible
           let mStableOutputCurrency;
           let mStableOutputAmountAfterFeeBN;
 
-          if (currencyCode === 'mUSD' || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+          if (currencyCode === "mUSD" || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
             for (var acceptedCurrency of directlyDepositableCurrencyCodes) {
               if (
-                acceptedCurrency === 'mUSD' ||
+                acceptedCurrency === "mUSD" ||
                 MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(acceptedCurrency) >= 0
               ) {
-                if (currencyCode === 'mUSD') {
+                if (currencyCode === "mUSD") {
                   try {
-                    var redeemValidity = await self.pools['mStable'].externalContracts.MassetValidationHelper.methods
+                    var redeemValidity = await self.pools["mStable"].externalContracts.MassetValidationHelper.methods
                       .getRedeemValidity(
-                        '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                        "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                         amount,
                         self.internalTokens[acceptedCurrency].address,
                       )
                       .call();
                   } catch (err: any) {
-                    console.error('Failed to check mUSD redeem validity:', err);
+                    console.error("Failed to check mUSD redeem validity:", err);
                     continue;
                   }
 
-                  if (!redeemValidity || !redeemValidity['0']) continue;
-                  mStableOutputAmountAfterFeeBN = BigNumber.from(redeemValidity['2']);
+                  if (!redeemValidity || !redeemValidity["0"]) continue;
+                  mStableOutputAmountAfterFeeBN = BigNumber.from(redeemValidity["2"]);
                 }
               } else {
                 try {
-                  var maxSwap = await self.pools['mStable'].externalContracts.MassetValidationHelper.methods
+                  var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.methods
                     .getMaxSwap(
-                      '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                      "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                       self.internalTokens[currencyCode].address,
                       self.internalTokens[acceptedCurrency].address,
                     )
                     .call();
                 } catch (err: any) {
-                  console.error('Failed to check mUSD max swap:', err);
+                  console.error("Failed to check mUSD max swap:", err);
                   continue;
                 }
 
-                if (!maxSwap || !maxSwap['0'] || amount.gt(BigNumber.from(maxSwap['2']))) continue;
+                if (!maxSwap || !maxSwap["0"] || amount.gt(BigNumber.from(maxSwap["2"]))) continue;
 
                 var outputAmountBeforeFeesBN = amount
                   .mul(
@@ -1335,9 +1335,9 @@ export default class StablePool {
                       : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals),
                   );
 
-                if (acceptedCurrency === 'mUSD') mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
+                if (acceptedCurrency === "mUSD") mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
                 else {
-                  var swapFeeBN = await self.pools['mStable'].getMUsdSwapFeeBN();
+                  var swapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
 
                   mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN.sub(
                     outputAmountBeforeFeesBN.mul(swapFeeBN).div(constants.WeiPerEther),
@@ -1355,15 +1355,15 @@ export default class StablePool {
 
             // Get USD amount added to sender's fund balance
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
             );
             var outputAmountUsdBN = mStableOutputAmountAfterFeeBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
               .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[mStableOutputCurrency].decimals)));
 
             // Check outputAmountUsdBN against minUsdAmount
-            if (typeof minUsdAmount !== 'undefined' && minUsdAmount !== null && outputAmountUsdBN.lt(minUsdAmount))
+            if (typeof minUsdAmount !== "undefined" && minUsdAmount !== null && outputAmountUsdBN.lt(minUsdAmount))
               return [outputAmountUsdBN];
 
             // Approve tokens to RariFundProxy
@@ -1376,10 +1376,10 @@ export default class StablePool {
               );
 
               if (allowanceBN.lt(amount)) {
-                if (allowanceBN.gt(constants.Zero) && currencyCode === 'USDT') {
+                if (allowanceBN.gt(constants.Zero) && currencyCode === "USDT") {
                   await self.internalTokens[currencyCode].contract.approve(
                     self.contracts.RariFundProxy.options.address,
-                    '0',
+                    "0",
                     options,
                   );
                 }
@@ -1390,7 +1390,7 @@ export default class StablePool {
                 );
               }
             } catch (err: any) {
-              throw new Error('Failed to approve tokens to RariFundProxy: ' + (err.message ? err.message : err));
+              throw new Error("Failed to approve tokens to RariFundProxy: " + (err.message ? err.message : err));
             }
 
             // Exchange and deposit tokens via mStable via RariFundProxy
@@ -1402,10 +1402,10 @@ export default class StablePool {
                 options,
               );
             } catch (err: any) {
-              throw new Error('RariFundProxy.exchangeAndDeposit failed: ' + (err.message ? err.message : err));
+              throw new Error("RariFundProxy.exchangeAndDeposit failed: " + (err.message ? err.message : err));
             }
 
-            self.cache.clear('allBalances');
+            self.cache.clear("allBalances");
             return [mStableOutputAmountAfterFeeBN, null, approvalReceipt, receipt];
           } else {
             // Use first accepted currency for 0x
@@ -1422,49 +1422,49 @@ export default class StablePool {
                 makerAssetFilledAmountBN,
                 gasPrice,
               ] = await get0xSwapOrders(
-                currencyCode === 'ETH' ? 'WETH' : allTokens[currencyCode].address,
+                currencyCode === "ETH" ? "WETH" : allTokens[currencyCode].address,
                 allTokens[acceptedCurrency].address,
                 amount,
               );
             } catch (err: any) {
-              throw new Error('Failed to get swap orders from 0x API: ' + err);
+              throw new Error("Failed to get swap orders from 0x API: " + err);
             }
 
             // Get USD amount added to sender's fund balance
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
             );
 
             var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(acceptedCurrency)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(acceptedCurrency)]))
               .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[acceptedCurrency].decimals)));
 
             // Make sure input amount is completely filled
             if (inputFilledAmountBN.lt(amount))
-              throw new Error('Unable to find enough liquidity to exchange ' + currencyCode + ' before depositing.');
+              throw new Error("Unable to find enough liquidity to exchange " + currencyCode + " before depositing.");
 
             // Multiply protocol fee by 1.5 to account for user upping the gas price
             var protocolFeeBN = BigNumber.from(protocolFee).mul(BigNumber.from(15)).div(BigNumber.from(10));
 
             // Make sure we have enough ETH for the protocol fee
             var ethBalanceBN =
-              currencyCode == 'ETH' ? accountBalanceBN : BigNumber.from(await self.provider.getBalance(options.from));
+              currencyCode == "ETH" ? accountBalanceBN : BigNumber.from(await self.provider.getBalance(options.from));
 
-            if (protocolFeeBN.gt(currencyCode === 'ETH' ? ethBalanceBN.sub(amount) : ethBalanceBN)) {
-              throw new Error('ETH balance too low to cover 0x exchange protocol fee.');
+            if (protocolFeeBN.gt(currencyCode === "ETH" ? ethBalanceBN.sub(amount) : ethBalanceBN)) {
+              throw new Error("ETH balance too low to cover 0x exchange protocol fee.");
             }
 
             // Check makerAssetFilledAmountUsdBN against minUsdAmount
             if (
-              typeof minUsdAmount !== 'undefined' &&
+              typeof minUsdAmount !== "undefined" &&
               minUsdAmount !== null &&
               makerAssetFilledAmountUsdBN.lt(minUsdAmount)
             )
               return [makerAssetFilledAmountUsdBN];
 
             // Approve tokens to RariFundProxy if token is not ETH
-            if (currencyCode !== 'ETH') {
+            if (currencyCode !== "ETH") {
               try {
                 var allowanceBN = BigNumber.from(
                   await allTokens[currencyCode].contract.allowance(
@@ -1473,16 +1473,16 @@ export default class StablePool {
                   ),
                 );
                 if (allowanceBN.lt(amount)) {
-                  if (allowanceBN.gt(constants.Zero) && currencyCode === 'USDT')
+                  if (allowanceBN.gt(constants.Zero) && currencyCode === "USDT")
                     await allTokens[currencyCode].contract.methods
-                      .approve(self.contracts.RariFundProxy.options.address, '0')
+                      .approve(self.contracts.RariFundProxy.options.address, "0")
                       .send(options);
                   approvalReceipt = await allTokens[currencyCode].contract.methods
                     .approve(self.contracts.RariFundProxy.options.address, amount)
                     .send(options);
                 }
               } catch (err: any) {
-                throw new Error('Failed to approve tokens to RariFundProxy: ' + (err.message ? err.message : err));
+                throw new Error("Failed to approve tokens to RariFundProxy: " + (err.message ? err.message : err));
               }
             }
 
@@ -1513,8 +1513,8 @@ export default class StablePool {
             try {
               var receipt = await self.contracts.RariFundProxy.methods
                 .exchangeAndDeposit(
-                  currencyCode === 'ETH'
-                    ? '0x0000000000000000000000000000000000000000'
+                  currencyCode === "ETH"
+                    ? "0x0000000000000000000000000000000000000000"
                     : allTokens[currencyCode].address,
                   amount,
                   acceptedCurrency,
@@ -1525,17 +1525,17 @@ export default class StablePool {
                 .send(
                   Object.assign(
                     {
-                      value: currencyCode === 'ETH' ? protocolFeeBN.add(amount).toString() : protocolFeeBN.toString(),
+                      value: currencyCode === "ETH" ? protocolFeeBN.add(amount).toString() : protocolFeeBN.toString(),
                       gasPrice: gasPrice,
                     },
                     options,
                   ),
                 );
             } catch (err: any) {
-              throw new Error('RariFundProxy.exchangeAndDeposit failed: ' + (err.message ? err.message : err));
+              throw new Error("RariFundProxy.exchangeAndDeposit failed: " + (err.message ? err.message : err));
             }
 
-            self.cache.clear('allBalances');
+            self.cache.clear("allBalances");
             return [makerAssetFilledAmountUsdBN, protocolFeeBN, approvalReceipt, receipt];
           }
         }
@@ -1545,7 +1545,7 @@ export default class StablePool {
     this.withdrawals = {
       getWithdrawalCurrencies: async function () {
         var currencyCodes = self.allocations.CURRENCIES.slice();
-        currencyCodes.push('ETH');
+        currencyCodes.push("ETH");
         var allTokens = await self.getAllTokens();
         for (const currencyCode of Object.keys(allTokens))
           if (currencyCodes.indexOf(currencyCode) < 0) currencyCodes.push(currencyCode);
@@ -1556,7 +1556,7 @@ export default class StablePool {
       },
       getMaxWithdrawalAmount: async function (currencyCode, senderUsdBalance, sender) {
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
         if (!senderUsdBalance || senderUsdBalance.lte(constants.Zero)) return [constants.Zero];
 
         // Get user fund balance
@@ -1565,28 +1565,28 @@ export default class StablePool {
 
         // Check balances to find withdrawal source
         var allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices().call,
         );
 
         // See how much we can withdraw directly if token is supported by the fund
-        var i = allBalances['0'].indexOf(currencyCode);
+        var i = allBalances["0"].indexOf(currencyCode);
         var tokenRawFundBalanceBN = constants.Zero;
 
         if (i >= 0) {
-          tokenRawFundBalanceBN = BigNumber.from(allBalances['1'][i]);
-          for (var j = 0; j < allBalances['3'][i].length; j++)
-            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+          tokenRawFundBalanceBN = BigNumber.from(allBalances["1"][i]);
+          for (var j = 0; j < allBalances["3"][i].length; j++)
+            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
         }
 
         if (tokenRawFundBalanceBN.gt(constants.Zero)) {
           var maxWithdrawalAmountBN = senderUsdBalance
             .mul(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)))
-            .div(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]));
+            .div(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]));
 
           if (
             maxWithdrawalAmountBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
               .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)))
               .gt(senderUsdBalance)
           )
@@ -1605,7 +1605,7 @@ export default class StablePool {
         if (tokenRawFundBalanceBN.gt(constants.Zero)) {
           amountInputtedUsdBN = amountInputtedUsdBN.add(
             tokenRawFundBalanceBN
-              .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+              .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
               .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))),
           );
           amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
@@ -1614,12 +1614,12 @@ export default class StablePool {
         // Get input candidates
         let inputCandidates: any[] = [];
 
-        for (var i: any = 0; i < allBalances['0'].length; i++) {
-          var inputCurrencyCode = allBalances['0'][i];
+        for (var i: any = 0; i < allBalances["0"].length; i++) {
+          var inputCurrencyCode = allBalances["0"][i];
           if (inputCurrencyCode !== currencyCode) {
-            var rawFundBalanceBN = BigNumber.from(allBalances['1'][i]);
-            for (var j = 0; j < allBalances['3'][i].length; j++)
-              rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+            var rawFundBalanceBN = BigNumber.from(allBalances["1"][i]);
+            for (var j = 0; j < allBalances["3"][i].length; j++)
+              rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
 
             if (rawFundBalanceBN.gt(constants.Zero)) {
               inputCandidates.push({
@@ -1639,10 +1639,10 @@ export default class StablePool {
             var usdAmountLeft = senderUsdBalance.sub(amountInputtedUsdBN);
             var maxInputAmountLeftBN = usdAmountLeft
               .mul(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidate.currencyCode].decimals)))
-              .div(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidate.currencyCode)]));
+              .div(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidate.currencyCode)]));
             if (
               maxInputAmountLeftBN
-                .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidate.currencyCode)]))
+                .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidate.currencyCode)]))
                 .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidate.currencyCode].decimals)))
                 .gt(usdAmountLeft)
             )
@@ -1670,12 +1670,12 @@ export default class StablePool {
               ); */
 
         // mStable
-        if (currencyCode === 'mUSD' || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+        if (currencyCode === "mUSD" || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
           var mStableSwapFeeBN = null;
 
           for (var i: any = 0; i < inputCandidates.length; i++) {
             if (
-              inputCandidates[i].currencyCode !== 'mUSD' &&
+              inputCandidates[i].currencyCode !== "mUSD" &&
               MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(inputCandidates[i].currencyCode) < 0
             )
               continue;
@@ -1684,47 +1684,47 @@ export default class StablePool {
             var mStableOutputAmountAfterFeesBN = constants.Zero;
 
             // Check max swap/redeem validity
-            if (inputCandidates[i].currencyCode === 'mUSD') {
+            if (inputCandidates[i].currencyCode === "mUSD") {
               try {
                 var redeemValidity = await self.pools[
-                  'mStable'
+                  "mStable"
                 ].externalContracts.MassetValidationHelper.getRedeemValidity(
-                  '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                  "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                   mStableInputAmountBN,
                   self.internalTokens[currencyCode].address,
                 );
               } catch (err: any) {
-                console.error('Failed to check mUSD redeem validity:', err);
+                console.error("Failed to check mUSD redeem validity:", err);
                 continue;
               }
 
-              if (!redeemValidity || !redeemValidity['0']) continue;
-              mStableOutputAmountAfterFeesBN = BigNumber.from(redeemValidity['2']);
+              if (!redeemValidity || !redeemValidity["0"]) continue;
+              mStableOutputAmountAfterFeesBN = BigNumber.from(redeemValidity["2"]);
             } else {
               try {
-                var maxSwap = await self.pools['mStable'].externalContracts.MassetValidationHelper.getMaxSwap(
-                  '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.getMaxSwap(
+                  "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                   self.internalTokens[inputCandidates[i].currencyCode].address,
                   self.internalTokens[currencyCode].address,
                 );
               } catch (err: any) {
-                console.error('Failed to check mUSD max swap:', err);
+                console.error("Failed to check mUSD max swap:", err);
                 continue;
               }
 
-              if (!maxSwap || !maxSwap['0'] || BigNumber.from(maxSwap['2']).lte(constants.Zero)) continue;
-              mStableInputAmountBN = mStableInputAmountBN.lt(BigNumber.from(maxSwap['2']))
+              if (!maxSwap || !maxSwap["0"] || BigNumber.from(maxSwap["2"]).lte(constants.Zero)) continue;
+              mStableInputAmountBN = mStableInputAmountBN.lt(BigNumber.from(maxSwap["2"]))
                 ? mStableInputAmountBN
-                : BigNumber.from(maxSwap['2']);
+                : BigNumber.from(maxSwap["2"]);
               var outputAmountBeforeFeesBN = mStableInputAmountBN
                 .mul(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)))
                 .div(
                   BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals)),
                 );
 
-              if (currencyCode === 'mUSD') mStableOutputAmountAfterFeesBN = outputAmountBeforeFeesBN;
+              if (currencyCode === "mUSD") mStableOutputAmountAfterFeesBN = outputAmountBeforeFeesBN;
               else {
-                if (mStableSwapFeeBN === null) mStableSwapFeeBN = await self.pools['mStable'].getMUsdSwapFeeBN();
+                if (mStableSwapFeeBN === null) mStableSwapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
                 mStableOutputAmountAfterFeesBN = outputAmountBeforeFeesBN.sub(
                   outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(constants.WeiPerEther),
                 );
@@ -1735,7 +1735,7 @@ export default class StablePool {
               mStableInputAmountBN
                 .mul(
                   BigNumber.from(
-                    allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                    allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                   ),
                 )
                 .div(
@@ -1749,7 +1749,7 @@ export default class StablePool {
 
             // Stop if we have filled the USD amount
             if (amountInputtedUsdBN.gt(senderUsdBalance))
-              throw new Error('Amount inputted in USD greater than sender USD fund balance');
+              throw new Error("Amount inputted in USD greater than sender USD fund balance");
             if (amountInputtedUsdBN.gte(senderUsdBalance.sub(BigNumber.from(10).mul(BigNumber.from(16))))) break;
           }
         }
@@ -1772,17 +1772,17 @@ export default class StablePool {
                 gasPrice,
               ] = await get0xSwapOrders(
                 self.internalTokens[inputCandidates[i].currencyCode].address,
-                currencyCode === 'ETH' ? 'WETH' : allTokens[currencyCode].address,
+                currencyCode === "ETH" ? "WETH" : allTokens[currencyCode].address,
                 inputCandidates[i].inputAmountBN,
               );
             } catch (err: any) {
-              if (err === 'Insufficient liquidity') {
+              if (err === "Insufficient liquidity") {
                 inputCandidates.splice(i, 1);
                 i--;
                 continue;
               }
 
-              throw new Error('Failed to get swap orders from 0x API: ' + err);
+              throw new Error("Failed to get swap orders from 0x API: " + err);
             }
 
             inputCandidates[i].inputFillAmountBN = inputFilledAmountBN;
@@ -1793,7 +1793,7 @@ export default class StablePool {
             inputCandidates[i].makerAssetFillAmountBN = makerAssetFilledAmountBN;
             inputCandidates[i].takerAssetFillAmountUsdBN = takerAssetFilledAmountBN
               .mul(
-                BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)]),
+                BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)]),
               )
               .div(
                 BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals)),
@@ -1816,7 +1816,7 @@ export default class StablePool {
             var usdAmountLeft = senderUsdBalance.sub(amountInputtedUsdBN);
             var inputFillAmountUsdBN = inputCandidates[i].inputFillAmountBN
               .mul(
-                BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)]),
+                BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)]),
               )
               .div(
                 BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals)),
@@ -1832,7 +1832,7 @@ export default class StablePool {
                 thisInputAmountBN
                   .mul(
                     BigNumber.from(
-                      allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                      allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                     ),
                   )
                   .div(
@@ -1851,7 +1851,7 @@ export default class StablePool {
                 inputCandidates[i].inputFillAmountBN
                   .mul(
                     BigNumber.from(
-                      allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                      allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                     ),
                   )
                   .div(
@@ -1866,13 +1866,13 @@ export default class StablePool {
 
             // Stop if we have filled the USD amount
             if (amountInputtedUsdBN.gt(senderUsdBalance))
-              throw new Error('Amount inputted in USD greater than sender USD fund balance');
+              throw new Error("Amount inputted in USD greater than sender USD fund balance");
             if (amountInputtedUsdBN.gte(senderUsdBalance.sub(BigNumber.from(10).mul(BigNumber.from(16))))) break;
           }
 
           // Make sure input amount is completely filled
           if (amountInputtedUsdBN.lt(senderUsdBalance.sub(BigNumber.from(10).mul(BigNumber.from(16)))))
-            throw new Error('Unable to find enough liquidity to exchange withdrawn tokens to ' + currencyCode + '.');
+            throw new Error("Unable to find enough liquidity to exchange withdrawn tokens to " + currencyCode + ".");
         }
 
         // Return amountWithdrawnBN and totalProtocolFeeBN
@@ -1880,28 +1880,28 @@ export default class StablePool {
       },
       validateWithdrawal: async function (currencyCode, amount, sender, getSlippage) {
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
-        if (!amount || amount.lte(constants.Zero)) throw new Error('Withdrawal amount must be greater than 0!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
+        if (!amount || amount.lte(constants.Zero)) throw new Error("Withdrawal amount must be greater than 0!");
 
         // Check balances to find withdrawal source
         var allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
         // See how much we can withdraw directly if token is supported by the fund
-        var i: any = allBalances['0'].indexOf(currencyCode);
+        var i: any = allBalances["0"].indexOf(currencyCode);
         var tokenRawFundBalanceBN = constants.Zero;
 
         if (i >= 0) {
-          tokenRawFundBalanceBN = BigNumber.from(allBalances['1'][i]);
-          for (var j = 0; j < allBalances['3'][i].length; j++)
-            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+          tokenRawFundBalanceBN = BigNumber.from(allBalances["1"][i]);
+          for (var j = 0; j < allBalances["3"][i].length; j++)
+            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
         }
 
         if (tokenRawFundBalanceBN.gte(amount)) {
           var amountUsdBN = amount
-            .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+            .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
             .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)));
 
           // Check amountUsdBN against user fund balance
@@ -1911,7 +1911,7 @@ export default class StablePool {
             throw new Error(
               "Requested withdrawal amount is greater than the sender's " +
                 self.POOL_NAME +
-                ' balance. Please click the max button and try again (or reload and try again later if the issue persists).',
+                " balance. Please click the max button and try again (or reload and try again later if the issue persists).",
             );
 
           // Return amountUsdBN
@@ -1926,7 +1926,7 @@ export default class StablePool {
           if (tokenRawFundBalanceBN.gt(constants.Zero)) {
             amountInputtedUsdBN = amountInputtedUsdBN.add(
               tokenRawFundBalanceBN
-                .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                 .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))),
             );
             amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
@@ -1935,32 +1935,32 @@ export default class StablePool {
           // Get input candidates
           let inputCandidates: any[] = [];
 
-          for (var i: any = 0; i < allBalances['0'].length; i++) {
-            if (allBalances['0'][i] !== currencyCode) {
+          for (var i: any = 0; i < allBalances["0"].length; i++) {
+            if (allBalances["0"][i] !== currencyCode) {
               var rawFundBalanceBN = constants.Zero;
-              for (var j = 0; j < allBalances['3'][i].length; j++)
-                rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+              for (var j = 0; j < allBalances["3"][i].length; j++)
+                rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
               if (rawFundBalanceBN.gt(constants.Zero))
                 inputCandidates.push({
-                  currencyCode: allBalances['0'][i],
+                  currencyCode: allBalances["0"][i],
                   rawFundBalanceBN,
                 });
             }
           }
 
           // mStable
-          if (currencyCode === 'mUSD' || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+          if (currencyCode === "mUSD" || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
             let mStableSwapFeeBN: any;
             for (var i: any = 0; i < inputCandidates.length; i++) {
               if (
-                inputCandidates[i].currencyCode !== 'mUSD' &&
+                inputCandidates[i].currencyCode !== "mUSD" &&
                 MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(inputCandidates[i].currencyCode) < 0
               )
                 continue;
 
               // Get swap fee and calculate input amount needed to fill output amount
-              if (currencyCode !== 'mUSD' && mStableSwapFeeBN === null) {
-                mStableSwapFeeBN = await self.pools['mStable'].getMUsdSwapFeeBN();
+              if (currencyCode !== "mUSD" && mStableSwapFeeBN === null) {
+                mStableSwapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
 
                 var inputAmountBN = amount
                   .sub(amountWithdrawnBN)
@@ -1990,7 +1990,7 @@ export default class StablePool {
                   );
 
                 var outputAmountBN =
-                  currencyCode === 'mUSD'
+                  currencyCode === "mUSD"
                     ? outputAmountBeforeFeesBN
                     : outputAmountBeforeFeesBN.sub(
                         outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(constants.WeiPerEther),
@@ -1999,13 +1999,13 @@ export default class StablePool {
                 var tries = 0;
                 while (outputAmountBN.lt(amount.sub(amountWithdrawnBN))) {
                   if (tries >= 1000)
-                    throw new Error('Failed to get increment order input amount to achieve desired output amount.');
+                    throw new Error("Failed to get increment order input amount to achieve desired output amount.");
                   inputAmountBN = inputAmountBN.add(constants.One); // Make sure we have enough input amount to receive amount.sub(amountWithdrawnBN)
                   outputAmountBeforeFeesBN = inputAmountBN
                     .mul(BigNumber.from(10).pow(BigNumber.from(allTokens[currencyCode].decimals)))
                     .div(BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals));
                   outputAmountBN =
-                    currencyCode === 'mUSD'
+                    currencyCode === "mUSD"
                       ? outputAmountBeforeFeesBN
                       : outputAmountBeforeFeesBN.sub(
                           outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(constants.WeiPerEther),
@@ -2019,7 +2019,7 @@ export default class StablePool {
                     .mul(BigNumber.from(10).pow(allTokens[currencyCode].decimals))
                     .div(BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals));
                   outputAmountBN =
-                    currencyCode === 'mUSD'
+                    currencyCode === "mUSD"
                       ? outputAmountBeforeFeesBN
                       : outputAmountBeforeFeesBN.sub(
                           outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(constants.WeiPerEther),
@@ -2027,45 +2027,45 @@ export default class StablePool {
                 }
 
                 // Check max swap/redeem validity
-                if (inputCandidates[i].currencyCode === 'mUSD') {
+                if (inputCandidates[i].currencyCode === "mUSD") {
                   try {
                     var redeemValidity = await self.pools[
-                      'mStable'
+                      "mStable"
                     ].externalContracts.MassetValidationHelper.getRedeemValidity(
-                      '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                      "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                       inputAmountBN,
                       self.internalTokens[currencyCode].address,
                     );
                   } catch (err: any) {
-                    console.error('Failed to check mUSD redeem validity:', err);
+                    console.error("Failed to check mUSD redeem validity:", err);
                   }
 
                   //if (!redeemValidity || !redeemValidity["0"]) break;
 
-                  if (!outputAmountBN.eq(BigNumber.from(redeemValidity['2'])))
+                  if (!outputAmountBN.eq(BigNumber.from(redeemValidity["2"])))
                     throw new Error(
-                      'Predicted mStable output amount and output amount returned by getRedeemValidity not equal.',
+                      "Predicted mStable output amount and output amount returned by getRedeemValidity not equal.",
                     );
                 } else {
                   try {
-                    var maxSwap = await self.pools['mStable'].externalContracts.MassetValidationHelper.getMaxSwap(
-                      '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                    var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.getMaxSwap(
+                      "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                       self.internalTokens[inputCandidates[i].currencyCode].address,
                       self.internalTokens[currencyCode].address,
                     );
                   } catch (err: any) {
-                    console.error('Failed to check mUSD max swap:', err);
+                    console.error("Failed to check mUSD max swap:", err);
                     continue;
                   }
 
-                  if (!maxSwap || !maxSwap['0'] || BigNumber.from(maxSwap['2']).lt(inputAmountBN)) continue;
+                  if (!maxSwap || !maxSwap["0"] || BigNumber.from(maxSwap["2"]).lt(inputAmountBN)) continue;
                 }
 
                 amountInputtedUsdBN = amountInputtedUsdBN.add(
                   inputAmountBN
                     .mul(
                       BigNumber.from(
-                        allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                        allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                       ),
                     )
                     .div(
@@ -2102,18 +2102,18 @@ export default class StablePool {
                   gasPrice,
                 ] = await get0xSwapOrders(
                   self.internalTokens[inputCandidates[i].currencyCode].address,
-                  currencyCode === 'ETH' ? 'WETH' : allTokens[currencyCode].address,
+                  currencyCode === "ETH" ? "WETH" : allTokens[currencyCode].address,
                   inputCandidates[i].rawFundBalanceBN,
                   amount.sub(amountWithdrawnBN),
                 );
               } catch (err: any) {
-                if (err === 'Insufficient liquidity') {
+                if (err === "Insufficient liquidity") {
                   inputCandidates.splice(i, 1);
                   i--;
                   continue;
                 }
 
-                throw new Error('Failed to get swap orders from 0x API: ' + err);
+                throw new Error("Failed to get swap orders from 0x API: " + err);
               }
 
               inputCandidates[i].inputFillAmountBN = inputFilledAmountBN;
@@ -2126,7 +2126,7 @@ export default class StablePool {
               inputCandidates[i].takerAssetFillAmountUsdBN = takerAssetFilledAmountBN
                 .mul(
                   BigNumber.from(
-                    allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                    allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                   ),
                 )
                 .div(
@@ -2161,7 +2161,7 @@ export default class StablePool {
                     .lt(thisOutputAmountBN)
                 ) {
                   if (tries >= 1000)
-                    throw new Error('Failed to get increment order input amount to achieve desired output amount.');
+                    throw new Error("Failed to get increment order input amount to achieve desired output amount.");
                   thisInputAmountBN.iadd(constants.One); // Make sure we have enough input fill amount to achieve this maker asset fill amount
                   tries++;
                 }
@@ -2170,7 +2170,7 @@ export default class StablePool {
                   thisInputAmountBN
                     .mul(
                       BigNumber.from(
-                        allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                        allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                       ),
                     )
                     .div(
@@ -2189,7 +2189,7 @@ export default class StablePool {
                   inputCandidates[i].inputFillAmountBN
                     .mul(
                       BigNumber.from(
-                        allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                        allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                       ),
                     )
                     .div(
@@ -2209,7 +2209,7 @@ export default class StablePool {
 
             // Make sure input amount is completely filled
             if (amountWithdrawnBN.lt(amount))
-              throw new Error('Unable to find enough liquidity to exchange withdrawn tokens to ' + currencyCode + '.');
+              throw new Error("Unable to find enough liquidity to exchange withdrawn tokens to " + currencyCode + ".");
           }
 
           // Check amountInputtedUsdBN against user fund balance
@@ -2219,7 +2219,7 @@ export default class StablePool {
             throw new Error(
               "Requested withdrawal amount is greater than the sender's " +
                 self.POOL_NAME +
-                ' balance. Please click the max button and try again (or reload and try again later if the issue persists).',
+                " balance. Please click the max button and try again (or reload and try again later if the issue persists).",
             );
 
           // Return amountInputtedUsdBN
@@ -2233,9 +2233,9 @@ export default class StablePool {
         }
       },
       getWithdrawalSlippage: async function (currencyCode, amount, usdAmount) {
-        if (self.POOL_TOKEN_SYMBOL === 'RYPT') {
+        if (self.POOL_TOKEN_SYMBOL === "RYPT") {
           var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
-            'acceptedCurrencies',
+            "acceptedCurrencies",
             self.contracts.RariFundManager.callStatic.getAcceptedCurrencies,
           );
           if (
@@ -2244,55 +2244,55 @@ export default class StablePool {
             directlyDepositableCurrencyCodes.indexOf(currencyCode) >= 0
           ) {
             var allBalances = await self.cache.getOrUpdate(
-              'allBalances',
+              "allBalances",
               self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
             );
             return constants.WeiPerEther.sub(
               amount
-                .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                 .div(constants.WeiPerEther)
                 .mul(BigNumber.from(10).pow(BigNumber.from(36 - self.internalTokens[currencyCode].decimals)))
                 .div(usdAmount),
             );
           }
-        } else if (self.POOL_TOKEN_SYMBOL === 'RSPT') {
-          if (currencyCode === 'USDC')
+        } else if (self.POOL_TOKEN_SYMBOL === "RSPT") {
+          if (currencyCode === "USDC")
             return constants.WeiPerEther.sub(
               amount.mul(BigNumber.from(10).pow(BigNumber.from(36 - 6))).div(usdAmount),
             ).toString();
-          if (currencyCode === 'mUSD')
+          if (currencyCode === "mUSD")
             return constants.WeiPerEther.sub(amount.mul(constants.WeiPerEther).div(usdAmount)).toString();
-        } else if (self.POOL_TOKEN_SYMBOL === 'RDPT') {
-          if (currencyCode === 'DAI')
+        } else if (self.POOL_TOKEN_SYMBOL === "RDPT") {
+          if (currencyCode === "DAI")
             return constants.WeiPerEther.sub(amount.mul(constants.WeiPerEther).div(usdAmount)).toString();
         } else {
-          throw 'Not implemented for ' + self.POOL_TOKEN_SYMBOL;
+          throw "Not implemented for " + self.POOL_TOKEN_SYMBOL;
         }
 
         // Get tokens
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
 
         // Try cache
         if (
           self.cache._raw.coinGeckoUsdPrices &&
           self.cache._raw.coinGeckoUsdPrices.value &&
-          self.cache._raw.coinGeckoUsdPrices.value['USDC'] &&
+          self.cache._raw.coinGeckoUsdPrices.value["USDC"] &&
           self.cache._raw.coinGeckoUsdPrices.value[currencyCode] &&
           new Date().getTime() / 1000 <=
             self.cache._raw.coinGeckoUsdPrices.lastUpdated + self.cache._raw.coinGeckoUsdPrices.timeout
         ) {
-          if (self.POOL_TOKEN_SYMBOL === 'RSPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['USDC'];
-          else if (self.POOL_TOKEN_SYMBOL === 'RDPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['DAI'];
+          if (self.POOL_TOKEN_SYMBOL === "RSPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+          else if (self.POOL_TOKEN_SYMBOL === "RDPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["DAI"];
           else usdAmount = parseFloat(usdAmount.toString());
           return constants.WeiPerEther.sub(
             BigNumber.from(
               Math.trunc(
                 (parseFloat(amount.toString()) *
                   self.cache._raw.coinGeckoUsdPrices.value[currencyCode] *
-                  10 ** (currencyCode === 'ETH' ? 18 : 36 - allTokens[currencyCode].decimals)) /
+                  10 ** (currencyCode === "ETH" ? 18 : 36 - allTokens[currencyCode].decimals)) /
                   usdAmount,
               ),
             ),
@@ -2304,29 +2304,29 @@ export default class StablePool {
         currencyCodes.push(currencyCode);
 
         // Get CoinGecko IDs
-        var decoded = await self.cache.getOrUpdate('coinGeckoList', async function () {
-          return (await axios.get('https://api.coingecko.com/api/v3/coins/list')).data;
+        var decoded = await self.cache.getOrUpdate("coinGeckoList", async function () {
+          return (await axios.get("https://api.coingecko.com/api/v3/coins/list")).data;
         });
-        if (!decoded) throw new Error('Failed to decode coins list from CoinGecko');
+        if (!decoded) throw new Error("Failed to decode coins list from CoinGecko");
         var currencyCodesByCoinGeckoIds = {};
 
         for (const currencyCode of currencyCodes) {
           var filtered = decoded.filter((coin) => coin.symbol.toLowerCase() === currencyCode.toLowerCase());
-          if (!filtered) throw new Error('Failed to get currency IDs from CoinGecko');
+          if (!filtered) throw new Error("Failed to get currency IDs from CoinGecko");
           for (const coin of filtered) currencyCodesByCoinGeckoIds[coin.id] = currencyCode;
         }
 
         // Get prices
         var decoded = (
-          await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+          await axios.get("https://api.coingecko.com/api/v3/simple/price", {
             params: {
-              vs_currencies: 'usd',
-              ids: Object.keys(currencyCodesByCoinGeckoIds).join(','),
+              vs_currencies: "usd",
+              ids: Object.keys(currencyCodesByCoinGeckoIds).join(","),
               include_market_cap: true,
             },
           })
         ).data;
-        if (!decoded) throw new Error('Failed to decode USD exchange rates from CoinGecko');
+        if (!decoded) throw new Error("Failed to decode USD exchange rates from CoinGecko");
         var prices = {};
         var maxMarketCaps = {};
 
@@ -2340,68 +2340,68 @@ export default class StablePool {
           }
 
         // Update cache
-        self.cache.update('coinGeckoUsdPrices', prices);
+        self.cache.update("coinGeckoUsdPrices", prices);
 
         // Return slippage
         if (
-          self.cache._raw.coinGeckoUsdPrices.value['USDC'] &&
+          self.cache._raw.coinGeckoUsdPrices.value["USDC"] &&
           self.cache._raw.coinGeckoUsdPrices.value[currencyCode]
         ) {
-          if (self.POOL_TOKEN_SYMBOL === 'RSPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['USDC'];
-          else if (self.POOL_TOKEN_SYMBOL === 'RDPT')
-            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value['DAI'];
+          if (self.POOL_TOKEN_SYMBOL === "RSPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["USDC"];
+          else if (self.POOL_TOKEN_SYMBOL === "RDPT")
+            usdAmount = parseFloat(usdAmount.toString()) * self.cache._raw.coinGeckoUsdPrices.value["DAI"];
           else usdAmount = parseFloat(usdAmount.toString());
           return constants.WeiPerEther.sub(
             BigNumber.from(
               Math.trunc(
                 (parseFloat(amount.toString()) *
                   self.cache._raw.coinGeckoUsdPrices.value[currencyCode] *
-                  10 ** (currencyCode === 'ETH' ? 18 : 36 - allTokens[currencyCode].decimals)) /
+                  10 ** (currencyCode === "ETH" ? 18 : 36 - allTokens[currencyCode].decimals)) /
                   usdAmount,
               ),
             ),
           );
-        } else throw new Error('Failed to get currency prices from CoinGecko');
+        } else throw new Error("Failed to get currency prices from CoinGecko");
       },
       withdraw: async function (currencyCode, amount, maxUsdAmount, options) {
-        if (!options || !options.from) throw new Error('Options parameter not set or from address not set.');
+        if (!options || !options.from) throw new Error("Options parameter not set or from address not set.");
         var allTokens = await self.getAllTokens();
-        if (currencyCode !== 'ETH' && !allTokens[currencyCode]) throw new Error('Invalid currency code!');
-        if (!amount || amount.lte(constants.Zero)) throw new Error('Withdrawal amount must be greater than 0!');
+        if (currencyCode !== "ETH" && !allTokens[currencyCode]) throw new Error("Invalid currency code!");
+        if (!amount || amount.lte(constants.Zero)) throw new Error("Withdrawal amount must be greater than 0!");
 
         // Check balances to find withdrawal source
         var allBalances = await self.cache.getOrUpdate(
-          'allBalances',
+          "allBalances",
           self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices,
         );
 
         // See how much we can withdraw directly if token is supported by the fund
-        var i = allBalances['0'].indexOf(currencyCode);
+        var i = allBalances["0"].indexOf(currencyCode);
         var tokenRawFundBalanceBN = constants.Zero;
 
         if (i >= 0) {
-          tokenRawFundBalanceBN = BigNumber.from(allBalances['1'][i]);
-          for (var j = 0; j < allBalances['3'][i].length; j++)
-            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+          tokenRawFundBalanceBN = BigNumber.from(allBalances["1"][i]);
+          for (var j = 0; j < allBalances["3"][i].length; j++)
+            tokenRawFundBalanceBN = tokenRawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
         }
 
         if (tokenRawFundBalanceBN.gte(amount)) {
           // Check maxUsdAmount
           var amountUsdBN = amount
-            .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+            .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
             .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals)));
-          if (typeof maxUsdAmount !== 'undefined' && maxUsdAmount !== null && amountUsdBN.gt(maxUsdAmount))
+          if (typeof maxUsdAmount !== "undefined" && maxUsdAmount !== null && amountUsdBN.gt(maxUsdAmount))
             return [amountUsdBN];
 
           // If we can withdraw everything directly, do so
           try {
             var receipt = await self.contracts.RariFundManager.withdraw(currencyCode, amount, options);
           } catch (err: any) {
-            throw new Error('RariFundManager.withdraw failed: ' + (err.message ? err.message : err));
+            throw new Error("RariFundManager.withdraw failed: " + (err.message ? err.message : err));
           }
 
-          self.cache.clear('allBalances');
+          self.cache.clear("allBalances");
           return [amountUsdBN, null, receipt];
         } else {
           // Otherwise, exchange as few currencies as possible (ideally those with the lowest balances)
@@ -2427,7 +2427,7 @@ export default class StablePool {
 
             amountInputtedUsdBN = amountInputtedUsdBN.add(
               tokenRawFundBalanceBN
-                .mul(BigNumber.from(allBalances['4'][self.allocations.CURRENCIES.indexOf(currencyCode)]))
+                .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                 .div(BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))),
             );
             amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
@@ -2436,14 +2436,14 @@ export default class StablePool {
           // Get input candidates
           let inputCandidates: any[] = [];
 
-          for (var i: any = 0; i < allBalances['0'].length; i++)
-            if (allBalances['0'][i] !== currencyCode) {
+          for (var i: any = 0; i < allBalances["0"].length; i++)
+            if (allBalances["0"][i] !== currencyCode) {
               var rawFundBalanceBN = constants.Zero;
-              for (var j = 0; j < allBalances['3'][i].length; j++)
-                rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances['3'][i][j]));
+              for (var j = 0; j < allBalances["3"][i].length; j++)
+                rawFundBalanceBN = rawFundBalanceBN.add(BigNumber.from(allBalances["3"][i][j]));
               if (rawFundBalanceBN.gt(constants.Zero))
                 inputCandidates.push({
-                  currencyCode: allBalances['0'][i],
+                  currencyCode: allBalances["0"][i],
                   rawFundBalanceBN,
                 });
             }
@@ -2454,18 +2454,18 @@ export default class StablePool {
               ); */
 
           // mStable
-          if (currencyCode === 'mUSD' || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
+          if (currencyCode === "mUSD" || MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(currencyCode) >= 0) {
             let mStableSwapFeeBN: any = null;
 
             for (var i: any = 0; i < inputCandidates.length; i++) {
               if (
-                inputCandidates[i].currencyCode !== 'mUSD' &&
+                inputCandidates[i].currencyCode !== "mUSD" &&
                 MStableSubpool.SUPPORTED_EXCHANGE_CURRENCIES.indexOf(inputCandidates[i].currencyCode) < 0
               )
                 continue;
 
               // Get swap fee and calculate input amount needed to fill output amount
-              if (mStableSwapFeeBN === null) mStableSwapFeeBN = await self.pools['mStable'].getMUsdSwapFeeBN();
+              if (mStableSwapFeeBN === null) mStableSwapFeeBN = await self.pools["mStable"].getMUsdSwapFeeBN();
               var inputAmountBN = amount
                 .sub(amountWithdrawnBN)
                 .mul(constants.WeiPerEther)
@@ -2486,7 +2486,7 @@ export default class StablePool {
               var tries = 0;
               while (outputAmountBN.lt(amount.sub(amountWithdrawnBN))) {
                 if (tries >= 1000)
-                  throw new Error('Failed to get increment order input amount to achieve desired output amount.');
+                  throw new Error("Failed to get increment order input amount to achieve desired output amount.");
                 inputAmountBN = inputAmountBN.add(constants.One); // Make sure we have enough input amount to receive amount.sub(amountWithdrawnBN)
                 outputAmountBeforeFeesBN = inputAmountBN
                   .mul(BigNumber.from(10).pow(BigNumber.from(allTokens[currencyCode].decimals)))
@@ -2516,40 +2516,40 @@ export default class StablePool {
               }
 
               // Check max swap/redeem validity
-              if (inputCandidates[i].currencyCode === 'mUSD') {
+              if (inputCandidates[i].currencyCode === "mUSD") {
                 try {
                   var redeemValidity = await self.pools[
-                    'mStable'
+                    "mStable"
                   ].externalContracts.MassetValidationHelper.callStatis.getRedeemValidity(
-                    '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                    "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                     inputAmountBN,
                     self.internalTokens[currencyCode].address,
                   );
                 } catch (err: any) {
-                  console.error('Failed to check mUSD redeem validity:', err);
+                  console.error("Failed to check mUSD redeem validity:", err);
                   continue;
                 }
 
-                if (!redeemValidity || !redeemValidity['0']) continue;
-                if (!outputAmountBN.eq(BigNumber.from(redeemValidity['2'])))
+                if (!redeemValidity || !redeemValidity["0"]) continue;
+                if (!outputAmountBN.eq(BigNumber.from(redeemValidity["2"])))
                   throw new Error(
-                    'Predicted mStable output amount and output amount returned by getRedeemValidity not equal.',
+                    "Predicted mStable output amount and output amount returned by getRedeemValidity not equal.",
                   );
               } else {
                 try {
                   var maxSwap = await self.pools[
-                    'mStable'
+                    "mStable"
                   ].externalContracts.MassetValidationHelper.callStatic.getMaxSwap(
-                    '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
+                    "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                     self.internalTokens[inputCandidates[i].currencyCode].address,
                     self.internalTokens[currencyCode].address,
                   );
                 } catch (err: any) {
-                  console.error('Failed to check mUSD max swap:', err);
+                  console.error("Failed to check mUSD max swap:", err);
                   continue;
                 }
 
-                if (!maxSwap || !maxSwap['0'] || BigNumber.from(maxSwap['2']).lt(inputAmountBN)) continue;
+                if (!maxSwap || !maxSwap["0"] || BigNumber.from(maxSwap["2"]).lt(inputAmountBN)) continue;
               }
 
               inputCurrencyCodes.push(inputCandidates[i].currencyCode);
@@ -2563,7 +2563,7 @@ export default class StablePool {
                 inputAmountBN
                   .mul(
                     BigNumber.from(
-                      allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                      allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                     ),
                   )
                   .div(
@@ -2599,18 +2599,18 @@ export default class StablePool {
                   gasPrice,
                 ] = await get0xSwapOrders(
                   self.internalTokens[inputCandidates[i].currencyCode].address,
-                  currencyCode === 'ETH' ? 'WETH' : allTokens[currencyCode].address,
+                  currencyCode === "ETH" ? "WETH" : allTokens[currencyCode].address,
                   inputCandidates[i].rawFundBalanceBN,
                   amount.sub(amountWithdrawnBN),
                 );
               } catch (err: any) {
-                if (err === 'Insufficient liquidity') {
+                if (err === "Insufficient liquidity") {
                   inputCandidates.splice(i, 1);
                   i--;
                   continue;
                 }
 
-                throw new Error('Failed to get swap orders from 0x API: ' + err);
+                throw new Error("Failed to get swap orders from 0x API: " + err);
               }
 
               // Build array of orders and signatures
@@ -2648,7 +2648,7 @@ export default class StablePool {
               inputCandidates[i].takerAssetFillAmountUsdBN = takerAssetFilledAmountBN
                 .mul(
                   BigNumber.from(
-                    allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                    allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                   ),
                 )
                 .div(
@@ -2684,7 +2684,7 @@ export default class StablePool {
                     .lt(thisOutputAmountBN)
                 ) {
                   if (tries >= 1000)
-                    throw new Error('Failed to get increment order input amount to achieve desired output amount.');
+                    throw new Error("Failed to get increment order input amount to achieve desired output amount.");
                   thisInputAmountBN = thisInputAmountBN.add(constants.One); // Make sure we have enough input fill amount to achieve this maker asset fill amount
                   tries++;
                 }
@@ -2700,7 +2700,7 @@ export default class StablePool {
                   thisInputAmountBN
                     .mul(
                       BigNumber.from(
-                        allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                        allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                       ),
                     )
                     .div(
@@ -2726,7 +2726,7 @@ export default class StablePool {
                   inputCandidates[i].inputFillAmountBN
                     .mul(
                       BigNumber.from(
-                        allBalances['4'][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
+                        allBalances["4"][self.allocations.CURRENCIES.indexOf(inputCandidates[i].currencyCode)],
                       ),
                     )
                     .div(
@@ -2745,11 +2745,11 @@ export default class StablePool {
 
             // Make sure input amount is completely filled
             if (amountWithdrawnBN.lt(amount))
-              throw new Error('Unable to find enough liquidity to exchange withdrawn tokens to ' + currencyCode + '.');
+              throw new Error("Unable to find enough liquidity to exchange withdrawn tokens to " + currencyCode + ".");
           }
 
           // Check maxUsdAmount
-          if (typeof maxUsdAmount !== 'undefined' && maxUsdAmount !== null && amountInputtedUsdBN.gt(maxUsdAmount))
+          if (typeof maxUsdAmount !== "undefined" && maxUsdAmount !== null && amountInputtedUsdBN.gt(maxUsdAmount))
             return [amountInputtedUsdBN];
 
           // Withdraw and exchange tokens via RariFundProxy
@@ -2764,7 +2764,7 @@ export default class StablePool {
             var receipt = await self.contracts.RariFundProxy.withdrawAndExchange(
               inputCurrencyCodes,
               inputAmountStrings,
-              currencyCode === 'ETH' ? '0x0000000000000000000000000000000000000000' : allTokens[currencyCode].address,
+              currencyCode === "ETH" ? "0x0000000000000000000000000000000000000000" : allTokens[currencyCode].address,
               allOrders,
               allSignatures,
               makerAssetFillAmountStrings,
@@ -2777,10 +2777,10 @@ export default class StablePool {
               },
             );
           } catch (err: any) {
-            throw new Error('RariFundProxy.withdrawAndExchange failed: ' + (err.message ? err.message : err));
+            throw new Error("RariFundProxy.withdrawAndExchange failed: " + (err.message ? err.message : err));
           }
 
-          self.cache.clear('allBalances');
+          self.cache.clear("allBalances");
           return [amountInputtedUsdBN, totalProtocolFeeBN, receipt];
         }
       },
@@ -2789,45 +2789,45 @@ export default class StablePool {
 
   internalTokens = {
     DAI: {
-      symbol: 'DAI',
-      address: '0x6b175474e89094c44da98b954eedeac495271d0f',
-      name: 'Dai Stablecoin',
+      symbol: "DAI",
+      address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+      name: "Dai Stablecoin",
       decimals: 18,
     },
     USDC: {
-      symbol: 'USDC',
-      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-      name: 'USD Coin',
+      symbol: "USDC",
+      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      name: "USD Coin",
       decimals: 6,
     },
     USDT: {
-      symbol: 'USDT',
-      address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-      name: 'Tether USD',
+      symbol: "USDT",
+      address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      name: "Tether USD",
       decimals: 6,
     },
     TUSD: {
-      symbol: 'TUSD',
-      address: '0x0000000000085d4780b73119b644ae5ecd22b376',
-      name: 'TrueUSD',
+      symbol: "TUSD",
+      address: "0x0000000000085d4780b73119b644ae5ecd22b376",
+      name: "TrueUSD",
       decimals: 18,
     },
     BUSD: {
-      symbol: 'BUSD',
-      address: '0x4Fabb145d64652a948d72533023f6E7A623C7C53',
-      name: 'Binance USD',
+      symbol: "BUSD",
+      address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
+      name: "Binance USD",
       decimals: 18,
     },
     sUSD: {
-      symbol: 'sUSD',
-      address: '0x57ab1ec28d129707052df4df418d58a2d46d5f51',
-      name: 'sUSD',
+      symbol: "sUSD",
+      address: "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+      name: "sUSD",
       decimals: 18,
     },
     mUSD: {
-      symbol: 'mUSD',
-      address: '0xe2f2a5c287993345a840db3b0845fbc70f5935a5',
-      name: 'mStable USD',
+      symbol: "mUSD",
+      address: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+      name: "mStable USD",
       decimals: 18,
     },
   };
