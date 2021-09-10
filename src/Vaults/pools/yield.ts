@@ -52,23 +52,24 @@ export default class YieldPool extends StablePool {
     constructor(provider: JsonRpcProvider, subpools, getAllTokens) {
         super(provider, subpools, getAllTokens);
 
-        this.contracts = {};
-        for (const contractName of Object.keys(contractAddresses)) {
-            this.contracts[contractName] = new Contract(contractAddresses[contractName], YieldPool.CONTRACT_ABIS[contractName], this.provider)
-        }
+        this.contracts = {
+          RariFundController: new Contract("0x9245efB59f6491Ed1652c2DD8a4880cBFADc3ffA", YieldPool.CONTRACT_ABIS["RariFundController"], this.provider),
+          RariFundManager: new Contract("0x59FA438cD0731EBF5F4cDCaf72D4960EFd13FCe6", YieldPool.CONTRACT_ABIS["RariFundManager"], this.provider),
+          RariFundToken: new Contract("0x3baa6B7Af0D72006d3ea770ca29100Eb848559ae", YieldPool.CONTRACT_ABIS["RariFundToken"], this.provider),
+          RariFundPriceConsumer:new Contract("0x00815e0e9d118769542ce24be95f8e21c60e5561", YieldPool.CONTRACT_ABIS["RariFundPriceConsumer"], this.provider), 
+          RariFundProxy: new Contract("0x35DDEFa2a30474E64314aAA7370abE14c042C6e8", YieldPool.CONTRACT_ABIS["RariFundProxy"], this.provider)
 
-        this.legacyContracts = {};
+        };
 
-        for (const version of Object.keys(legacyContractAddresses)) {
-          if (!this.legacyContracts[version]) this.legacyContracts[version] = {};
-          for (const contractName of Object.keys(legacyContractAddresses[version]))
-            this.legacyContracts[version][
-              contractName
-            ] = new Contract(
-              legacyABIS[version][contractName],
-              legacyContractAddresses[version][contractName]
-            );
-        }
+        this.legacyContracts = {
+          "v1.0.0": {
+            "RariFundController": new Contract("0x6afE6C37bF75f80D512b9D89C19EC0B346b09a8d", LegacyRariFundControllerAbi1, this.provider),
+            "RariFundProxy": new Contract("0x6dd8e1Df9F366e6494c2601e515813e0f9219A88", LegacyRariFundProxyAbi1, this.provider)
+          },
+          "v1.1.0": {
+            "RariFundProxy": new Contract("0x626d6979F3607d13051594d8B27a0A64E413bC11", LegacyRaryFundProxyAbi11, this.provider )
+          }
+        };
 
         this.rypt = this.rspt;
         delete this.rspt;
