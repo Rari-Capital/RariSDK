@@ -17,7 +17,7 @@ export default class JumpRateModelV2 {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
-      provider,
+      provider
     );
 
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
@@ -25,10 +25,11 @@ export default class JumpRateModelV2 {
     this.jumpMultiplierPerBlock = toBN(await jumpRateModelContract.callStatic.jumpMultiplierPerBlock());
     this.kink = toBN(await jumpRateModelContract.callStatic.kink());
 
+
     const cTokenContract = createContract(
       assetAddress,
       JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
-      provider,
+      provider
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
@@ -46,11 +47,12 @@ export default class JumpRateModelV2 {
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
-  ) {
+  )
+  {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
-      provider,
+      provider
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = toBN(await jumpRateModelContract.callStatic.multiplierPerBlock());
@@ -86,17 +88,11 @@ export default class JumpRateModelV2 {
   }
 
   getBorrowRate(utilizationRate: BigNumber) {
-    if (
-      !this.initialized ||
-      !this.multiplierPerBlock ||
-      !this.kink ||
-      !this.baseRatePerBlock ||
-      !this.jumpMultiplierPerBlock
-    )
-      throw new Error("Interest rate model class not initialized.");
+    if (!this.initialized || !this.multiplierPerBlock || !this.kink || !this.baseRatePerBlock || !this.jumpMultiplierPerBlock) throw new Error("Interest rate model class not initialized.");
     if (utilizationRate.lte(this.kink)) {
       return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
-    } else {
+    } 
+    else {
       const normalRate = this.kink.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
       const excessUtil = utilizationRate.sub(this.kink);
       return excessUtil.mul(this.jumpMultiplierPerBlock).div(toBN(1e18)).add(normalRate);

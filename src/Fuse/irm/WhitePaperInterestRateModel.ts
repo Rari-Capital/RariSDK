@@ -10,11 +10,12 @@ export default class WhitePaperInterestRateModel {
   multiplierPerBlock: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
 
+
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const whitePaperModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
-      provider,
+      provider
     );
 
     this.baseRatePerBlock = toBN(await whitePaperModelContract.callStatic.baseRatePerBlock());
@@ -23,7 +24,7 @@ export default class WhitePaperInterestRateModel {
     const cTokenContract = createContract(
       assetAddress,
       JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
-      provider,
+      provider
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
     this.reserveFactorMantissa = this.reserveFactorMantissa.add(
@@ -40,12 +41,12 @@ export default class WhitePaperInterestRateModel {
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
-    provider: Web3Provider,
+    provider: Web3Provider
   ) {
     const whitePaperModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
-      provider,
+      provider
     );
 
     this.baseRatePerBlock = toBN(await whitePaperModelContract.callStatic.baseRatePerBlock());
@@ -75,8 +76,7 @@ export default class WhitePaperInterestRateModel {
   }
 
   getBorrowRate(utilizationRate: BigNumber) {
-    if (!this.initialized || !this.multiplierPerBlock || !this.baseRatePerBlock)
-      throw new Error("Interest rate model class not initialized.");
+    if (!this.initialized || !this.multiplierPerBlock || !this.baseRatePerBlock) throw new Error("Interest rate model class not initialized.");
     return utilizationRate.mul(this.multiplierPerBlock).div(toBN(1e18)).add(this.baseRatePerBlock);
   }
 

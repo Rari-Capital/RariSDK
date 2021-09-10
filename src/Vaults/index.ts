@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Contract, getDefaultProvider, BigNumber, utils, constants } from "ethers";
+import { Contract, getDefaultProvider, BigNumber, utils, constants  } from "ethers";
 import { JsonRpcProvider, Web3Provider, ExternalProvider, JsonRpcFetchFunc } from "@ethersproject/providers";
 
 // Cache
@@ -36,8 +36,10 @@ export default class Vaults {
   governance;
 
   constructor(web3Provider: JsonRpcProvider | Web3Provider) {
-    this.provider = web3Provider;
+    this.provider = web3Provider
     this.cache = new Cache({ allTokens: 8600, ethUSDPrice: 300 });
+
+    
 
     for (const currencyCode of Object.keys(this.internalTokens))
       this.internalTokens[currencyCode].contract = new Contract(
@@ -59,20 +61,18 @@ export default class Vaults {
       return await self.cache.getOrUpdate("ethUSDPrice", async function () {
         try {
           // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
-          const UsdPrice: number = (
-            await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
-          ).data.ethereum.usd;
+          const UsdPrice: number = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")).data.ethereum.usd
 
           // Now we turn it into a big number
-          const usdPriceBN = utils.parseUnits(UsdPrice.toString(), 18);
-
+          const usdPriceBN = utils.parseUnits(UsdPrice.toString(), 18)
+          
           // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
-          return usdPriceBN;
+          return usdPriceBN
         } catch (error) {
           throw new Error("Error retrieving data from Coingecko API: " + error);
         }
       });
-    };
+    }; 
 
     this.getAllTokens = async function (cacheTimeout = 86400) {
       self.cache._raw["allTokens"].timeout = typeof cacheTimeout === "undefined" ? 86400 : cacheTimeout;
@@ -175,7 +175,7 @@ export default class Vaults {
           Aave: subpools["Aave"],
           mStable: subpools["mStable"],
         },
-        this.getAllTokens,
+        this.getAllTokens
       ),
       ethereum: new EthereumPool(
         this.provider,
@@ -190,8 +190,8 @@ export default class Vaults {
         this.getAllTokens,
       ),
     };
-
-    this.governance = new Governance(this.provider);
+    
+    this.governance = new Governance(this.provider)
   }
 
   internalTokens = {

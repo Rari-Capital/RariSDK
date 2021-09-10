@@ -19,8 +19,8 @@ export default class AaveSubpool {
 
       const data: {
         data: {
-          reserves: any[];
-        };
+          reserves: any[]
+        }
       } = (
         await axios.post("https://api.thegraph.com/subgraphs/name/aave/protocol-multy-raw", {
           query:

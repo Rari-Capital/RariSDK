@@ -93,7 +93,8 @@ export default class mStableSubpool {
   async getIMUsdVaultWeeklyRoi(totalStakingRewards, stakingTokenPrice) {
     // Get Total Staked by our account
     const contract = new Contract("0x30647a72dc82d7fbb1123ea74716ab8a317eac19", erc20Abi, this.provider);
-    const totalStaked = (await contract.balanceOf("0x78befca7de27d07dc6e71da295cc2946681a6c7b")) / 1e18;
+    const totalStaked =
+      (await contract.balanceOf("0x78befca7de27d07dc6e71da295cc2946681a6c7b")) / 1e18;
 
     // https://github.com/mstable/mStable-app/blob/56055318f23b43479455cdf0a9521dfec493b01c/src/hooks/useVaultWeeklyROI.ts#L43
     const mtaPerWeekInUsd = totalStakingRewards * (await this.getMtaUsdPrice());

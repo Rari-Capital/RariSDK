@@ -16,12 +16,12 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   reserveFactorMantissa: BigNumber | undefined;
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
-    await super.init(interestRateModelAddress, assetAddress, provider);
+    await super.init( interestRateModelAddress, assetAddress, provider);
 
     const interestRateContract = createContract(
       interestRateModelAddress,
       contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
-      provider,
+      provider
     );
 
     this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
@@ -29,7 +29,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
     const cTokenContract = createContract(
       assetAddress,
       contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
-      provider,
+      provider
     );
 
     this.cash = toBN(await cTokenContract.callStatic.getCash());
@@ -42,14 +42,14 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
     fuseFeeMantissa: BigNumberish,
-    provider: Web3Provider,
+    provider: Web3Provider
   ) {
     await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, provider);
 
     const interestRateContract = createContract(
       interestRateModelAddress,
       contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
-      provider,
+      provider
     );
     this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
     this.cash = toBN(0);
@@ -82,8 +82,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
-    if (!this.initialized || !this.cash || !this.borrows || !this.reserves || !this.dsrPerBlock)
-      throw new Error("Interest rate model class not initialized.");
+    if (!this.initialized || !this.cash || !this.borrows || !this.reserves || !this.dsrPerBlock) throw new Error("Interest rate model class not initialized.");
 
     // const protocolRate = super.getSupplyRate(utilizationRate, this.reserveFactorMantissa); //todo - do we need this
     const protocolRate = super.getSupplyRate(utilizationRate);
