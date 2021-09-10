@@ -17,7 +17,11 @@ export default class AaveSubpool {
     return await this.cache.getOrUpdate("aaveCurrencyApys", async function () {
       let currencyCodes = ["DAI", "USDC", "USDT", "TUSD", "BUSD", "SUSD", "mUSD", "ETH"];
 
-      const data = (
+      const data: {
+        data: {
+          reserves: any[]
+        }
+      } = (
         await axios.post("https://api.thegraph.com/subgraphs/name/aave/protocol-multy-raw", {
           query:
             `{
@@ -44,7 +48,7 @@ export default class AaveSubpool {
           continue;
 
         apyBNs[data.data.reserves[i].symbol == "SUSD" ? "sUSD" : data.data.reserves[i].symbol] = BigNumber.from(
-          data.date.reserves[i].liquidityRate,
+          data.data.reserves[i].liquidityRate,
         ).div(BigNumber.from(1e9));
       }
 
