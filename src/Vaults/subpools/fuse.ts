@@ -1,8 +1,8 @@
-import Caches from "../cache";
-import { Contract, BigNumber } from "ethers";
+import Caches from '../cache';
+import { Contract, BigNumber } from 'ethers';
 
 // ABIs
-import cErc20DelegateAbi from "./fuse/abi/CErc20Delegate.json";
+import cErc20DelegateAbi from './fuse/abi/CErc20Delegate.json';
 
 export default class FuseSubpool {
   provider;
@@ -26,7 +26,7 @@ export default class FuseSubpool {
   async getCurrencyApys() {
     let self = this;
 
-    return await self.cache.getOrUpdate("currencyApys", async function () {
+    return await self.cache.getOrUpdate('currencyApys', async function () {
       let apyBNs = {};
       for (const currencyCode of Object.keys(self.cTokens)) {
         apyBNs[currencyCode] = await self.getCurrencyApy(self.cTokens[currencyCode]);

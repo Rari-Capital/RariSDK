@@ -1,5 +1,5 @@
-import { BigNumber, constants } from "ethers";
-import axios from "axios";
+import { BigNumber, constants } from 'ethers';
+import axios from 'axios';
 
 interface ZeroxAPIResponse {
   orders: any;
@@ -27,27 +27,27 @@ export const get0xSwapOrders = (
 
     try {
       decoded = await axios.get(
-        "https://api.0x.org/swap/v0/quote?affiliateAddress=0x10dB6Bce3F2AE1589ec91A872213DAE59697967a&excludedSources=mStable&sellToken=" +
+        'https://api.0x.org/swap/v0/quote?affiliateAddress=0x10dB6Bce3F2AE1589ec91A872213DAE59697967a&excludedSources=mStable&sellToken=' +
           inputTokenAddress +
-          "&buyToken=" +
+          '&buyToken=' +
           outputTokenAddress +
           (maxMakerAssetFillAmountBN !== undefined && maxMakerAssetFillAmountBN !== null
-            ? "&buyAmount=" + maxMakerAssetFillAmountBN.toString()
-            : "&sellAmount=" + maxInputAmountBN.toString()),
+            ? '&buyAmount=' + maxMakerAssetFillAmountBN.toString()
+            : '&sellAmount=' + maxInputAmountBN.toString()),
       );
     } catch (error: any) {
       if (
         error.response &&
         error.response.data.validationErrors &&
-        error.response.data.validationErrors[0].reason === "INSUFFICIENT_ASSET_LIQUIDITY"
+        error.response.data.validationErrors[0].reason === 'INSUFFICIENT_ASSET_LIQUIDITY'
       ) {
-        return reject("Insufficient liquidity");
+        return reject('Insufficient liquidity');
       }
-      return reject("Error requesting quote from 0x swap API: " + error.message);
+      return reject('Error requesting quote from 0x swap API: ' + error.message);
     }
 
-    if (!decoded) return reject("Failed to decode quote from 0x swap API");
-    if (!decoded.orders) return reject("No orders found on 0x swap API");
+    if (!decoded) return reject('Failed to decode quote from 0x swap API');
+    if (!decoded.orders) return reject('No orders found on 0x swap API');
 
     decoded.orders.sort((a, b) =>
       a.makerAssetAmount / (a.takerAssetAmount + a.takerFee) < b.makerAssetAmount / (b.takerAssetAmount + b.takerFee)
@@ -64,7 +64,7 @@ export const get0xSwapOrders = (
       if (
         decoded.orders[i].takerFee > 0 &&
         decoded.orders[i].takerFeeAssetData.toLowerCase() !==
-          "0xf47261b0000000000000000000000000" + inputTokenAddress.toLowerCase()
+          '0xf47261b0000000000000000000000000' + inputTokenAddress.toLowerCase()
       )
         continue;
 
@@ -89,7 +89,7 @@ export const get0xSwapOrders = (
             makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).lt(orderMakerAssetFillAmountBN)
           ) {
             if (tries >= 1000) {
-              return reject("Failed to get increment order input amount to achieve desired output amount");
+              return reject('Failed to get increment order input amount to achieve desired output amount');
             }
             orderInputFillAmountBN = orderInputFillAmountBN.add(constants.One);
             tries++;
@@ -149,7 +149,7 @@ export const get0xSwapOrders = (
         break;
     }
 
-    if (takerAssetFilledAmountBN.isZero()) return reject("No orders found on 0x swap API");
+    if (takerAssetFilledAmountBN.isZero()) return reject('No orders found on 0x swap API');
 
     resolve([
       orders,
