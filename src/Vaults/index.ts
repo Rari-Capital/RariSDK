@@ -66,16 +66,19 @@ export default class Vaults {
     this.getEthUsdPriceBN = async function (): Promise<BigNumber> {
       return await self.cache.getOrUpdate("ethUSDPrice", async function () {
         try {
-          const usdPrice = (
-            await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")
-          ).data.ethereum.usd;
-          const usdPriceBN = utils.parseUnits(usdPrice.toString(), "ether");
-          return usdPriceBN;
+          // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
+          const UsdPrice: number = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")).data.ethereum.usd
+
+          // Now we turn it into a big number
+          const usdPriceBN = utils.parseUnits(UsdPrice.toString(), 18)
+          
+          // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
+          return usdPriceBN
         } catch (error) {
           throw new Error("Error retrieving data from Coingecko API: " + error);
         }
       });
-    };
+    }; 
 
     this.getAllTokens = async function (cacheTimeout = 86400) {
       self.cache._raw["allTokens"].timeout = typeof cacheTimeout === "undefined" ? 86400 : cacheTimeout;

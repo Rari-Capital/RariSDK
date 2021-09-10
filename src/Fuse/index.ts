@@ -237,13 +237,10 @@ export default class Fuse {
             // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
             const UsdPrice: number = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")).data.ethereum.usd
 
-            // Decimal numbres are unsafe for bigNumber so we have to get rid of them
-            const usdPriceParsed = UsdPrice * 1e2
-
             // Now we turn it into a big number
-            const usdPriceBN = BigNumber.from(usdPriceParsed)
+            const usdPriceBN = utils.parseUnits(UsdPrice.toString(), 18)
             
-            // To parse this back into USD (parseInt(usdPriceBN.toString()) * 1e-2).toFixed(2)
+            // To parse this back into USD usdPriceBN.div(constants.WeiPerEther).toString()
             return usdPriceBN
 
             // Web3.utils.toBN(
