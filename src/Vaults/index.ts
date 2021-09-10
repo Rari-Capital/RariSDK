@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Contract, getDefaultProvider, BigNumber, utils, constants  } from "ethers";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { JsonRpcProvider, Web3Provider, ExternalProvider, JsonRpcFetchFunc } from "@ethersproject/providers";
 
 // Cache
 import Cache from "./cache";
@@ -17,10 +17,13 @@ import Fuse from "./subpools/fuse";
 // Pools
 import StablePool from "./pools/stable";
 import DaiPool from "./pools/dai";
+import EthereumPool from "./pools/ethereum";
 
 // ERC20ABI
 import erc20Abi from "./abi/ERC20.json";
 import Governance from "./governance/governance";
+import YieldPool from "./pools/yield";
+import KeeperDAOSubpool from "./subpools/keeperdao";
 
 export default class Vaults {
   provider: JsonRpcProvider;
@@ -35,12 +38,14 @@ export default class Vaults {
   pools;
   governance;
 
-  constructor(web3Provider: string) {
-    this.provider = new JsonRpcProvider(web3Provider);
+  constructor(web3Provider: JsonRpcProvider | Web3Provider) {
+    this.provider = web3Provider
     this.cache = new Cache({ allTokens: 8600, ethUSDPrice: 300 });
     this.utils = utils
     this.constants = constants
     this.Contract = Contract
+
+    
 
     for (const currencyCode of Object.keys(this.internalTokens))
       this.internalTokens[currencyCode].contract = new Contract(
@@ -95,6 +100,7 @@ export default class Vaults {
       mStable: new mStable(this.provider),
       yVault: new yVault(this.provider),
       Alpha: new Alpha(this.provider),
+      KeeperDAO: new KeeperDAOSubpool(this.provider),
       Fuse2: new Fuse(this.provider, {
         USDC: "0x69aEd4932B3aB019609dc567809FA6953a7E0858",
       }),
@@ -164,8 +170,30 @@ export default class Vaults {
         },
         this.getAllTokens,
       ),
+      yield: new YieldPool(
+        this.provider,
+        {
+          dYdX: subpools["dYdX"],
+          Compound: subpools["Compound"],
+          Aave: subpools["Aave"],
+          mStable: subpools["mStable"],
+        },
+        this.getAllTokens
+      ),
+      ethereum: new EthereumPool(
+        this.provider,
+        {
+          dYdX: subpools["dYdX"],
+          Compound: subpools["Compound"],
+          KeeperDAO: subpools["KeeperDAO"],
+          Aave: subpools["Aave"],
+          Alpha: subpools["Alpha"],
+          Enzyme: subpools["Alpha"],
+        },
+        this.getAllTokens,
+      ),
     };
-
+    
     this.governance = new Governance(this.provider)
   }
 
