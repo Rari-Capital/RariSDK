@@ -3,6 +3,10 @@ import { createContract, toBN } from "../utils/web3";
 import { contracts } from "../contracts/compound-protocol.min.json";
 import { Web3Provider } from "@ethersproject/providers";
 
+export interface JumpRateModelInterface {
+   JumpRateModel
+}
+
 export default class JumpRateModel {
   static RUNTIME_BYTECODE_HASHES = [
     "0x00f083d6c0022358b6b3565c026e815cfd6fc9dcd6c3ad1125e72cbb81f41b2a",
@@ -15,6 +19,7 @@ export default class JumpRateModel {
   jumpMultiplierPerBlock: BigNumber | undefined;
   kink: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
+  RUNTIME_BYTECODE_HASHES
 
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const jumpRateModelContract = createContract(
