@@ -149,8 +149,8 @@ export default class StablePool {
     deposits
     withdrawals
     history
-    static CONTRACT_ADDRESSES = contractAddressesStable;
-    static CONTRACT_ABIS = abisStable;
+    static CONTRACT_ADDRESSES: any = contractAddressesStable;
+    static CONTRACT_ABIS: any = abisStable;
 
     constructor(provider: JsonRpcProvider, subpools, getAllTokens) {
         this.provider = provider;
@@ -165,7 +165,9 @@ export default class StablePool {
             acceptedCurrencies: 30,
         });
 
-        this.contracts = {};
+        this.contracts = {
+          
+        };
         for (const contractName of Object.keys(contractAddressesStable))
             this.contracts[contractName] = new Contract(contractAddressesStable[contractName], abisStable[contractName], this.provider);
         
@@ -205,7 +207,7 @@ export default class StablePool {
                 return ( await self.contracts.RariFundManager.callStatic.balanceOf(account) );
 
             },
-            interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = "latest") => {
+            interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = "latest"): Promise<string> => {
                 if (!account) throw new Error("No account specified");
                 if (!fromTimestamp) fromTimestamp = 0;
                 if (toTimestamp === undefined) toTimestamp = "latest";
@@ -508,6 +510,33 @@ export default class StablePool {
                 const response = (division ** (SECONDS_PER_YEAR / timeDiff) -1) * 1e18
                 return Math.trunc(response)
             },
+            getApyOverTime: async function (
+              fromTimestamp = 0,
+              toTimestamp: any = "latest"
+            ) {
+
+              fromTimestamp =
+                fromTimestamp !== undefined
+                  ? Math.max(fromTimestamp, 1593499687)
+                  : 1593499687;
+
+              toTimestamp =
+                toTimestamp !== undefined && toTimestamp !== "latest"
+                  ? Math.min(toTimestamp, new Date().getTime() / 1000)
+                  : Math.trunc(new Date().getTime() / 1000);
+      
+              try {
+                return BigNumber.from(
+                  (
+                    await axios.get(self.API_BASE_URL + "apy", {
+                      params: { fromTimestamp, toTimestamp },
+                    })
+                  ).data
+                );
+              } catch (error) {
+                throw new Error("Error in Rari API: " + error);
+              }
+            },
         };
 
         this.rspt = this.poolToken = {
@@ -623,7 +652,8 @@ export default class StablePool {
                 throw new Error("Error in Rari API: " + error);
               }
             },
-            getRsptExchangeRateHistory: this.history.getPoolTokenExchangeRateHistory,
+            // @ts-ignore for some reason when using this its refering to StablePool, not history. 
+            getRsptExchangeRateHistory: this.getPoolTokenExchangeRateHistory,
             getPredictedDailyRawFundApyHistoryLastYear: async function () {
               // TODO: Get results from app.rari.capital
             },
@@ -657,25 +687,22 @@ export default class StablePool {
                   1 + apyHistory[timestamp] / 100 / 365;
               return returns;
             },
-            getPoolAllocationHistory: async function (fromBlock, toBlock, filter) {
-              var events = [];
+            getPoolAllocationHistory: async function (fromBlock: number, toBlock: number) {
+              let events: any[] = [];
               if (toBlock >= 10909705 && fromBlock <= 11821040)
                 events = await self.legacyContracts[
                   "v2.0.0"
-                ].RariFundController.getPastEvents("PoolAllocation", {
-                  fromBlock: Math.max(fromBlock, 10909705),
-                  toBlock: Math.min(toBlock, 11821040),
-                  filter,
-                });
+                ]["RariFundController"].queryFilter(
+                  self.contracts.RariFundController.filters.PoolAllocation(),
+                  Math.max(fromBlock, 10909705),
+                  Math.min(toBlock, 11821040),
+                );
               if (toBlock >= 11821040)
                 events = events.concat(
-                  await self.contracts.RariFundController.getPastEvents(
-                    "PoolAllocation",
-                    {
-                      fromBlock: Math.max(fromBlock, 11821040),
-                      toBlock,
-                      filter,
-                    }
+                  await self.contracts.RariFundController.queryFilter(
+                    self.contracts.RariFundController.filters.PoolAllocation(),
+                     Math.max(fromBlock, 11821040),
+                      toBlock
                   )
                 );
               return events;
@@ -685,7 +712,7 @@ export default class StablePool {
               if (toBlock >= 10926182 && fromBlock <= 11821040)
                 events = await self.legacyContracts[
                   "v2.0.0"
-                ].RariFundController.getPastEvents("CurrencyTrade", {
+                ].RariFundController.getPastEvents(self.contracts.RariFundController.filters.PoolAllocation(), {
                   fromBlock: Math.max(fromBlock, 10926182),
                   toBlock: Math.min(toBlock, 11821040),
                   filter,
@@ -879,7 +906,8 @@ export default class StablePool {
                 );
               return events;
             },
-            getRsptTransferHistory: this.history.getPoolTokenTransferHistory,
+            //@ts-ignore
+            getRsptTransferHistory: this.getPoolTokenTransferHistory,
         };
 
         this.deposits = {
@@ -2306,7 +2334,7 @@ export default class StablePool {
                                     inputCandidates[i].currencyCode
                                   ) < 0
                                 ) continue
-                          }
+                          
 
                           // Get swap fee and calculate input amount needed to fill output amount
                           if (currencyCode !== "mUSD" && mStableSwapFeeBN === null) {
@@ -2423,15 +2451,15 @@ export default class StablePool {
                                         )
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD max swap:", err);
-                                      //continue;
+                                      continue;
                                     }
 
-                                    // if (
-                                    //   !maxSwap ||
-                                    //   !maxSwap["0"] ||
-                                    //   BigNumber.from(maxSwap["2"]).lt(inputAmountBN)
-                                    // )
-                                     // continue;
+                                    if (
+                                      !maxSwap ||
+                                      !maxSwap["0"] ||
+                                      BigNumber.from(maxSwap["2"]).lt(inputAmountBN)
+                                    )
+                                     continue;
                               }
 
                               amountInputtedUsdBN = amountInputtedUsdBN.add(
@@ -2463,9 +2491,9 @@ export default class StablePool {
                               }
 
                               // Stop if we have filled the withdrawal
-                              //@ts-ignore
-                              //if (amountWithdrawnBN.gte(amount)) break;
+                              if (amountWithdrawnBN.gte(amount)) break;
                           }
+                        }
                   }
 
                   // Use 0x if necessary
