@@ -1,6 +1,6 @@
 // Ethers
 import { BigNumber, Contract, utils, ContractFactory, constants, ethers} from "ethers";
-import { JsonRpcProvider} from "@ethersproject/providers";
+import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 // Axios
 import axios from 'axios';
 
@@ -28,13 +28,16 @@ type MinifiedContracts = {
     }
 }
 
+
+
 type interestRateModelType = 
                 JumpRateModel |
                 JumpRateModelV2 |
                 DAIInterestRateModelV2 |
                 WhitePaperInterestRateModel |
-                null
+                undefined
 
+                
 type cERC20Conf = {
     underlying: string // underlying ERC20
     comptroller: string // Address of the comptroller
@@ -211,8 +214,8 @@ export default class Fuse {
     static FuseFeeDistributorAddress = "0xa731585ab05fC9f83555cf9Bff8F58ee94e18F85";
     static FusePoolLensAddress = "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493";
 
-    constructor(web3Provider: string) {
-        this.provider = new JsonRpcProvider(web3Provider)
+    constructor(web3Provider: JsonRpcProvider | Web3Provider) {
+        this.provider = web3Provider
         this.Contract = Contract
         this.utils = utils 
         this.BigNumber = BigNumber
@@ -259,9 +262,9 @@ export default class Fuse {
         this.deployPool = async function (
             poolName : string,
             enforceWhitelist: boolean,
-            closeFactor: number,
+            closeFactor: BigNumber,
             maxAssets: number,
-            liquidationIncentive: number,
+            liquidationIncentive: BigNumber,
             priceOracle: string, // Contract address
             priceOracleConf: any,
             options: any, // We might need to add sender as argument. Getting address from options will colide with the override arguments in ethers contract method calls. It doesnt take address.
@@ -288,7 +291,7 @@ export default class Fuse {
                     let implementationAddress = Fuse.COMPTROLLER_IMPLEMENTATION_CONTRACT_ADDRESS;
 
                     if (!implementationAddress) {
-                        const comptrollerContract = new ContractFactory( JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi), this.contracts["contracts/Comptroller.sol:Comptroller"].bin, this.provider.getSigner(accountToImpersonate));
+                        const comptrollerContract = new ContractFactory( JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi), this.contracts["contracts/Comptroller.sol:Comptroller"].bin, this.provider.getSigner());
                         const deployedComptroller = await comptrollerContract.deploy({...options})
                         implementationAddress = deployedComptroller.options.address;
                     }
@@ -326,9 +329,9 @@ export default class Fuse {
                     );
 
                     let unitroller = new Contract(
-                        poolAddress,
-                        JSON.parse(this.contracts["contracts/Unitroller.sol:Unitroller"].abi),
-                        this.provider.getSigner(accountToImpersonate)
+                      poolAddress,
+                      JSON.parse(this.contracts["contracts/Unitroller.sol:Unitroller"].abi),
+                        this.provider
                     );
 
                     
@@ -346,7 +349,8 @@ export default class Fuse {
                     if (enforceWhitelist) {
                         let comptroller = new Contract(
                             poolAddress,
-                            JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi)
+                            JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
+                            this.provider
                         );
 
                         // Already enforced so now we just need to add the addresses
@@ -377,12 +381,12 @@ export default class Fuse {
                                                 ? conf.maxSecondsBeforePriceIsStale
                                                 : 0,
                                     ]
-                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracle"].abi, this.oracleContracts["ChainlinkPriceOracle"].bin, await this.provider.getSigner(accountToImpersonate) );
+                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracle"].abi, this.oracleContracts["ChainlinkPriceOracle"].bin, this.provider.getSigner() );
                         deployedPriceOracle = await priceOracleContract.deploy({...options});
                         break;
                     case "UniswapLpTokenPriceOracle":
                         deployArgs = [conf.useRootOracle ? true : false];
-                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapLpTokenPriceOracle"].abi, this.oracleContracts["UniswapLpTokenPriceOracle"].bin, this.provider.getSigner(accountToImpersonate))
+                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapLpTokenPriceOracle"].abi, this.oracleContracts["UniswapLpTokenPriceOracle"].bin, this.provider.getSigner())
                         deployedPriceOracle = priceOracleContract.deploy(deployArgs, {...options}) 
                         break;
                     case "UniswapTwapPriceOracle": // Uniswap V2 TWAPs
@@ -394,7 +398,7 @@ export default class Fuse {
                                         ? conf.uniswapV2Factory 
                                         : "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
                                     ]; // Default to official Uniswap V2 factory
-                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapTwapPriceOracle"].abi, this.oracleContracts["UniswapTwapPriceOracle"].bin, this.provider.getSigner(accountToImpersonate))
+                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapTwapPriceOracle"].abi, this.oracleContracts["UniswapTwapPriceOracle"].bin, this.provider.getSigner())
                         deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {options})
                         break;
                     case "UniswapTwapPriceOracleV2": // Uniswap V2 TWAPs
@@ -409,11 +413,11 @@ export default class Fuse {
                                         ? conf.baseToken 
                                         : Fuse.WETH_ADDRESS
                                     ]; // Default to official Uniswap V2 factory
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapTwapPriceOracleV2"].abi, this.oracleContracts["UniswapTwapPriceOracleV2"].bin, this.provider.getSigner(accountToImpersonate));
+                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapTwapPriceOracleV2"].abi, this.oracleContracts["UniswapTwapPriceOracleV2"].bin, this.provider.getSigner());
                         deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
                         break;                  
                     case "ChainlinkPriceOracleV2":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracleV2"].abi, this.oracleContracts["ChainlinkPriceOracleV2"].bin, this.provider.getSigner(accountToImpersonate) );
+                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracleV2"].abi, this.oracleContracts["ChainlinkPriceOracleV2"].bin, this.provider.getSigner() );
                         deployArgs = [
                                     conf.admin 
                                         ? conf.admin 
@@ -427,12 +431,12 @@ export default class Fuse {
                     case "UniswapV3TwapPriceOracle":
                         if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) throw Error ("Invalid fee tier passed to UniswapV3TwapPriceOracle deployment.");
                         deployArgs = [conf.uniswapV3Factory ? conf.uniswapV3Factory : "0x1f98431c8ad98523631ae4a59f267346ea31f984", conf.feeTier]; // Default to official Uniswap V3 factory
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracle"].abi, this.oracleContracts["UniswapV3TwapPriceOracle"].bin, this.provider.getSigner(accountToImpersonate));
+                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracle"].abi, this.oracleContracts["UniswapV3TwapPriceOracle"].bin, this.provider.getSigner());
                         deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
                         break;
                     case "UniswapV3TwapPriceOracleV2":
                         if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) throw Error ("Invalid fee tier passed to UniswapV3TwapPriceOracleV2 deployment.");
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracleV2"].abi, this.oracleContracts["UniswapV3TwapPriceOracleV2"].bin, this.provider.getSigner(accountToImpersonate));
+                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracleV2"].abi, this.oracleContracts["UniswapV3TwapPriceOracleV2"].bin, this.provider.getSigner());
                         deployArgs = [
                                     conf.uniswapV3Factory 
                                         ? conf.uniswapV3Factory 
@@ -443,12 +447,12 @@ export default class Fuse {
                         deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
                         break;
                     case "FixedTokenPriceOracle":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["FixedTokenPriceOracle"].abi, this.oracleContracts["FixedTokenPriceOracle"].bin, this.provider.getSigner(accountToImpersonate));
+                        priceOracleContract = new ContractFactory(this.oracleContracts["FixedTokenPriceOracle"].abi, this.oracleContracts["FixedTokenPriceOracle"].bin, this.provider.getSigner());
                         deployArgs = [ conf.baseToken];
                         deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
                         break;
                     case "MasterPriceOracle":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["MasterPriceOracle"].abi, this.oracleContracts["MasterPriceOracle"].bin, this.provider.getSigner(accountToImpersonate) );
+                        priceOracleContract = new ContractFactory(this.oracleContracts["MasterPriceOracle"].abi, this.oracleContracts["MasterPriceOracle"].bin, this.provider.getSigner() );
                         deployArgs = [
                             conf.underlyings ? conf.underlyings : [],
                             conf.oracles ? conf.oracles : [],
@@ -461,12 +465,12 @@ export default class Fuse {
                         priceOracleContract = new ContractFactory(
                             JSON.parse( this.contracts["contracts/SimplePriceOracle.sol:SimplePriceOracle"].abi ),
                             this.contracts["contracts/SimplePriceOracle.sol:SimplePriceOracle"].bin,
-                            this.provider.getSigner(accountToImpersonate)
+                            this.provider.getSigner()
                         );
                         deployedPriceOracle = await priceOracleContract.deploy({...options})
                         break;
                     default:
-                        priceOracleContract = new ContractFactory(this.oracleContracts[model].abi, this.oracleContracts[model].bin, this.provider.getSigner(accountToImpersonate) );
+                        priceOracleContract = new ContractFactory(this.oracleContracts[model].abi, this.oracleContracts[model].bin, this.provider.getSigner() );
                         deployedPriceOracle = await priceOracleContract.deploy({...options})
                         break;
                 }
@@ -490,7 +494,7 @@ export default class Fuse {
                   JSON.parse(
                       this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
                       this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bin,
-                      this.provider.getSigner(accountToImpersonate)
+                      this.provider
               );
               deployedComptroller = await comptrollerContract.deploy(...options);
               implementationAddress = deployedComptroller.options.address;
@@ -500,7 +504,7 @@ export default class Fuse {
             const unitrollerContract = new ContractFactory(
               JSON.parse(this.compoundContracts["contracts/Unitroller.sol:Unitroller"].abi),
               this.compoundContracts["contracts/Unitroller.sol:Unitroller"].bin,
-              this.provider.getSigner(accountToImpersonate)
+              this.provider.getSigner()
             );
 
             const deployedUnitroller = await unitrollerContract.deploy({...options})
@@ -636,7 +640,7 @@ export default class Fuse {
             const interestRateModelContract = new ContractFactory(
               JSON.parse(this.compoundContracts["contracts/" + model + ".sol:" + model].abi),
               this.compoundContracts["contracts/" + model + ".sol:" + model].bin,
-              this.provider.getSigner(accountToImpersonate)
+              this.provider.getSigner()
             );
             
             const deployedInterestRateModel = await interestRateModelContract.deploy(deployArgs, {...options})
@@ -747,7 +751,7 @@ export default class Fuse {
               const cEtherDelegateContract = new ContractFactory(
                 JSON.parse(this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi),
                 this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].bin,
-                this.provider.getSigner(accountToImpersonate)
+                this.provider.getSigner()
               );
               const deployedCEtherDelegate = await cEtherDelegateContract.deploy({...options})
               implementationAddress = deployedCEtherDelegate.options.address;
@@ -757,7 +761,7 @@ export default class Fuse {
             const cEtherDelegatorContract = new ContractFactory(
               JSON.parse(this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].abi),
               this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].bin,
-              this.provider.getSigner(accountToImpersonate)
+              this.provider.getSigner()
             );
             let deployArgs = [
               conf.comptroller,
@@ -778,7 +782,7 @@ export default class Fuse {
             const comptrollerContract = new Contract(
               JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
               conf.comptroller,
-              this.provider.getSigner(accountToImpersonate)
+              this.provider
             );
             deployedCEtherDelegator.options.jsonInterface = JSON.parse(this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi);
       
@@ -817,8 +821,8 @@ export default class Fuse {
               ethers.BigNumber.from(conf.initialExchangeRateMantissa).isZero()
             ) {
               const erc20 = new Contract(
-                JSON.parse(this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi),
                 conf.underlying,
+                JSON.parse(this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi),
                 this.provider
               );
               const underlyingDecimals: number = await erc20.methods.decimals()
@@ -829,8 +833,8 @@ export default class Fuse {
       
             // Get Comptroller
             const comptroller = new Contract(
-              JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
               conf.comptroller, 
+              JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
               this.provider.getSigner(accountToImpersonate)
             );
       
@@ -842,7 +846,7 @@ export default class Fuse {
               const cErc20DelegateContract = new ContractFactory(
                 JSON.parse(this.compoundContracts["contracts/CErc20Delegate.sol:CErc20Delegate"].abi),
                 this.compoundContracts["contracts/CErc20Delegate.sol:CErc20Delegate"].bin,
-                this.provider.getSigner(accountToImpersonate)
+                this.provider.getSigner()
               );
               const deployedCErc20Delegate = await cErc20DelegateContract.deploy({...options})
               implementationAddress = deployedCErc20Delegate.options.address;
@@ -852,7 +856,7 @@ export default class Fuse {
             const cErc20DelegatorContract = new Contract(
               JSON.parse(this.compoundContracts["contracts/CErc20Delegator.sol:CErc20Delegator"].abi),
               this.compoundContracts["contracts/CErc20Delegator.sol:CErc20Delegator"].bin,
-              this.provider.getSigner(accountToImpersonate)
+              this.provider
             );
 
             let deployArgs = [
@@ -890,58 +894,58 @@ export default class Fuse {
             return [deployedCErc20Delegator.options.address, implementationAddress];
         };
 
-        this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<interestRateModelType> {
+        this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<any> {
             // Get interest rate model type from runtime bytecode hash and init class
             const interestRateModels: { [key:string]: any}  = {
-              JumpRateModel: JumpRateModel,
-              JumpRateModelV2: JumpRateModelV2,
-              DAIInterestRateModelV2: DAIInterestRateModelV2,
-              WhitePaperInterestRateModel: WhitePaperInterestRateModel,
+              "JumpRateModel": JumpRateModel,
+              "JumpRateModelV2": JumpRateModelV2,
+              "DAIInterestRateModelV2": DAIInterestRateModelV2,
+              "WhitePaperInterestRateModel": WhitePaperInterestRateModel,
             };
             const runtimeBytecodeHash = utils.keccak256( await this.provider.getCode(interestRateModelAddress) );
-            let interestRateModel: interestRateModelType = null;
-      
+            // Find ONE interes ratemodel and return thath
+            // compare runtimeByrecodeHash with
+            // 
+
+            let irm
             outerLoop:
+
             for (const model of Object.keys(interestRateModels)) {
-              if (interestRateModels[model].RUNTIME_BYTECODE_HASHES !== undefined) {
+              if ( interestRateModels[model].RUNTIME_BYTECODE_HASHES !== undefined) {
                 for (const hash of interestRateModels[model].RUNTIME_BYTECODE_HASHES) {
                   if (runtimeBytecodeHash === hash) {
-                    interestRateModel = new interestRateModels[model]();
+                    irm = new interestRateModels[model]()
+                    console.log(irm)
                     break outerLoop;
                   }
                 }
               } else if (runtimeBytecodeHash === interestRateModels[model].RUNTIME_BYTECODE_HASH) {
-                interestRateModel = new interestRateModels[model]();
+                irm = new interestRateModels[model]();
                 break;
               }
             }
-      
-            return interestRateModel;
+
+            console.log(irm, "WHY")
+            return irm
         };
 
-        this.getInterestRateModel = async function (assetAddress: string): Promise<interestRateModelType | undefined> {
+        this.getInterestRateModel = async function (assetAddress: string): Promise<any | undefined> {
             // Get interest rate model address from asset address
             const assetContract = new Contract(
-              JSON.parse(this.compoundContracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
               assetAddress,
+              JSON.parse(this.compoundContracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
               this.provider
             );
             const interestRateModelAddress: string = await assetContract.callStatic.interestRateModel()
       
-            const interestRateModel: interestRateModelType = await this.identifyInterestRateModel( interestRateModelAddress);
-
-            if (interestRateModel) {
+            const interestRateModel = await this.identifyInterestRateModel(interestRateModelAddress);
                 
-                await interestRateModel.init(
+            await interestRateModel.init(
                     interestRateModelAddress,
                     assetAddress,
                     this.provider
                 ); 
-                
-            } else {
-
-                return interestRateModel;
-            }
+            return interestRateModel
         };
 
         this.checkForCErc20PriceFeed = async function (
@@ -973,9 +977,9 @@ export default class Fuse {
             let chainlinkPriceFeed: boolean | undefined = undefined // will be true if chainlink has a price feed for underlying Erc20 token
             
             chainlinkPriceOracle = new Contract(
-              this.oracleContracts["ChainlinkPriceOracle"].abi,
               priceOracle,
-              this.provider.getSigner(accountToImpersonate)
+              this.oracleContracts["ChainlinkPriceOracle"].abi,
+              this.provider
             );
       
             // If underlying Erc20 is WETH use chainlinkPriceFeed, otherwise check if Chainlink supports it.
@@ -990,9 +994,9 @@ export default class Fuse {
             if (chainlinkPriceFeed === undefined || !chainlinkPriceFeed) {
 
               const preferredPriceOracle = new Contract(
-                this.oracleContracts["PreferredPriceOracle"].abi,
                 priceOracle,
-                this.provider.getSigner(accountToImpersonate)
+                this.oracleContracts["PreferredPriceOracle"].abi,
+                this.provider
               );
       
               try {
@@ -1001,8 +1005,8 @@ export default class Fuse {
 
                 // Initiate ChainlinkOracle 
                 chainlinkPriceOracle = new Contract(
-                  this.oracleContracts["ChainlinkPriceOracle"].abi,
                   chainlinkPriceOracleAddress,
+                  this.oracleContracts["ChainlinkPriceOracle"].abi,
                   this.provider
                 );
                 
@@ -1018,8 +1022,8 @@ export default class Fuse {
               let uniswapOrUniswapAnchoredViewContract: Contract
               try {
                 uniswapOrUniswapAnchoredViewContract = new Contract(
-                    JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
-                    priceOracle,
+                  priceOracle,
+                  JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
                     this.provider
                 );
                 await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW()
@@ -1027,16 +1031,16 @@ export default class Fuse {
               } catch {
                 try {
                     uniswapOrUniswapAnchoredViewContract = new Contract(
-                    JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
-                    priceOracle,
-                    this.provider.getSigner(accountToImpersonate)
+                      priceOracle,
+                      JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
+                    this.provider
                   );
                   await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_VIEW();
                 } catch {
                   // Check for PreferredPriceOracle's secondary oracle.
                   const preferredPriceOracle = new Contract(
-                    this.oracleContracts["PreferredPriceOracle"].abi,
                     priceOracle,
+                    this.oracleContracts["PreferredPriceOracle"].abi,
                     this.provider
                   );
       
@@ -1050,8 +1054,8 @@ export default class Fuse {
       
                   try {
                     uniswapOrUniswapAnchoredViewContract = new Contract(
-                      JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
                       uniswapOrUniswapAnchoredViewAddress,
+                      JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapAnchoredView.sol:UniswapAnchoredView"].abi),
                       this.provider
                     );
                     await uniswapOrUniswapAnchoredViewContract.IS_UNISWAP_ANCHORED_VIEW()
@@ -1059,8 +1063,8 @@ export default class Fuse {
                   } catch {
                     try {
                       uniswapOrUniswapAnchoredViewContract = new Contract(
-                        JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
                         uniswapOrUniswapAnchoredViewAddress,
+                        JSON.parse(this.openOracleContracts["contracts/Uniswap/UniswapView.sol:UniswapView"].abi),
                         this.provider
                       );
                       await uniswapOrUniswapAnchoredViewContract.methods.IS_UNISWAP_VIEW()
@@ -1077,8 +1081,8 @@ export default class Fuse {
               } catch {
                 // If not, add it!
                 const underlyingToken = new Contract(
-                  JSON.parse(this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi),
                   conf.underlying,
+                  JSON.parse(this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi),
                   this.provider
                 );
 
@@ -1295,8 +1299,8 @@ export default class Fuse {
                     if (isUniswapAnchoredView) {
                       // Post reported price or (if price has never been reported) have user report and post price
                       const priceData = new Contract(
-                        JSON.parse(self.openOracleContracts["contracts/OpenOraclePriceData.sol:OpenOraclePriceData"].abi),
                         await uniswapOrUniswapAnchoredViewContract.priceData(),
+                        JSON.parse(self.openOracleContracts["contracts/OpenOraclePriceData.sol:OpenOraclePriceData"].abi),
                         self.provider
                       );
                       var reporter = await uniswapOrUniswapAnchoredViewContract.methods.reporter()
