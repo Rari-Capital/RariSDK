@@ -1541,8 +1541,7 @@ export default class StablePool {
                                   await internalTokens[currencyCode].Contract
                                   .approve(self.contracts.RariFundProxy.options.address, "0", sender)
                               }
-                          approvalReceipt = await internalTokens[currencyCode].contract
-                              .approve(self.contracts.RariFundProxy.options.address, amount, sender)
+                          approvalReceipt = await internalTokens[currencyCode].Contract.approve(self.contracts.RariFundProxy.options.address, amount, sender)
                           }
                       } catch (err: any) {
                           throw new Error(
