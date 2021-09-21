@@ -182,7 +182,7 @@ export default class Governance {
                     );
                   }
                 },
-                getCurrentApr: async function (blockNumber, tvl) {
+                getCurrentApr: async function (blockNumber: number, tvl: number) {
                   // Get APR from difference in distribution over last 270 blocks (estimating a 1 hour time difference)
                   const rgtDistributedPastHour = self.rgt.distributions
                     .getDistributedAtBlock(blockNumber)
@@ -227,7 +227,7 @@ export default class Governance {
               },
             sushiSwapDistributions: {
                 DISTRIBUTION_START_BLOCK: 11909000,
-                DISTIBUTION_PERIOD: 6500 * 365 * 3,
+                DISTRIBUTION_PERIOD: 6500 * 365 * 3,
                 //@ts-ignore
                 DISTRIBUTION_PERIOD_END: this.DISTRIBUTION_PERIOD + this.DISTRIBUTION_START_BLOCK,
                 FINAL_RGT_DISTRIBUTION: utils.parseUnits("568717819057309757517546")
@@ -287,7 +287,7 @@ export default class Governance {
                     }
                 },
                 getCurrentApr: async function (blockNumber, totalStakedUsd) {
-                    // Predicted APY if we have't started the distribution period or we don't have enough data
+                    // Predicted APY if we have't started the distribution period or we don't have enough datac
                     if (
                     blockNumber - 270 <
                     self.rgt.sushiSwapDistributions.DISTRIBUTION_START_BLOCK
@@ -312,9 +312,7 @@ export default class Governance {
                     return rgtDistributedPastHourPerUsdInUsd.mul(BigNumber.from(24 * 365));
                 },
                 totalStaked: async function () {
-                    return BigNumber.from(
-                        await self.contracts.RariGovernanceTokenUniswapDistributor.totalStaked()
-                    );
+                    return await self.contracts.RariGovernanceTokenUniswapDistributor.totalStaked()
                 },
                 getLpTokenData: async function () {
                     // TODO: RGT price getter function from Coingecko
