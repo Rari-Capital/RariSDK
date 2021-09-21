@@ -90,7 +90,6 @@ export default class DaiPool extends StablePools {
     ) {
       var events = [];
       if (toBlock >= 11441321 && fromBlock <= 12535101)
-        console.log(self.legacyContracts["v1.0.0"])
         events = await self.legacyContracts[
           "v1.0.0"
         ].RariFundController.queryFilter(
