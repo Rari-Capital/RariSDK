@@ -224,9 +224,6 @@ export default class Fuse {
             FuseFeeDistributorAbi: new Contract(Fuse.FuseFeeDistributorAddress, fuseFeeDistributorAbi, this.provider)
         }
 
-        let accountToImpersonate  = "0xB81473F20818225302b8FfFB905B53D58a793D84"
-      
-
         this.getEthUsdPriceBN = async function () {
             // Returns a USD price. Which means its a floating point of at least 2 decimal numbers.
             const UsdPrice: number = (await axios.get("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=ethereum")).data.ethereum.usd
@@ -291,7 +288,7 @@ export default class Fuse {
                     let receipt
                     try {
 
-                        const contract  = this.contracts.FusePoolDirectory.connect(this.provider.getSigner(accountToImpersonate)) 
+                        const contract  = this.contracts.FusePoolDirectory.connect(this.provider.getSigner()) 
                         receipt = await contract
                         .deployPool(
                             poolName,
@@ -310,7 +307,7 @@ export default class Fuse {
                     }
                                     
                     //4. Compute Unitroller address
-                    const saltsHash = utils.solidityKeccak256(["address", "string", "uint"], [accountToImpersonate, poolName, receipt.deployTransaction.blockNumber])
+                    const saltsHash = utils.solidityKeccak256(["address", "string", "uint"], [options.from, poolName, receipt.deployTransaction.blockNumber])
                     const byteCodeHash = utils.keccak256("0x" + this.contracts["contracts/Unitroller.sol:Unitroller"].bin)
 
                     let poolAddress = utils.getCreate2Address(
@@ -826,7 +823,7 @@ export default class Fuse {
             const comptroller = new Contract(
               conf.comptroller, 
               JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
-              this.provider.getSigner(accountToImpersonate)
+              this.provider.getSigner()
             );
       
             // Check for price feed assuming !bypassPriceFeedCheck
