@@ -166,11 +166,11 @@ export default class StablePool {
         });
 
         this.contracts = {
-          RariFundController: new Contract(contractAddressesStable["RariFundController"], abisStable["RariFundController"], this.provider),
-          RariFundManager: new Contract(contractAddressesStable["RariFundManager"], abisStable["RariFundManager"], this.provider),
-          RariFundToken: new Contract(contractAddressesStable["RariFundToken"], abisStable["RariFundToken"], this.provider),
-          RariFundPriceConsumer: new Contract(contractAddressesStable["RariFundPriceConsumer"], abisStable["RariFundPriceConsumer"], this.provider),
-          RariFundProxy: new Contract(contractAddressesStable["RariFundProxy"], abisStable["RariFundProxy"], this.provider)
+          RariFundController: new Contract(contractAddressesStable["RariFundController"], abisStable["RariFundController"], this.provider.getSigner()),
+          RariFundManager: new Contract(contractAddressesStable["RariFundManager"], abisStable["RariFundManager"], this.provider.getSigner()),
+          RariFundToken: new Contract(contractAddressesStable["RariFundToken"], abisStable["RariFundToken"], this.provider.getSigner()),
+          RariFundPriceConsumer: new Contract(contractAddressesStable["RariFundPriceConsumer"], abisStable["RariFundPriceConsumer"], this.provider.getSigner()),
+          RariFundProxy: new Contract(contractAddressesStable["RariFundProxy"], abisStable["RariFundProxy"], this.provider.getSigner())
         };
         
         this.legacyContracts = {
@@ -202,9 +202,6 @@ export default class StablePool {
               RariFundController: new Contract(legacyContractAddresses["v2.5.0"]["RariFundController"], legacyAbis["v2.5.0"]["RariFundController"], this.provider),
           }
         };
-
-        for (const currencyCode of Object.keys(this.internalTokens))
-            this.internalTokens[currencyCode].contract = new Contract(this.internalTokens[currencyCode].address, erc20Abi, this.provider);
 
         var self = this;
         
@@ -339,9 +336,9 @@ export default class StablePool {
                     const contractBalanceUsdBN = contractBalanceBN
                         .mul(priceInUsdBN)
                         .div(
-                            self.internalTokens[currencyCode].decimals === 18 
+                            internalTokens[currencyCode].decimals === 18 
                                 ? constants.WeiPerEther 
-                                : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                         );
                     allocationsByCurrency[currencyCode] = contractBalanceUsdBN;
 
@@ -353,9 +350,9 @@ export default class StablePool {
                         const poolBalanceUsdBN = poolBalanceBN
                             .mul(priceInUsdBN)
                             .div(
-                                self.internalTokens[currencyCode].decimals === 18 
+                                internalTokens[currencyCode].decimals === 18 
                                 ? constants.WeiPerEther 
-                                : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                             );
                         allocationsByCurrency[currencyCode] = allocationsByCurrency[currencyCode].add(poolBalanceUsdBN)
                     };
@@ -382,9 +379,9 @@ export default class StablePool {
                     const contractBalanceUsdBN = contractBalanceBN
                         .mul(priceInUsdBN)
                         .div(
-                            self.internalTokens[currencyCode].decimals === 18 
+                            internalTokens[currencyCode].decimals === 18 
                             ? constants.WeiPerEther 
-                            : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                            : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                         );
                     allocationsByPool._cash = allocationsByPool._cash.add(contractBalanceUsdBN);
                     const pools = allBalances["2"][i];
@@ -396,9 +393,9 @@ export default class StablePool {
                         const poolBalanceUsdBN = poolBalanceBN
                             .mul(priceInUsdBN)
                             .div(
-                                self.internalTokens[currencyCode].decimals === 18 
+                                internalTokens[currencyCode].decimals === 18 
                                 ? constants.WeiPerEther 
-                                : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                             )
                         allocationsByPool[self.allocations.POOLS[pool]] = allocationsByPool[self.allocations.POOLS[pool]].add(poolBalanceUsdBN);
                     }
@@ -461,9 +458,9 @@ export default class StablePool {
                     const contractBalanceUsdBN = contractBalanceBN
                         .mul(priceInUsdBN)
                         .div(
-                            self.internalTokens[currencyCode].decimals === 18 
+                            internalTokens[currencyCode].decimals === 18 
                             ? constants.WeiPerEther 
-                            : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                            : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                         );
                     
                     factors.push([contractBalanceUsdBN, constants.Zero]);
@@ -477,9 +474,9 @@ export default class StablePool {
                         const poolBalanceUsdBN = poolBalanceBN
                             .mul(priceInUsdBN)
                             .div(
-                                self.internalTokens[currencyCode].decimals === 18 
+                                internalTokens[currencyCode].decimals === 18 
                                 ? constants.WeiPerEther 
-                                : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                             );
 
                         const poolApyBN = poolBalanceUsdBN.gt(constants.Zero) 
@@ -981,11 +978,13 @@ export default class StablePool {
                       self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
                   );
 
+                  console.log(allBalances, "allBalances")
+
                   const amountUsdBN = amount.mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                       .div(
                           BigNumber.from(10)
                           .pow(
-                              BigNumber.from(self.internalTokens[currencyCode].decimals)
+                              BigNumber.from(internalTokens[currencyCode].decimals)
                           )
                       )
 
@@ -1011,7 +1010,7 @@ export default class StablePool {
                                       var redeemValidity = await self.pools["mStable"].externalContracts.MassetValidationHelper.getRedeemValidity(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                                            amount, 
-                                           self.internalTokens[acceptedCurrency].address
+                                           internalTokens[acceptedCurrency].address
                                       )
                                   } catch (err: any) {
                                       console.error("Failed to check mUSD redeem validity: ", err);
@@ -1026,8 +1025,8 @@ export default class StablePool {
                                   try {
                                       var maxSwap = await self.pools["mStable"].externalContracts.MassetValidationHelper.getMaxSwap(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                                          self.internalTokens[currencyCode].address,
-                                          self.internalTokens[acceptedCurrency].address
+                                          internalTokens[currencyCode].address,
+                                          internalTokens[acceptedCurrency].address
                                       )
                                   } catch (err: any) {
                                       console.error("Failed to check mUSD max swap:", err);
@@ -1045,14 +1044,14 @@ export default class StablePool {
                                   // amount * accepted currency decimals / decimals of the currency we want to use
                                   var outputAmountBeforeFeesBN = amount
                                   .mul(
-                                      self.internalTokens[acceptedCurrency].decimals >= 18 
+                                      internalTokens[acceptedCurrency].decimals >= 18 
                                       ? constants.WeiPerEther
-                                      : BigNumber.from(10 ** self.internalTokens[acceptedCurrency].decimals)
+                                      : BigNumber.from(10 ** internalTokens[acceptedCurrency].decimals)
                                   )
                                   .div(
-                                      self.internalTokens[currencyCode].decimals >= 18 
+                                      internalTokens[currencyCode].decimals >= 18 
                                       ? constants.WeiPerEther
-                                      : BigNumber.from(10 ** self.internalTokens[currencyCode].decimals)
+                                      : BigNumber.from(10 ** internalTokens[currencyCode].decimals)
                                   );
               
                                   // if acceptedCurrency is mUSD there is no fee so
@@ -1095,7 +1094,7 @@ export default class StablePool {
                               BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)])
                           )
                           .div(
-                              (BigNumber.from(10)).pow(self.internalTokens[mStableOutputCurrency].decimals)
+                              (BigNumber.from(10)).pow(internalTokens[mStableOutputCurrency].decimals)
                           )
 
                       return [
@@ -1142,7 +1141,7 @@ export default class StablePool {
                       var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN.mul(
                           BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(acceptedCurrency)])
                       ).div(
-                          BigNumber.from(10).pow(BigNumber.from(self.internalTokens[acceptedCurrency].decimals))
+                          BigNumber.from(10).pow(BigNumber.from(internalTokens[acceptedCurrency].decimals))
                       );
 
                       // Make sure input amount is completely filled
@@ -1189,7 +1188,7 @@ export default class StablePool {
                       return constants.WeiPerEther.sub(
                           usdAmount.mul(
                               BigNumber.from(10)
-                              .pow(BigNumber.from(self.internalTokens[currencyCode].decimals))
+                              .pow(BigNumber.from(internalTokens[currencyCode].decimals))
                           ).div(
                               amount
                               .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
@@ -1339,22 +1338,29 @@ export default class StablePool {
                   );
               } else throw new Error("Failed to get currency prices from CoinGecko");
           },
-          deposit: async function (currencyCode, amount, minUsdAmount, options) {
+          deposit: async function (
+            currencyCode: string,  
+            amount: BigNumber, 
+            minUsdAmount: BigNumber, 
+            sender: string // Users address
+            ) {
               // Input validation
-              if (!options || !options.from)
-              throw new Error("Options parameter not set or from address not set.");
-              var allTokens = await self.getAllTokens();
+              if (!sender)
+                throw new Error("Address not set.");
+                var allTokens = await self.getAllTokens();
               if (currencyCode !== "ETH" && !allTokens[currencyCode])
-              throw new Error("Invalid currency code!");
+                throw new Error("Invalid currency code!");
               if (!amount || amount.lte(constants.Zero))
-              throw new Error("Deposit amount must be greater than 0!");
+                throw new Error("Deposit amount must be greater than 0!");
               var accountBalanceBN = BigNumber.from(
-              await (currencyCode == "ETH"
-                  ? self.provider.getBalance(options.from)
-                  : allTokens[currencyCode].contract.methods
-                      .balanceOf(options.from)
-                      .call())
+                await (currencyCode == "ETH"
+                    ? self.provider.getBalance(sender)
+                    : allTokens[currencyCode].contract.balanceOf(sender)
+                  )
               );
+
+              console.log(accountBalanceBN, "im here bby")
+
               if (amount.gt(accountBalanceBN))
               throw new Error(
                   "Not enough balance in your account to make a deposit of this amount."
@@ -1363,7 +1369,7 @@ export default class StablePool {
               // Check if currency is directly depositable
               var directlyDepositableCurrencyCodes = await self.cache.getOrUpdate(
                   "acceptedCurrencies",
-                  self.contracts.RariFundManager.methods.getAcceptedCurrencies().call
+                  self.contracts.RariFundManager.getAcceptedCurrencies
               );
               if (
                   !directlyDepositableCurrencyCodes ||
@@ -1375,15 +1381,14 @@ export default class StablePool {
                   // Get USD amount added to sender's fund balance
                   var allBalances = await self.cache.getOrUpdate(
                       "allBalances",
-                      self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices()
-                      .call
+                      self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
                   );
 
                   var amountUsdBN = amount
                   .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)]))
                   .div(
                       BigNumber.from(10)
-                      .pow(BigNumber.from(self.internalTokens[currencyCode].decimals))
+                      .pow(BigNumber.from(internalTokens[currencyCode].decimals))
                   )
 
                    // Check amountUsdBN against minUsdAmount
@@ -1401,9 +1406,8 @@ export default class StablePool {
                        // Approve tokens to RariFundManager
                       try {
                           var allowanceBN = BigNumber.from(
-                          await allTokens[currencyCode].contract.methods
-                              .allowance(options.from, depositContract.options.address)
-                              .call()
+                          await allTokens[currencyCode].contract.callStatic
+                              .allowance(sender, depositContract.address)
                           );
                           if (allowanceBN.lt(amount)) {
                           if (
@@ -1412,10 +1416,8 @@ export default class StablePool {
                           )
                               await allTokens[currencyCode].contract.methods
                               .approve(depositContract.options.address, "0")
-                              .send(options);
                           approvalReceipt = await allTokens[currencyCode].contract.methods
                               .approve(depositContract.options.address, amount)
-                              .send(options);
                           }
                       } catch (err: any) {
                           throw new Error(
@@ -1426,9 +1428,8 @@ export default class StablePool {
                       
                       // Deposit tokens to RariFundManager
                       try {
-                          receipt = await depositContract.methods
+                          receipt = await depositContract
                           .deposit(currencyCode, amount)
-                          .send(options);
                       } catch (err: any) {
                           if (useGsn) {
                           useGsn = false;
@@ -1459,7 +1460,7 @@ export default class StablePool {
                                         .getRedeemValidity(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                                           amount,
-                                          self.internalTokens[acceptedCurrency].address
+                                          internalTokens[acceptedCurrency].address
                                         )
                                         .call();
                                     } catch (err: any) {
@@ -1479,8 +1480,8 @@ export default class StablePool {
                                   ].externalContracts.MassetValidationHelper.methods
                                     .getMaxSwap(
                                       "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                                      self.internalTokens[currencyCode].address,
-                                      self.internalTokens[acceptedCurrency].address
+                                      internalTokens[currencyCode].address,
+                                      internalTokens[acceptedCurrency].address
                                     )
                                     .call();
                                 } catch (err: any) {
@@ -1492,13 +1493,13 @@ export default class StablePool {
 
                               var outputAmountBeforeFeesBN = amount
                                   .mul(
-                                      self.internalTokens[acceptedCurrency].decimals === 18 
+                                      internalTokens[acceptedCurrency].decimals === 18 
                                       ? constants.WeiPerEther
-                                      : BigNumber.from( 10 ** self.internalTokens[acceptedCurrency].decimals)
+                                      : BigNumber.from( 10 ** internalTokens[acceptedCurrency].decimals)
                                   ).div(
-                                      self.internalTokens[currencyCode].decimals === 18 
+                                      internalTokens[currencyCode].decimals === 18 
                                       ? constants.WeiPerEther
-                                      : BigNumber.from( 10 ** self.internalTokens[currencyCode].decimals)
+                                      : BigNumber.from( 10 ** internalTokens[currencyCode].decimals)
                                   );
                               
                               if (acceptedCurrency === "mUSD") mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
@@ -1523,7 +1524,7 @@ export default class StablePool {
                       var outputAmountUsdBN = mStableOutputAmountAfterFeeBN
                               .mul(BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(mStableOutputCurrency)]))
                               .div(BigNumber.from(10)
-                                      .pow( BigNumber.from(self.internalTokens[mStableOutputCurrency].decimals) )
+                                      .pow( BigNumber.from(internalTokens[mStableOutputCurrency].decimals) )
                                   );
 
                       // Check outputAmountUsdBN against minUsdAmount
@@ -1532,16 +1533,16 @@ export default class StablePool {
                       // Approve tokens to RariFundProxy
                       try {
                           var allowanceBN = BigNumber.from(
-                              await self.internalTokens[currencyCode].contract.callStatic.allowance(options.from, self.contracts.RariFundProxy.options.address)
+                              await internalTokens[currencyCode].contract.callStatic.allowance(sender, self.contracts.RariFundProxy.options.address)
                           );
 
                           if (allowanceBN.lt(amount)) {
                               if (allowanceBN.gt(constants.Zero) && currencyCode === "USDT") {
-                                  await self.internalTokens[currencyCode].contract
-                                  .approve(self.contracts.RariFundProxy.options.address, "0", options)
+                                  await internalTokens[currencyCode].Contract
+                                  .approve(self.contracts.RariFundProxy.options.address, "0", sender)
                               }
-                          approvalReceipt = await self.internalTokens[currencyCode].contract
-                              .approve(self.contracts.RariFundProxy.options.address, amount, options)
+                          approvalReceipt = await internalTokens[currencyCode].contract
+                              .approve(self.contracts.RariFundProxy.options.address, amount, sender)
                           }
                       } catch (err: any) {
                           throw new Error(
@@ -1552,7 +1553,7 @@ export default class StablePool {
 
                       // Exchange and deposit tokens via mStable via RariFundProxy
                       try {
-                          var receipt = await self.contracts.RariFundProxy.exchangeAndDeposit(currencyCode, amount, mStableOutputCurrency, options);
+                          var receipt = await self.contracts.RariFundProxy.exchangeAndDeposit(currencyCode, amount, mStableOutputCurrency, sender);
                       } catch (err: any) {
                           throw new Error("RariFundProxy.exchangeAndDeposit failed: " + (err.message ? err.message : err));
                       }
@@ -1607,7 +1608,7 @@ export default class StablePool {
                         BigNumber.from(10)
                           .pow(
                             BigNumber.from(
-                              self.internalTokens[acceptedCurrency].decimals
+                              internalTokens[acceptedCurrency].decimals
                             )
                           )
                       );
@@ -1629,7 +1630,7 @@ export default class StablePool {
                       var ethBalanceBN =
                       currencyCode == "ETH"
                       ? accountBalanceBN
-                      : BigNumber.from(await self.provider.getBalance(options.from));
+                      : BigNumber.from(await self.provider.getBalance(sender));
 
                       if ( protocolFeeBN.gt( currencyCode === "ETH" ? ethBalanceBN.sub(amount) : ethBalanceBN ) ) {
                           throw new Error( "ETH balance too low to cover 0x exchange protocol fee.");
@@ -1646,7 +1647,7 @@ export default class StablePool {
                               var allowanceBN = BigNumber.from(
                                   await allTokens[currencyCode].contract
                                       .allowance(
-                                      options.from,
+                                      sender,
                                       self.contracts.RariFundProxy.options.address
                                       )
                                   );
@@ -1655,20 +1656,17 @@ export default class StablePool {
                                   allowanceBN.gt(constants.Zero) &&
                                   currencyCode === "USDT"
                                 )
-                                  await allTokens[currencyCode].contract.methods
+                                  await allTokens[currencyCode].contract
                                     .approve(
                                       self.contracts.RariFundProxy.options.address,
                                       "0"
                                     )
-                                    .send(options);
                                 approvalReceipt = await allTokens[
                                   currencyCode
-                                ].contract.methods
-                                  .approve(
+                                ].contract.approve(
                                     self.contracts.RariFundProxy.options.address,
                                     amount
                                   )
-                                  .send(options);
                               }
                           } catch (err: any) {
                               throw new Error( "Failed to approve tokens to RariFundProxy: " + (err.message ? err.message : err));
@@ -1722,7 +1720,7 @@ export default class StablePool {
                                       : protocolFeeBN.toString(),
                                   gasPrice: gasPrice,
                               },
-                              options
+                              sender
                               )
                           );
                       } catch (err: any) {
@@ -1794,7 +1792,7 @@ export default class StablePool {
                   .mul(
                     BigNumber.from(10)
                       .pow(
-                        BigNumber.from(self.internalTokens[currencyCode].decimals)
+                        BigNumber.from(internalTokens[currencyCode].decimals)
                       )
                   )
                   .div(
@@ -1817,7 +1815,7 @@ export default class StablePool {
                     .div(
                       BigNumber.from(10)
                         .pow(
-                          BigNumber.from(self.internalTokens[currencyCode].decimals)
+                          BigNumber.from(internalTokens[currencyCode].decimals)
                         )
                     )
                     .gt(senderUsdBalance)
@@ -1848,7 +1846,7 @@ export default class StablePool {
                     .div(
                       BigNumber.from(10)
                         .pow(
-                          BigNumber.from(self.internalTokens[currencyCode].decimals)
+                          BigNumber.from(internalTokens[currencyCode].decimals)
                         )
                     )
                 );
@@ -1886,7 +1884,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                           BigNumber.from(
-                            self.internalTokens[inputCandidate.currencyCode].decimals
+                            internalTokens[inputCandidate.currencyCode].decimals
                           )
                         )
                     )
@@ -1914,7 +1912,7 @@ export default class StablePool {
                         BigNumber.from(10)
                           .pow(
                             BigNumber.from(
-                              self.internalTokens[inputCandidate.currencyCode]
+                              internalTokens[inputCandidate.currencyCode]
                                 .decimals
                             )
                           )
@@ -1971,7 +1969,7 @@ export default class StablePool {
                         .getRedeemValidity(
                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                           mStableInputAmountBN,
-                          self.internalTokens[currencyCode].address
+                          internalTokens[currencyCode].address
                         )
                     } catch (err: any) {
                       console.error("Failed to check mUSD redeem validity:", err);
@@ -1989,9 +1987,9 @@ export default class StablePool {
                       ].externalContracts.MassetValidationHelper
                         .getMaxSwap(
                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                          self.internalTokens[inputCandidates[i].currencyCode]
+                          internalTokens[inputCandidates[i].currencyCode]
                             .address,
-                          self.internalTokens[currencyCode].address
+                          internalTokens[currencyCode].address
                         )
                     } catch (err: any) {
                       console.error("Failed to check mUSD max swap:", err);
@@ -2008,10 +2006,10 @@ export default class StablePool {
                       mStableInputAmountBN.lt(BigNumber.from(maxSwap["2"])) ? mStableInputAmountBN : BigNumber.from(maxSwap["2"])
                     var outputAmountBeforeFeesBN = mStableInputAmountBN
                       .mul(
-                        BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))
+                        BigNumber.from(10).pow(BigNumber.from(internalTokens[currencyCode].decimals))
                       )
                       .div(
-                        BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals))
+                        BigNumber.from(10).pow(BigNumber.from(internalTokens[inputCandidates[i].currencyCode].decimals))
                       );
       
                     if (currencyCode === "mUSD")
@@ -2044,7 +2042,7 @@ export default class StablePool {
                         BigNumber.from(10)
                           .pow(
                             BigNumber.from(
-                              self.internalTokens[inputCandidates[i].currencyCode]
+                              internalTokens[inputCandidates[i].currencyCode]
                                 .decimals
                             )
                           )
@@ -2086,7 +2084,7 @@ export default class StablePool {
                       makerAssetFilledAmountBN,
                       gasPrice,
                     ] = await get0xSwapOrders(
-                      self.internalTokens[inputCandidates[i].currencyCode].address,
+                      internalTokens[inputCandidates[i].currencyCode].address,
                       currencyCode === "ETH"
                         ? "WETH"
                         : allTokens[currencyCode].address,
@@ -2120,7 +2118,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                           BigNumber.from(
-                            self.internalTokens[inputCandidates[i].currencyCode]
+                            internalTokens[inputCandidates[i].currencyCode]
                               .decimals
                           )
                         )
@@ -2159,7 +2157,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                           BigNumber.from(
-                            self.internalTokens[inputCandidates[i].currencyCode]
+                            internalTokens[inputCandidates[i].currencyCode]
                               .decimals
                           )
                         )
@@ -2190,7 +2188,7 @@ export default class StablePool {
                           BigNumber.from(10)
                             .pow(
                               BigNumber.from(
-                                self.internalTokens[inputCandidates[i].currencyCode]
+                                internalTokens[inputCandidates[i].currencyCode]
                                   .decimals
                               )
                             )
@@ -2217,7 +2215,7 @@ export default class StablePool {
                           BigNumber.from(10)
                             .pow(
                               BigNumber.from(
-                                self.internalTokens[inputCandidates[i].currencyCode]
+                                internalTokens[inputCandidates[i].currencyCode]
                                   .decimals
                               )
                             )
@@ -2289,7 +2287,7 @@ export default class StablePool {
                           BigNumber.from( allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)])
                       )
                       .div(
-                          BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))
+                          BigNumber.from(10).pow(BigNumber.from(internalTokens[currencyCode].decimals))
                       )
 
                   // Check amountUsdBN against user fund balance
@@ -2321,7 +2319,7 @@ export default class StablePool {
                               BigNumber.from(allBalances["4"][self.allocations.CURRENCIES.indexOf(currencyCode)])
                           )
                           .div(
-                              BigNumber.from(10).pow(BigNumber.from(self.internalTokens[currencyCode].decimals))
+                              BigNumber.from(10).pow(BigNumber.from(internalTokens[currencyCode].decimals))
                           )
                       );
                       amountWithdrawnBN = amountWithdrawnBN.add(tokenRawFundBalanceBN);
@@ -2370,9 +2368,9 @@ export default class StablePool {
                                   .mul(constants.WeiPerEther)
                                   .div(constants.WeiPerEther.sub(mStableSwapFeeBN))
                                   .mul(
-                                      self.internalTokens[inputCandidates[i].currencyCode].decimals === 18 
+                                      internalTokens[inputCandidates[i].currencyCode].decimals === 18 
                                       ? constants.WeiPerEther 
-                                      : BigNumber.from( 10 ** self.internalTokens[inputCandidates[i].currencyCode].decimals) 
+                                      : BigNumber.from( 10 ** internalTokens[inputCandidates[i].currencyCode].decimals) 
                                   ).div(
                                       allTokens[currencyCode].decimals === 18 
                                       ? constants.WeiPerEther 
@@ -2386,9 +2384,9 @@ export default class StablePool {
                                       : BigNumber.from( 10 ** allTokens[currencyCode].decimals) 
                                   )
                                   .div(
-                                      self.internalTokens[inputCandidates[i].currencyCode].decimals === 18 
+                                      internalTokens[inputCandidates[i].currencyCode].decimals === 18 
                                       ? constants.WeiPerEther 
-                                      : BigNumber.from( 10 ** self.internalTokens[inputCandidates[i].currencyCode].decimals) 
+                                      : BigNumber.from( 10 ** internalTokens[inputCandidates[i].currencyCode].decimals) 
                                   );
 
                               var outputAmountBN =
@@ -2410,7 +2408,7 @@ export default class StablePool {
                                   outputAmountBeforeFeesBN = inputAmountBN
                                     .mul(BigNumber.from(10).pow(BigNumber.from(allTokens[currencyCode].decimals)))
                                     .div(
-                                      BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals)
+                                      BigNumber.from(10).pow(internalTokens[inputCandidates[i].currencyCode].decimals)
                                       );
                                   outputAmountBN =
                                     currencyCode === "mUSD"
@@ -2428,7 +2426,7 @@ export default class StablePool {
                                   outputAmountBeforeFeesBN = inputAmountBN
                                     .mul(BigNumber.from(10).pow(allTokens[currencyCode].decimals))
                                     .div(
-                                      BigNumber.from(10).pow(self.internalTokens[inputCandidates[i].currencyCode].decimals)
+                                      BigNumber.from(10).pow(internalTokens[inputCandidates[i].currencyCode].decimals)
                                     );
                                   outputAmountBN =
                                     currencyCode === "mUSD"
@@ -2449,7 +2447,7 @@ export default class StablePool {
                                         .getRedeemValidity(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                                           inputAmountBN,
-                                          self.internalTokens[currencyCode].address
+                                          internalTokens[currencyCode].address
                                         )
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD redeem validity:", err);
@@ -2468,9 +2466,9 @@ export default class StablePool {
                                       ].externalContracts.MassetValidationHelper
                                         .getMaxSwap(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                                          self.internalTokens[inputCandidates[i].currencyCode]
+                                          internalTokens[inputCandidates[i].currencyCode]
                                             .address,
-                                          self.internalTokens[currencyCode].address
+                                          internalTokens[currencyCode].address
                                         )
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD max swap:", err);
@@ -2499,7 +2497,7 @@ export default class StablePool {
                                       BigNumber.from(10)
                                         .pow(
                                           BigNumber.from(
-                                            self.internalTokens[inputCandidates[i].currencyCode]
+                                            internalTokens[inputCandidates[i].currencyCode]
                                               .decimals
                                           )
                                         )
@@ -2533,7 +2531,7 @@ export default class StablePool {
                                 makerAssetFilledAmountBN,
                                 gasPrice,
                               ] = await get0xSwapOrders(
-                                self.internalTokens[inputCandidates[i].currencyCode].address,
+                                internalTokens[inputCandidates[i].currencyCode].address,
                                 currencyCode === "ETH"
                                   ? "WETH"
                                   : allTokens[currencyCode].address,
@@ -2573,7 +2571,7 @@ export default class StablePool {
                                   BigNumber.from(10)
                                   .pow(
                                     BigNumber.from(
-                                      self.internalTokens[inputCandidates[i].currencyCode]
+                                      internalTokens[inputCandidates[i].currencyCode]
                                         .decimals
                                     )
                                   )
@@ -2635,7 +2633,7 @@ export default class StablePool {
                                       BigNumber.from(10)
                                         .pow(
                                           BigNumber.from(
-                                            self.internalTokens[inputCandidates[i].currencyCode]
+                                            internalTokens[inputCandidates[i].currencyCode]
                                               .decimals
                                           )
                                         )
@@ -2662,7 +2660,7 @@ export default class StablePool {
                                       BigNumber.from(10)
                                       .pow(
                                           BigNumber.from(
-                                          self.internalTokens[inputCandidates[i].currencyCode]
+                                          internalTokens[inputCandidates[i].currencyCode]
                                               .decimals
                                           )
                                       )
@@ -2737,7 +2735,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                           BigNumber.from(
-                            36 - self.internalTokens[currencyCode].decimals
+                            36 - internalTokens[currencyCode].decimals
                           )
                         )
                     )
@@ -2932,7 +2930,7 @@ export default class StablePool {
                 .div(
                   BigNumber.from(10)
                     .pow(
-                      BigNumber.from(self.internalTokens[currencyCode].decimals)
+                      BigNumber.from(internalTokens[currencyCode].decimals)
                     )
                 );
               if (
@@ -2990,7 +2988,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                           BigNumber.from(
-                            self.internalTokens[currencyCode].decimals
+                            internalTokens[currencyCode].decimals
                           )
                         )
                     )
@@ -3048,7 +3046,7 @@ export default class StablePool {
                     .mul(
                       BigNumber.from(
                         10).pow(BigNumber.from(
-                          self.internalTokens[inputCandidates[i].currencyCode]
+                          internalTokens[inputCandidates[i].currencyCode]
                             .decimals
                         )
                       )
@@ -3059,7 +3057,7 @@ export default class StablePool {
                     .div(
                       BigNumber.from(
                         10).pow(BigNumber.from(
-                          self.internalTokens[inputCandidates[i].currencyCode]
+                          internalTokens[inputCandidates[i].currencyCode]
                             .decimals
                         )));
                   var outputAmountBN = outputAmountBeforeFeesBN.sub(
@@ -3078,7 +3076,7 @@ export default class StablePool {
                     outputAmountBeforeFeesBN = inputAmountBN
                       .mul(BigNumber.from(10).pow(BigNumber.from(allTokens[currencyCode].decimals)))
                       .div(
-                        BigNumber.from(10).pow(BigNumber.from(self.internalTokens[inputCandidates[i].currencyCode].decimals))
+                        BigNumber.from(10).pow(BigNumber.from(internalTokens[inputCandidates[i].currencyCode].decimals))
                       );
                     outputAmountBN = outputAmountBeforeFeesBN.sub(
                       outputAmountBeforeFeesBN
@@ -3094,7 +3092,7 @@ export default class StablePool {
                       .mul(BigNumber.from(10).pow(BigNumber.from(allTokens[currencyCode].decimals)))
                       .div(
                         BigNumber.from(10).pow(BigNumber.from(
-                            self.internalTokens[inputCandidates[i].currencyCode]
+                            internalTokens[inputCandidates[i].currencyCode]
                               .decimals
                         ))
                       );
@@ -3114,7 +3112,7 @@ export default class StablePool {
                         .getRedeemValidity(
                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                           inputAmountBN,
-                          self.internalTokens[currencyCode].address
+                          internalTokens[currencyCode].address
                         )
                     } catch (err: any) {
                       console.error("Failed to check mUSD redeem validity:", err);
@@ -3133,9 +3131,9 @@ export default class StablePool {
                       ].externalContracts.MassetValidationHelper.callStatic
                         .getMaxSwap(
                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-                          self.internalTokens[inputCandidates[i].currencyCode]
+                          internalTokens[inputCandidates[i].currencyCode]
                             .address,
-                          self.internalTokens[currencyCode].address
+                          internalTokens[currencyCode].address
                         )
                     } catch (err: any) {
                       console.error("Failed to check mUSD max swap:", err);
@@ -3172,7 +3170,7 @@ export default class StablePool {
                         BigNumber.from(10)
                           .pow(
                             BigNumber.from(
-                              self.internalTokens[inputCandidates[i].currencyCode]
+                              internalTokens[inputCandidates[i].currencyCode]
                                 .decimals
                             )
                           )
@@ -3204,7 +3202,7 @@ export default class StablePool {
                       makerAssetFilledAmountBN,
                       gasPrice,
                     ] = await get0xSwapOrders(
-                      self.internalTokens[inputCandidates[i].currencyCode].address,
+                      internalTokens[inputCandidates[i].currencyCode].address,
                       currencyCode === "ETH"
                         ? "WETH"
                         : allTokens[currencyCode].address,
@@ -3275,7 +3273,7 @@ export default class StablePool {
                       BigNumber.from(10)
                         .pow(
                          BigNumber.from(
-                            self.internalTokens[inputCandidates[i].currencyCode]
+                            internalTokens[inputCandidates[i].currencyCode]
                               .decimals
                           )
                         )
@@ -3347,7 +3345,7 @@ export default class StablePool {
                           BigNumber.from(10)
                             .pow(
                               BigNumber.from(
-                                self.internalTokens[inputCandidates[i].currencyCode]
+                                internalTokens[inputCandidates[i].currencyCode]
                                   .decimals
                               )
                             )
@@ -3383,7 +3381,7 @@ export default class StablePool {
                           BigNumber.from(10)
                             .pow(
                               BigNumber.from(
-                                self.internalTokens[inputCandidates[i].currencyCode]
+                                internalTokens[inputCandidates[i].currencyCode]
                                   .decimals
                               )
                             )
@@ -3459,50 +3457,57 @@ export default class StablePool {
             }
           },
         }
-      }
     
-  internalTokens = {
-    DAI: {
-      symbol: "DAI",
-      address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-      name: "Dai Stablecoin",
-      decimals: 18,
-    },
-    USDC: {
-      symbol: "USDC",
-      address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      name: "USD Coin",
-      decimals: 6,
-    },
-    USDT: {
-      symbol: "USDT",
-      address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-      name: "Tether USD",
-      decimals: 6,
-    },
-    TUSD: {
-      symbol: "TUSD",
-      address: "0x0000000000085d4780b73119b644ae5ecd22b376",
-      name: "TrueUSD",
-      decimals: 18,
-    },
-    BUSD: {
-      symbol: "BUSD",
-      address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
-      name: "Binance USD",
-      decimals: 18,
-    },
-    sUSD: {
-      symbol: "sUSD",
-      address: "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
-      name: "sUSD",
-      decimals: 18,
-    },
-    mUSD: {
-      symbol: "mUSD",
-      address: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
-      name: "mStable USD",
-      decimals: 18,
-    },
-  };
+    const internalTokens = {
+      DAI: {
+        symbol: "DAI",
+        address: "0x6b175474e89094c44da98b954eedeac495271d0f",
+        name: "Dai Stablecoin",
+        decimals: 18,
+        Contract: new Contract("0x6b175474e89094c44da98b954eedeac495271d0f", erc20Abi, this.provider.getSigner())
+      },
+      USDC: {
+        symbol: "USDC",
+        address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        name: "USD Coin",
+        decimals: 6,
+        Contract: new Contract("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", erc20Abi, this.provider.getSigner())
+      },
+      USDT: {
+        symbol: "USDT",
+        address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        name: "Tether USD",
+        decimals: 6,
+        Contract: new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", erc20Abi, this.provider.getSigner())
+      },
+      TUSD: {
+        symbol: "TUSD",
+        address: "0x0000000000085d4780b73119b644ae5ecd22b376",
+        name: "TrueUSD",
+        decimals: 18,
+        Contract: new Contract("0x0000000000085d4780b73119b644ae5ecd22b376", erc20Abi, this.provider.getSigner())
+      },
+      BUSD: {
+        symbol: "BUSD",
+        address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
+        name: "Binance USD",
+        decimals: 18,
+        Contract: new Contract("0x4Fabb145d64652a948d72533023f6E7A623C7C53", erc20Abi, this.provider.getSigner())
+      },
+      sUSD: {
+        symbol: "sUSD",
+        address: "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
+        name: "sUSD",
+        decimals: 18,
+        Contract: new Contract("0x57ab1ec28d129707052df4df418d58a2d46d5f51", erc20Abi, this.provider.getSigner())
+      },
+      mUSD: {
+        symbol: "mUSD",
+        address: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
+        name: "mStable USD",
+        decimals: 18,
+        Contract: new Contract("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", erc20Abi, this.provider.getSigner())
+      },
+    };
+  }
 }
