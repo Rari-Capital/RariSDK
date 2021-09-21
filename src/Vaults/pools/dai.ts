@@ -44,26 +44,20 @@ export default class DaiPool extends StablePools {
   constructor(provider, subpools, getAllTokens) {
     super(provider, subpools, getAllTokens);
 
-    this.contracts = {};
-    for (const contractName of Object.keys(contractAddressesDai))
-      this.contracts[contractName] = new Contract(
-        contractAddressesDai[contractName],
-        DaiPool.CONTRACT_ABIS[contractName],
-        this.provider,
-      );
+    this.contracts = {
+        RariFundController: new Contract( contractAddressesDai["RariFundController"], DaiPool.CONTRACT_ABIS["RariFundController"], this.provider ),
+        RariFundManager: new Contract( contractAddressesDai["RariFundManager"], DaiPool.CONTRACT_ABIS["RariFundManager"], this.provider ),
+        RariFundToken: new Contract( contractAddressesDai["RariFundToken"], DaiPool.CONTRACT_ABIS["RariFundToken"], this.provider ),
+        RariFundPriceConsumer: new Contract( contractAddressesDai["RariFundPriceConsumer"], DaiPool.CONTRACT_ABIS["RariFundPriceConsumer"], this.provider ),
+        RariFundProxy: new Contract( contractAddressesDai["RariFundProxy"], DaiPool.CONTRACT_ABIS["RariFundProxy"], this.provider ),
+    };
 
-    this.legacyContracts = {};
-    for (const version of Object.keys(legacyContractAddressesDai)) {
-      if (!this.legacyContracts[version]) this.legacyContracts[version] = {};
-
-      for (const contractName of Object.keys(legacyContractAddressesDai[version])) {
-        this.legacyContracts[version][contractName] = new Contract(
-          legacyContractAddressesDai[version][contractName],
-          legacyAbisDai[version][contractName],
-          this.provider,
-        );
-      }
-    }
+    this.legacyContracts = {
+        "v1.0.0": {
+          RariFundController: new Contract( legacyContractAddressesDai["v1.0.0"]["RariFundController"], legacyAbisDai["v1.0.0"]["RariFundController"], this.provider),
+          RariFundProxy: new Contract( legacyContractAddressesDai["v1.0.0"]["RariFundProxy"], legacyAbisDai["v1.0.0"]["RariFundProxy"], this.provider),
+        },
+    };
 
     this.allocations.POOLS = (function () {
       let pools = ["dYdX", "Compound", "Aave", "mStable"];

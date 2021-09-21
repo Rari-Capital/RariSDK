@@ -60,27 +60,21 @@ export default class EthereumPool extends StablePool {
   constructor(web3, subpools, getAllTokens) {
     super(web3, subpools, getAllTokens);
 
-    this.contracts = {};
-    for (const contractName of Object.keys(contractAddresses))
-      this.contracts[contractName] = new Contract(
-        contractAddresses[contractName],
-        abis[contractName],
-        this.provider
-      );
-    // this.gsnContracts = { RariFundProxy: new web3Gsn.eth.Contract(abis.RariFundProxy, contractAddresses.RariFundProxy) };
-    this.legacyContracts = {};
+    this.contracts = {
+      RariFundController: new Contract( contractAddresses["RariFundController"], abis["RariFundController"], this.provider ),
+      RariFundManager: new Contract( contractAddresses["RariFundManager"], abis["RariFundManager"], this.provider ),
+      RariFundToken: new Contract( contractAddresses["RariFundToken"], abis["RariFundToken"], this.provider ),
+      RariFundProxy: new Contract( contractAddresses["RariFundProxy"], abis["RariFundProxy"], this.provider ),
+    };
 
-    for (const version of Object.keys(legacyContractAddresses)) {
-      if (!this.legacyContracts[version]) this.legacyContracts[version] = {};
-      for (const contractName of Object.keys(legacyContractAddresses[version]))
-        this.legacyContracts[version][
-          contractName
-        ] = new Contract(
-            legacyContractAddresses[version][contractName],
-          legacyAbis[version][contractName],
-          this.provider
-        );
-    }
+    this.legacyContracts = {
+      "v1.0.0": {
+        RariFundController: new Contract( legacyContractAddresses["v1.0.0"]["RariFundController"], legacyAbis["v1.0.0"]["RariFundController"], this.provider ),
+      },
+      "v1.2.0": {
+        RariFundController: new Contract( legacyContractAddresses["v1.2.0"]["RariFundController"], legacyAbis["v1.2.0"]["RariFundController"], this.provider ),
+      }
+    };
 
     this.rept = this.rspt;
     delete this.rspt;
