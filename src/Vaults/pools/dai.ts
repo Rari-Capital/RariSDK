@@ -81,5 +81,32 @@ export default class DaiPool extends StablePools {
       Fuse7: ["DAI"],
       Fuse18: ["DAI"],
     };
+
+    var self = this
+
+    this.history.getPoolAllocationHistory = async function (
+      fromBlock: number,
+      toBlock: number,
+    ) {
+      var events = [];
+      if (toBlock >= 11441321 && fromBlock <= 12535101)
+        console.log(self.legacyContracts["v1.0.0"])
+        events = await self.legacyContracts[
+          "v1.0.0"
+        ].RariFundController.queryFilter(
+          self.contracts.RariFundController.filters.PoolAllocation(),
+          Math.max(fromBlock, 11441321),
+          Math.min(toBlock, 12535101),
+        );
+      if (toBlock >= 12535101)
+        events = events.concat(
+          await self.contracts.RariFundController.queryFilter(
+            self.contracts.RariFundController.filters.PoolAllocation(),
+            Math.max(fromBlock, 12535101),
+            toBlock,
+          )
+        );
+      return events;
+    };
   }
 }
