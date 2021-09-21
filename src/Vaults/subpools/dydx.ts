@@ -16,7 +16,6 @@ export default class DydxSubpool {
   async getCurrencyApys() {
     return await this.cache.getOrUpdate("dydxCurrencyApys", async function () {
       const data = (await axios.get("https://api.dydx.exchange/v1/markets")).data;
-      console.log(data);
       let apyBNs = {};
 
       for (let i = 0; i < data.markets.length; i++) {
