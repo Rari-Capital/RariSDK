@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Ethers
 import { Contract, BigNumber, constants } from "ethers";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 
 // Cache
 import RariCache from "../cache.js";
@@ -134,25 +134,47 @@ export default class StablePool {
     API_BASE_URL = "https://api.rari.capital/pools/stable/";
     POOL_NAME = "Rari Stable Pool";
     POOL_TOKEN_SYMBOL = "RSPT";
-    provider
+    provider: JsonRpcProvider | Web3Provider
     pools
     getAllTokens
     cache 
-    contracts
-    legacyContracts
-    balances
+    contracts: {
+      [key: string]: Contract
+    }
+    legacyContracts: {
+      [key: string]: {
+        [key: string]: Contract
+      }
+    }
+    balances:  {
+      getTotalSupply: () => Promise<BigNumber>
+      getTotalInterestAccrued: (fromBlock: number, toBlock: number | string) => Promise<BigNumber>
+      balanceOf: (address: string) => Promise<BigNumber>
+      interestAccruedBy: (account: string, fromBlock: number, toBlock: number | string) => Promise<any>
+      transfer: (recipient: string, amount: BigNumber, ) => any
+    }
     allocations
     apy
-    rspt
-    poolToken
-    fees
+    rspt: {
+      getExchangeRate: (blockNumber: number) => Promise<number>
+      balanceOf: (addres: string) => Promise<BigNumber>
+      transfer: (recipient: string, amount: BigNumber) => Promise<any>
+    }
+    poolToken: {
+      getExchangeRate: (blockNumber: number) => Promise<number>
+      balanceOf: (addres: string) => Promise<BigNumber>
+      transfer: (recipient: string, amount: BigNumber) => Promise<any>
+    }
+    fees: {
+      getInterestFeeRate: () => Promise<BigNumber>
+    }
     deposits
     withdrawals
     history
     static CONTRACT_ADDRESSES: any = contractAddressesStable;
     static CONTRACT_ABIS: any = abisStable;
 
-    constructor(provider: JsonRpcProvider, subpools, getAllTokens) {
+    constructor(provider: JsonRpcProvider | Web3Provider, subpools, getAllTokens: () => any[]) {
         this.provider = provider;
         this.pools = subpools;
         this.getAllTokens = getAllTokens;
@@ -227,7 +249,7 @@ export default class StablePool {
                 return ( await self.contracts.RariFundManager.callStatic.balanceOf(account) );
 
             },
-            interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = "latest"): Promise<string> => {
+            interestAccruedBy: async (account, fromTimestamp = 0, toTimestamp = "latest") => {
                 if (!account) throw new Error("No account specified");
                 if (!fromTimestamp) fromTimestamp = 0;
                 if (toTimestamp === undefined) toTimestamp = "latest";
@@ -238,15 +260,17 @@ export default class StablePool {
                     throw new Error("Error in Rari API: " + e);
                 }
             },
-            transfer: async (recipient, amount, options) => {
+            transfer: async (recipient, amount) => {
                 if (!recipient) throw new Error("No recipient specified.");
+
                 if ( !amount || !BigNumber.from(amount) || !amount.gt(constants.Zero) ) 
                     throw new Error("Amount is not a valid BN instance greater than 0.");
 
-                var fundBalanceBN = BigNumber.from( await self.contracts.RariFundManager.callStatic.getFundBalance() )
-                var rftTotalSupplyBN = BigNumber.from( await self.contracts.RariFundToken.callStatic.totalSupply() )
-                var rftAmountBN = amount.mul(rftTotalSupplyBN).div(fundBalanceBN);
-                return await self.contracts.RariFundToken.transfer(recipient, rftAmountBN).send(options)
+                const fundBalanceBN = BigNumber.from( await self.contracts.RariFundManager.callStatic.getFundBalance() )
+                const rftTotalSupplyBN = BigNumber.from( await self.contracts.RariFundToken.callStatic.totalSupply() )
+                const rftAmountBN = amount.mul(rftTotalSupplyBN).div(fundBalanceBN);
+
+                return await self.contracts.RariFundToken.transfer(recipient, rftAmountBN)
             }
         };
 
@@ -560,19 +584,19 @@ export default class StablePool {
         };
 
         this.rspt = this.poolToken = {
-            getExchangeRate: async function (blockNumber) {
-                if (!blockNumber) blockNumber =  (await self.provider.getBlock()).number;
+            getExchangeRate: async function (blockNumber: number): Promise<number> {
+                if (!blockNumber) blockNumber =  (await self.provider.getBlockNumber());
 
                 var balance = await self.contracts.RariFundManager.callStatic.getFundBalance({ blockTag: blockNumber });
                 var supply = await self.contracts.RariFundToken.callStatic.totalSupply({blockTag: blockNumber});
 
                 return balance.toString() / supply.toString()
             },
-            balanceOf: async function (account) {
-                return await self.contracts.RariFundToken.callStatic.balanceOf(account)
+            balanceOf: async function (address: string): Promise<BigNumber> {
+                return await self.contracts.RariFundToken.callStatic.balanceOf(address)
             },
-            transfer: async function (recipient, amount, options) {
-                return await self.contracts.RariFundToken.transfer(recipient, amount, {options})
+            transfer: async function (recipient: string, amount: BigNumber): Promise<any> {
+                return await self.contracts.RariFundToken.transfer(recipient, amount)
             } 
         };
 
