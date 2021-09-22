@@ -88,7 +88,7 @@ export default class DaiPool extends StablePools {
       fromBlock: number,
       toBlock: number,
     ) {
-      var events = [];
+      let events: any[] = [];
       if (toBlock >= 11441321 && fromBlock <= 12535101)
         events = await self.legacyContracts[
           "v1.0.0"

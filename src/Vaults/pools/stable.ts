@@ -155,7 +155,7 @@ export default class StablePool {
     }
     allocations
     apy
-    rspt: {
+    rspt?: {
       getExchangeRate: (blockNumber: number) => Promise<number>
       balanceOf: (addres: string) => Promise<BigNumber>
       transfer: (recipient: string, amount: BigNumber) => Promise<any>
