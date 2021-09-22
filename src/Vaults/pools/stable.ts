@@ -1789,8 +1789,7 @@ export default class StablePool {
               // Check balances to find withdrawal source
               var allBalances = await self.cache.getOrUpdate(
                 "allBalances",
-                self.contracts.RariFundProxy.methods.getRawFundBalancesAndPrices()
-                  .call
+                self.contracts.RariFundProxy.callStatic.getRawFundBalancesAndPrices
               );
       
               // See how much we can withdraw directly if token is supported by the fund
