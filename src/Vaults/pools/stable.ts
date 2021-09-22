@@ -169,7 +169,14 @@ export default class StablePool {
       getInterestFeeRate: () => Promise<BigNumber>
     }
     deposits
-    withdrawals
+    withdrawals: {
+      getWithdrawalCurrencies: () => Promise<String[]>
+      getMaxWithdrawalAmount: (currecyCode: string, senderUsdBalance: BigNumber, sender: string) => Promise<BigNumber[]>
+      getWithdrawalCurrenciesWithoutSlippage: () => Promise<any[]>
+      validateWithdrawal: (currencyCode: string, amount: BigNumber, sender: string, getSlippage: boolean) => Promise<any[]>
+      getWithdrawalSlippage: (currencyCode: string, amount: BigNumber, usdAmount: number | BigNumber) => Promise<string | BigNumber>
+      withdraw: (currencyCode: string, amount: BigNumber, maxUsdAmount: BigNumber, options: any) => Promise<any[]>
+    }
     history
     static CONTRACT_ADDRESSES: any = contractAddressesStable;
     static CONTRACT_ABIS: any = abisStable;
@@ -1754,9 +1761,9 @@ export default class StablePool {
 
       this.withdrawals = {
           getWithdrawalCurrencies: async function () {
-              var currencyCodes = self.allocations.CURRENCIES.slice();
+              const currencyCodes = self.allocations.CURRENCIES.slice();
               currencyCodes.push("ETH");
-              var allTokens = await self.getAllTokens();
+              const allTokens = await self.getAllTokens();
               for (const currencyCode of Object.keys(allTokens))
                 if (currencyCodes.indexOf(currencyCode) < 0)
                   currencyCodes.push(currencyCode);
