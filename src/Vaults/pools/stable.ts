@@ -1359,8 +1359,6 @@ export default class StablePool {
                   )
               );
 
-              console.log(accountBalanceBN, "im here bby")
-
               if (amount.gt(accountBalanceBN))
               throw new Error(
                   "Not enough balance in your account to make a deposit of this amount."
@@ -1405,19 +1403,11 @@ export default class StablePool {
 
                        // Approve tokens to RariFundManager
                       try {
-                          var allowanceBN = BigNumber.from(
-                          await allTokens[currencyCode].contract.callStatic
-                              .allowance(sender, depositContract.address)
-                          );
+                          var allowanceBN = await allTokens[currencyCode].contract.callStatic.allowance(sender, depositContract.address)
                           if (allowanceBN.lt(amount)) {
-                          if (
-                              allowanceBN.gt(constants.Zero) &&
-                              currencyCode === "USDT"
-                          )
-                              await allTokens[currencyCode].contract.methods
-                              .approve(depositContract.options.address, "0")
-                          approvalReceipt = await allTokens[currencyCode].contract.methods
-                              .approve(depositContract.options.address, amount)
+                              if ( allowanceBN.gt(constants.Zero) && currencyCode === "USDT" )
+                                  await allTokens[currencyCode].contract.connect(self.provider.getSigner()).approve(depositContract.address, "0")
+                              approvalReceipt = await allTokens[currencyCode].contract.connect(self.provider.getSigner()).approve(depositContract.address, amount)
                           }
                       } catch (err: any) {
                           throw new Error(
@@ -1428,8 +1418,7 @@ export default class StablePool {
                       
                       // Deposit tokens to RariFundManager
                       try {
-                          receipt = await depositContract
-                          .deposit(currencyCode, amount)
+                          receipt = await depositContract.deposit(currencyCode, amount)
                       } catch (err: any) {
                           if (useGsn) {
                           useGsn = false;
@@ -1456,13 +1445,12 @@ export default class StablePool {
                                   try {
                                       var redeemValidity = await self.pools[
                                         "mStable"
-                                      ].externalContracts.MassetValidationHelper.methods
+                                      ].externalContracts.MassetValidationHelper.callStatic
                                         .getRedeemValidity(
                                           "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                                           amount,
                                           internalTokens[acceptedCurrency].address
                                         )
-                                        .call();
                                     } catch (err: any) {
                                       console.error("Failed to check mUSD redeem validity:", err);
                                       continue;
@@ -1477,13 +1465,12 @@ export default class StablePool {
                               try {
                                   var maxSwap = await self.pools[
                                     "mStable"
-                                  ].externalContracts.MassetValidationHelper.methods
+                                  ].externalContracts.MassetValidationHelper.callStatic
                                     .getMaxSwap(
                                       "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
                                       internalTokens[currencyCode].address,
                                       internalTokens[acceptedCurrency].address
                                     )
-                                    .call();
                                 } catch (err: any) {
                                   console.error("Failed to check mUSD max swap:", err);
                                   continue;
@@ -1538,10 +1525,9 @@ export default class StablePool {
 
                           if (allowanceBN.lt(amount)) {
                               if (allowanceBN.gt(constants.Zero) && currencyCode === "USDT") {
-                                  await internalTokens[currencyCode].Contract
-                                  .approve(self.contracts.RariFundProxy.options.address, "0", sender)
+                                  await internalTokens[currencyCode].Contract.approve(self.contracts.RariFundProxy.options.address, "0", sender)
                               }
-                          approvalReceipt = await internalTokens[currencyCode].Contract.approve(self.contracts.RariFundProxy.options.address, amount, sender)
+                          approvalReceipt = await internalTokens[currencyCode].Contract.approve(self.contracts.RariFundProxy.address, amount, sender)
                           }
                       } catch (err: any) {
                           throw new Error(
