@@ -83,7 +83,7 @@ export default class Vaults {
 
         for (const token of data.records)
           if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "bUSD", "sUSD", "SUSD", "mUSD"].indexOf(token.symbol) < 0) {
-            token.contract = new Contract(token.address, erc20Abi);
+            token.contract = new Contract(token.address, erc20Abi, self.provider.getSigner());
             allTokens[token.symbol] = token;
           }
         return allTokens;
