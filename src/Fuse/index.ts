@@ -21,6 +21,10 @@ import JumpRateModelV2 from "./irm/JumpRateModelV2";
 import DAIInterestRateModelV2 from "./irm/DAIInterestRateModelV2";
 import WhitePaperInterestRateModel from "./irm/WhitePaperInterestRateModel";
 
+import uniswapV3PoolAbiSlim from "./abi/UniswapV3Pool.slim.json";
+import initializableClonesAbi from "./abi/InitializableClones.json";
+import { Interface } from "@ethersproject/abi";
+
 type MinifiedContracts = {
     [key: string]: {
         abi?: any
@@ -39,6 +43,7 @@ type interestRateModelType =
 
                 
 type cERC20Conf = {
+  delegateContractName?: any,
     underlying: string // underlying ERC20
     comptroller: string // Address of the comptroller
     interestRateModel: string // Address of the IRM
@@ -49,7 +54,7 @@ type cERC20Conf = {
     admin: string // Address of the admin
 }
 
-type ComptrollerConf = {
+type OracleConf = {
     anchorPeriod?: any;
     tokenConfigs?: any;
     canAdminOverwrite?: any;
@@ -70,6 +75,7 @@ type ComptrollerConf = {
     baseToken?: any;
     uniswapV3Factory?: any;
     feeTier?: any;
+    defaultOracle?: any;
 }
 
 type interestRateModelConf = {
@@ -104,6 +110,10 @@ export default class Fuse {
     getInterestRateModel
     checkForCErc20PriceFeed
     getPriceOracle
+    deployRewardsDistributor
+    checkCardinality
+    primeUniswapV3Oracle
+    identifyInterestRateModelName
 
     static FUSE_POOL_DIRECTORY_CONTRACT_ADDRESS =
       "0x835482FE0532f169024d5E9410199369aAD5C77E";
@@ -493,14 +503,15 @@ export default class Fuse {
 
         this.deployPriceOracle = async function (
             model: string, // TODO: find a way to use this.ORACLES 
-            conf: ComptrollerConf, // This conf depends on which comptroller model we're deploying
+            conf: OracleConf, // This conf depends on which comptroller model we're deploying
             options: any
         )  {
 
                 let deployArgs: any[] = [];
 
-                let priceOracleContract;
-                let deployedPriceOracle;
+                let priceOracleContract: any;
+                let deployedPriceOracle: any;
+                let oracleFactoryContract: any | Contract;
 
                 if (!model) model = "ChainlinkPriceOracle";
                 if (!conf) conf = {};
@@ -512,43 +523,74 @@ export default class Fuse {
                                                 ? conf.maxSecondsBeforePriceIsStale
                                                 : 0,
                                     ]
-                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracle"].abi, this.oracleContracts["ChainlinkPriceOracle"].bin, this.provider.getSigner() );
-                        deployedPriceOracle = await priceOracleContract.deploy({...options});
+                        priceOracleContract = new ContractFactory(
+                          this.oracleContracts["ChainlinkPriceOracle"].abi, 
+                          this.oracleContracts["ChainlinkPriceOracle"].bin, 
+                          this.provider.getSigner() 
+                        );
+                        deployedPriceOracle = await priceOracleContract.deploy(
+                          deployArgs, {...options}
+                        );
                         break;
                     case "UniswapLpTokenPriceOracle":
                         deployArgs = [conf.useRootOracle ? true : false];
-                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapLpTokenPriceOracle"].abi, this.oracleContracts["UniswapLpTokenPriceOracle"].bin, this.provider.getSigner())
+                        priceOracleContract = new ContractFactory(
+                          this.oracleContracts["UniswapLpTokenPriceOracle"].abi, 
+                          this.oracleContracts["UniswapLpTokenPriceOracle"].bin, 
+                          this.provider.getSigner()
+                        )
                         deployedPriceOracle = priceOracleContract.deploy(deployArgs, {...options}) 
                         break;
                     case "UniswapTwapPriceOracle": // Uniswap V2 TWAPs
+                        // Input Validation
+                        if (!conf.uniswapV2Factory)
+                            conf.uniswapV2Factory = Fuse.UNISWAP_V2_FACTORY_ADDRESS;
+                        
+                        
                         deployArgs = [
-                                    conf.rootOracle 
-                                        ? conf.rootOracle 
-                                        : Fuse.UNISWAP_TWAP_PRICE_ORACLE_ROOT_CONTRACT_ADDRESS, 
-                                    conf.uniswapV2Factory 
-                                        ? conf.uniswapV2Factory 
-                                        : "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
-                                    ]; // Default to official Uniswap V2 factory
-                        priceOracleContract = new ContractFactory(this.oracleContracts["UniswapTwapPriceOracle"].abi, this.oracleContracts["UniswapTwapPriceOracle"].bin, this.provider.getSigner())
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {options})
+                              Fuse.UNISWAP_TWAP_PRICE_ORACLE_ROOT_CONTRACT_ADDRESS,
+                              conf.uniswapV2Factory,
+                            ]; // Default to official Uniswap V2 factory
+
+                        // Deploy Oracle
+                        priceOracleContract = new ContractFactory(
+                          this.oracleContracts["UniswapTwapPriceOracle"].abi, 
+                          this.oracleContracts["UniswapTwapPriceOracle"].bin, 
+                          this.provider.getSigner()
+                        )
+                        deployedPriceOracle = await priceOracleContract.deploy(
+                          deployArgs, 
+                          {options}
+                        )
                         break;
                     case "UniswapTwapPriceOracleV2": // Uniswap V2 TWAPs
-                        deployArgs = [
-                                    conf.rootOracle 
-                                        ? conf.rootOracle 
-                                        : Fuse.UNISWAP_TWAP_PRICE_ORACLE_ROOT_CONTRACT_ADDRESS, 
-                                    conf.uniswapV2Factory 
-                                        ? conf.uniswapV2Factory 
-                                        : "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f", 
-                                    conf.baseToken 
-                                        ? conf.baseToken 
-                                        : Fuse.WETH_ADDRESS
-                                    ]; // Default to official Uniswap V2 factory
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapTwapPriceOracleV2"].abi, this.oracleContracts["UniswapTwapPriceOracleV2"].bin, this.provider.getSigner());
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
+                        // Input validation
+                        if (!conf.uniswapV2Factory)
+                          conf.uniswapV2Factory = Fuse.UNISWAP_V2_FACTORY_ADDRESS;
+
+                        // Check for existing oracle
+                        oracleFactoryContract = new Contract(
+                          Fuse.UNISWAP_TWAP_PRICE_ORACLE_V2_FACTORY_CONTRACT_ADDRESS,
+                          this.oracleContracts.UniswapTwapPriceOracleV2Factory.abi,
+                          this.provider.getSigner()
+                        );
+                        deployedPriceOracle = await oracleFactoryContract
+                          .oracles(Fuse.UNISWAP_V2_FACTORY_ADDRESS, conf.baseToken)
+
+                        // Deploy if oracle does not exist
+                        if (deployedPriceOracle === "0x0000000000000000000000000000000000000000") {
+                          await oracleFactoryContract
+                            .deploy(Fuse.UNISWAP_V2_FACTORY_ADDRESS, conf.baseToken)
+                          deployedPriceOracle = await oracleFactoryContract
+                            .oracles(Fuse.UNISWAP_V2_FACTORY_ADDRESS, conf.baseToken)
+                        }
                         break;                  
                     case "ChainlinkPriceOracleV2":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["ChainlinkPriceOracleV2"].abi, this.oracleContracts["ChainlinkPriceOracleV2"].bin, this.provider.getSigner() );
+                        priceOracleContract = new ContractFactory(
+                          this.oracleContracts["ChainlinkPriceOracleV2"].abi, 
+                          this.oracleContracts["ChainlinkPriceOracleV2"].bin, 
+                          this.provider.getSigner() 
+                        );
                         deployArgs = [
                                     conf.admin 
                                         ? conf.admin 
@@ -557,41 +599,95 @@ export default class Fuse {
                                         ? true 
                                         : false,
                                     ];
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
+                        deployedPriceOracle = await priceOracleContract.deploy(
+                          deployArgs, {...options}
+                        )
                         break;
                     case "UniswapV3TwapPriceOracle":
-                        if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) throw Error ("Invalid fee tier passed to UniswapV3TwapPriceOracle deployment.");
-                        deployArgs = [conf.uniswapV3Factory ? conf.uniswapV3Factory : "0x1f98431c8ad98523631ae4a59f267346ea31f984", conf.feeTier]; // Default to official Uniswap V3 factory
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracle"].abi, this.oracleContracts["UniswapV3TwapPriceOracle"].bin, this.provider.getSigner());
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
+                      // Input validation
+                        if (!conf.uniswapV3Factory)
+                        conf.uniswapV3Factory = Fuse.UNISWAP_V3_FACTORY_ADDRESS;
+                        if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) 
+                          throw Error (
+                            "Invalid fee tier passed to UniswapV3TwapPriceOracle deployment."
+                          );
+
+                        // Deploy oracle
+
+                        deployArgs = [conf.uniswapV3Factory, conf.feeTier]; // Default to official Uniswap V3 factory
+
+                        priceOracleContract = new ContractFactory( 
+                          this.oracleContracts["UniswapV3TwapPriceOracle"].abi, 
+                          this.oracleContracts["UniswapV3TwapPriceOracle"].bin, 
+                          this.provider.getSigner()
+                        );
+
+                        deployedPriceOracle = await priceOracleContract.deploy(
+                          deployArgs, {...options}
+                        )
                         break;
                     case "UniswapV3TwapPriceOracleV2":
-                        if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) throw Error ("Invalid fee tier passed to UniswapV3TwapPriceOracleV2 deployment.");
-                        priceOracleContract = new ContractFactory( this.oracleContracts["UniswapV3TwapPriceOracleV2"].abi, this.oracleContracts["UniswapV3TwapPriceOracleV2"].bin, this.provider.getSigner());
-                        deployArgs = [
-                                    conf.uniswapV3Factory 
-                                        ? conf.uniswapV3Factory 
-                                        : "0x1f98431c8ad98523631ae4a59f267346ea31f984", 
-                                    conf.feeTier, 
-                                    conf.baseToken
-                                ]; // Default to official Uniswap V3 factory
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
+                        // Input validation
+                        if (!conf.uniswapV3Factory)
+                          conf.uniswapV3Factory = Fuse.UNISWAP_V3_FACTORY_ADDRESS;
+                        if ([500, 3000, 10000].indexOf(parseInt(conf.feeTier)) < 0) 
+                          throw Error (
+                            "Invalid fee tier passed to UniswapV3TwapPriceOracleV2 deployment."
+                          );
+                        // Check for existing oracle
+                        oracleFactoryContract = new Contract(
+                          Fuse.UNISWAP_V3_TWAP_PRICE_ORACLE_V2_FACTORY_CONTRACT_ADDRESS,
+                          this.oracleContracts.UniswapV3TwapPriceOracleV2Factory.abi,
+                          this.provider.getSigner()
+                        );
+
+                        deployedPriceOracle = await oracleFactoryContract.methods
+                          .oracles(conf.uniswapV3Factory, conf.feeTier, conf.baseToken)
+                          .call();
+
+                        // Deploy if oracle does not exist
+                        if (deployedPriceOracle == "0x0000000000000000000000000000000000000000") {
+                          await oracleFactoryContract
+                            .deploy(conf.uniswapV3Factory, conf.feeTier, conf.baseToken)
+                          deployedPriceOracle = await oracleFactoryContract
+                            .oracles(conf.uniswapV3Factory, conf.feeTier, conf.baseToken)
+                        }
+
                         break;
                     case "FixedTokenPriceOracle":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["FixedTokenPriceOracle"].abi, this.oracleContracts["FixedTokenPriceOracle"].bin, this.provider.getSigner());
+                        priceOracleContract = new ContractFactory(
+                          this.oracleContracts["FixedTokenPriceOracle"].abi, 
+                          this.oracleContracts["FixedTokenPriceOracle"].bin, 
+                          this.provider.getSigner()
+                        );
                         deployArgs = [ conf.baseToken];
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
+                        deployedPriceOracle = await priceOracleContract.deploy(
+                          deployArgs, {...options}
+                        );
                         break;
                     case "MasterPriceOracle":
-                        priceOracleContract = new ContractFactory(this.oracleContracts["MasterPriceOracle"].abi, this.oracleContracts["MasterPriceOracle"].bin, this.provider.getSigner() );
-                        deployArgs = [
-                            conf.underlyings ? conf.underlyings : [],
-                            conf.oracles ? conf.oracles : [],
-                            conf.admin ? conf.admin : options.from,
-                            conf.canAdminOverwrite ? true : false,
-                        ];
-                        deployedPriceOracle = await priceOracleContract.deploy(deployArgs, {...options})
-                        break;
+                      var initializableClones = new Contract(
+                        Fuse.INITIALIZABLE_CLONES_CONTRACT_ADDRESS,
+                        initializableClonesAbi,
+                        this.provider.getSigner()
+                      );
+                      var masterPriceOracle = new Interface(
+                        Oracle["MasterPriceOracle"].abi
+                      );
+                      deployArgs = [
+                        conf.underlyings ? conf.underlyings : [],
+                        conf.oracles ? conf.oracles : [],
+                        conf.defaultOracle ? conf.defaultOracle : "0x0000000000000000000000000000000000000000",
+                        conf.admin ? conf.admin : options.from,
+                        conf.canAdminOverwrite ? true : false,
+                      ];
+                      var initializerData = masterPriceOracle.encodeDeploy(deployArgs)
+                      var receipt = await initializableClones.clone(Fuse.MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS, initializerData)
+                      deployedPriceOracle = new Contract(
+                        Oracle["MasterPriceOracle"].abi,
+                        receipt.events["Deployed"].returnValues.instance
+                      );
+                      break;
                     case "SimplePriceOracle":
                         priceOracleContract = new ContractFactory(
                             JSON.parse( this.contracts["contracts/SimplePriceOracle.sol:SimplePriceOracle"].abi ),
@@ -625,7 +721,7 @@ export default class Fuse {
                   JSON.parse(
                       this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
                       this.compoundContracts["contracts/Comptroller.sol:Comptroller"].bin,
-                      this.provider
+                      this.provider.getSigner()
               );
               deployedComptroller = await comptrollerContract.deploy(...options);
               implementationAddress = deployedComptroller.options.address;
@@ -644,9 +740,9 @@ export default class Fuse {
 
             // Comptroller becomes unitroller. 
             await deployedComptroller
-              ._become(deployedUnitroller.options.address, {...options}) 
+              ._become(deployedUnitroller.address, {...options}) 
       
-            deployedComptroller.options.address = deployedUnitroller.options.address;
+            deployedComptroller.address = deployedUnitroller.address;
 
             // Set comptroller configuration
             if (closeFactor)
@@ -676,7 +772,9 @@ export default class Fuse {
               [
                 "WhitePaperInterestRateModel",
                 "JumpRateModel",
-                "DAIInterestRateModelV2",
+                "JumpRateModelV2",
+                "ReactiveJumpRateModelV2",
+                "DAIInterestRateModelV2"
               ].indexOf(conf.interestRateModel) >= 0
             ) {
               try {
@@ -695,9 +793,8 @@ export default class Fuse {
       
             // Deploy new asset to existing pool via SDK
             try {
-              var [assetAddress, implementationAddress] = await this.deployCToken(
+              var [assetAddress, implementationAddress, receipt] = await this.deployCToken(
                 conf,
-                true,
                 collateralFactor,
                 reserveFactor,
                 adminFee,
@@ -711,7 +808,12 @@ export default class Fuse {
               );
             }
       
-            return [assetAddress, implementationAddress, conf.interestRateModel];
+            return [
+              assetAddress, 
+              implementationAddress, 
+              conf.interestRateModel,
+              receipt
+          ];
         };
 
         this.deployInterestRateModel = async function (
@@ -779,251 +881,271 @@ export default class Fuse {
         };
 
         this.deployCToken = async function (
-            conf: any,
-            supportMarket: boolean,
-            collateralFactor: any, 
-            reserveFactor: number,
-            adminFee: number,
-            options: any,
-            bypassPriceFeedCheck: boolean
-          ) {
-
-            // BigNumbers
-            const reserveFactorBN = BigNumber.from(reserveFactor)
-            const adminFeeBN = BigNumber.from(adminFee)
-            const collateralFactorBN = utils.parseUnits(collateralFactor, 18) // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
-
-
-            // Check collateral factor
-            if (
-              (!collateralFactorBN.gte(constants.Zero)) ||
-              collateralFactorBN.gt(utils.parseUnits("0.9", 18))
-            )
-              throw Error ("Collateral factor must range from 0 to 0.9.");
-      
-            // Check reserve factor + admin fee + Fuse fee
-            if (!reserveFactorBN.gte(constants.Zero))
-              throw Error ("Reserve factor cannot be negative.");
-            if (!adminFeeBN.gte(constants.Zero))
-              throw Error ("Admin fee cannot be negative.");
-
-            // If reserveFactor or adminFee is greater than zero, we get fuse fee.
-            // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
-            if (
-              reserveFactorBN.gt(constants.Zero) ||
-                adminFeeBN.gt(constants.Zero)
+              conf: any,
+              collateralFactor: any, 
+              reserveFactor: number,
+              adminFee: number,
+              options: any,
+              bypassPriceFeedCheck: boolean
             ) {
-              const fuseFee = await this.contracts.FuseFeeDistributor.callStatic.interestFeeRate()
+
+              // BigNumbers
+              const reserveFactorBN = BigNumber.from(reserveFactor)
+              const adminFeeBN = BigNumber.from(adminFee)
+              const collateralFactorBN = utils.parseUnits(collateralFactor, 18) // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
+
+
+              // Check collateral factor
               if (
-                reserveFactorBN
-                  .add(adminFeeBN)
-                  .add(BigNumber.from(fuseFee))
-                  .gt(constants.WeiPerEther)
+                (!collateralFactorBN.gte(constants.Zero)) ||
+                collateralFactorBN.gt(utils.parseUnits("0.9", 18))
               )
-                throw Error(
-                  "Sum of reserve factor and admin fee should range from 0 to " +
-                  (1 - parseInt(fuseFee) / 1e18) +
-                  "."
-                );
-            }
-      
-            return conf.underlying !== undefined &&
-              conf.underlying !== null &&
-              conf.underlying.length > 0 &&
-              !BigNumber.from(conf.underlying).isZero()
-              ? await this.deployCErc20(
-                  conf,
-                  supportMarket,
-                  collateralFactor,
-                  reserveFactor,
-                  adminFee,
-                  options,
-                  bypassPriceFeedCheck,
-                  Fuse.CERC20_DELEGATE_CONTRACT_ADDRESS
-                    ? Fuse.CERC20_DELEGATE_CONTRACT_ADDRESS
-                    : undefined,
+                throw Error ("Collateral factor must range from 0 to 0.9.");
+        
+              // Check reserve factor + admin fee + Fuse fee
+              if (!reserveFactorBN.gte(constants.Zero))
+                throw Error ("Reserve factor cannot be negative.");
+              if (!adminFeeBN.gte(constants.Zero))
+                throw Error ("Admin fee cannot be negative.");
+
+              // If reserveFactor or adminFee is greater than zero, we get fuse fee.
+              // Sum of reserveFactor and adminFee should not be greater than fuse fee. ? i think
+              if (
+                reserveFactorBN.gt(constants.Zero) ||
+                  adminFeeBN.gt(constants.Zero)
+              ) {
+                const fuseFee = await this.contracts.FuseFeeDistributor.callStatic.interestFeeRate()
+                if (
+                  reserveFactorBN
+                    .add(adminFeeBN)
+                    .add(BigNumber.from(fuseFee))
+                    .gt(constants.WeiPerEther)
                 )
-              : await this.deployCEther(
-                  conf,
-                  supportMarket,
-                  collateralFactor,
-                  reserveFactor,
-                  adminFee,
-                  Fuse.CETHER_DELEGATE_CONTRACT_ADDRESS
-                    ? Fuse.CETHER_DELEGATE_CONTRACT_ADDRESS
-                    : null,
-                  options
-                );
-        };
+                  throw Error(
+                    "Sum of reserve factor and admin fee should range from 0 to " +
+                    (1 - parseInt(fuseFee) / 1e18) +
+                    "."
+                  );
+              }
+        
+              return conf.underlying !== undefined &&
+                conf.underlying !== null &&
+                conf.underlying.length > 0 &&
+                !BigNumber.from(conf.underlying).isZero()
+                ? await this.deployCErc20(
+                    conf,
+                    collateralFactor,
+                    reserveFactor,
+                    adminFee,
+                    options,
+                    bypassPriceFeedCheck,
+                    Fuse.CERC20_DELEGATE_CONTRACT_ADDRESS
+                      ? Fuse.CERC20_DELEGATE_CONTRACT_ADDRESS
+                      : undefined,
+                  )
+                : await this.deployCEther(
+                    conf,
+                    collateralFactor,
+                    reserveFactor,
+                    adminFee,
+                    Fuse.CETHER_DELEGATE_CONTRACT_ADDRESS
+                      ? Fuse.CETHER_DELEGATE_CONTRACT_ADDRESS
+                      : null,
+                    options
+                  );
+          };
 
-        this.deployCEther = async function (
-            conf: cERC20Conf,
-            supportMarket: boolean,
-            collateralFactor: number,
-            reserveFactor: number,
-            adminFee: number,
-            options: any,
-            implementationAddress?: string,
-          ) {
-
-            // Check conf.initialExchangeRateMantissa
-            if (
-              conf.initialExchangeRateMantissa === undefined ||
-              conf.initialExchangeRateMantissa === null ||
-              ethers.BigNumber.from(conf.initialExchangeRateMantissa).isZero()
+          this.deployCEther = async function (
+              conf: cERC20Conf,
+              supportMarket: boolean,
+              collateralFactor: number,
+              reserveFactor: number,
+              adminFee: number,
+              options: any,
+              implementationAddress?: string,
             ) {
-              conf.initialExchangeRateMantissa = utils.parseUnits("0.02", 18)
-                .mul(constants.WeiPerEther)
-                .div(BigNumber.from(10).pow(BigNumber.from(conf.decimals)));
-            }
-      
             // Deploy CEtherDelegate implementation contract if necessary
             if (!implementationAddress) {
-              const cEtherDelegateContract = new ContractFactory(
-                JSON.parse(this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi),
-                this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].bin,
-                this.provider.getSigner()
-              );
-              const deployedCEtherDelegate = await cEtherDelegateContract.deploy({...options})
-              implementationAddress = deployedCEtherDelegate.options.address;
+              const cEtherDelegateFactory = new ContractFactory(
+                JSON.parse(
+                  this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi
+                ),
+                  this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].bin,
+                  this.provider.getSigner()
+                )
+              
+              const cEtherDelegateDeployed = await cEtherDelegateFactory
+                .deploy();
+              implementationAddress = cEtherDelegateDeployed.address;
             }
-      
-            // Deploy CEtherDelegator proxy contract if necessary
-            const cEtherDelegatorContract = new ContractFactory(
-              JSON.parse(this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].abi),
-              this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].bin,
-              this.provider.getSigner()
-            );
+
+            // Deploy CEtherDelegator proxy contract
             let deployArgs = [
               conf.comptroller,
               conf.interestRateModel,
-              conf.initialExchangeRateMantissa.toString(),
               conf.name,
               conf.symbol,
-              conf.decimals,
-              conf.admin,
               implementationAddress,
-              "0x0",
-              reserveFactor ? reserveFactor : 0,
-              adminFee ? adminFee : 0,
+              "0x00",
+              reserveFactor ? reserveFactor.toString() : 0,
+              adminFee ? adminFee.toString() : 0,
             ];
-            const deployedCEtherDelegator = await cEtherDelegatorContract.deploy(deployArgs, {...options})
-      
-            // Register new asset with Comptroller
-            const comptrollerContract = new Contract(
-              JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
-              conf.comptroller,
-              this.provider
+
+            const abiCoder = new utils.AbiCoder
+            var constructorData = abiCoder.encode(
+              [
+                "address",
+                "address",
+                "string",
+                "string",
+                "address",
+                "bytes",
+                "uint256",
+                "uint256",
+              ],
+              deployArgs
             );
-            deployedCEtherDelegator.options.jsonInterface = JSON.parse(this.compoundContracts["contracts/CEtherDelegate.sol:CEtherDelegate"].abi);
-      
-            if (supportMarket) {
-              if (collateralFactor)
-                await comptrollerContract
-                  ._supportMarketAndSetCollateralFactor(
-                        deployedCEtherDelegator.options.address,
-                        collateralFactor,
-                        {...options}
-                  )
-              else
-                await comptrollerContract
-                  ._supportMarket(deployedCEtherDelegator.options.address, {...options})
-            }
-      
-            // Return cToken proxy and implementation contract addresses
-            return [deployedCEtherDelegator.options.address, implementationAddress];
-        };
+            var comptroller = new Contract(
+              conf.comptroller,
+              JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
+              this.provider.getSigner()
+            );
+            var errorCode = await comptroller
+              ._deployMarket(
+                "0x0000000000000000000000000000000000000000",
+                constructorData,
+                collateralFactor
+              )
+          if (errorCode != constants.Zero)
+            throw (
+              "Failed to deploy market with error code: " +
+              Fuse.COMPTROLLER_ERROR_CODES[errorCode]
+            );
+          const receipt = await comptroller
+            ._deployMarket(
+              "0x0000000000000000000000000000000000000000",
+              constructorData,
+              collateralFactor
+            )
+
+          const saltsHash = utils.solidityKeccak256(
+            ["address", "address", "uint"],
+            [
+              conf.comptroller,
+              "0x0000000000000000000000000000000000000000",
+              receipt.blockNumber
+            ]
+          )
+
+          const byteCodeHash = utils.keccak256(
+            "0x" + this.compoundContracts["contracts/CEtherDelegator.sol:CEtherDelegator"].bin
+          )
+
+          const cEtherDelegatorAddress = utils.getCreate2Address(
+            Fuse.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS,
+            saltsHash,
+            byteCodeHash
+          );
+
+          // Return cToken proxy and implementation contract addresses
+          return [cEtherDelegatorAddress, implementationAddress, receipt];
+              };
 
         this.deployCErc20 = async function (
-            conf: cERC20Conf,
-            supportMarket: boolean,
-            collateralFactor: number,
-            reserveFactor: number,
-            adminFee: number,
-            options: any,
-            bypassPriceFeedCheck: boolean,
-            implementationAddress?: string // cERC20Delegate implementation
-          ) {
-
-            // Check conf.initialExchangeRateMantissa
-            if (
-              conf.initialExchangeRateMantissa === undefined ||
-              conf.initialExchangeRateMantissa === null ||
-              ethers.BigNumber.from(conf.initialExchangeRateMantissa).isZero()
+              conf: cERC20Conf,
+              collateralFactor: number,
+              reserveFactor: number,
+              adminFee: number,
+              options: any,
+              bypassPriceFeedCheck: boolean,
+              implementationAddress?: string // cERC20Delegate implementation
             ) {
-              const erc20 = new Contract(
-                conf.underlying,
-                JSON.parse(this.compoundContracts["contracts/EIP20Interface.sol:EIP20Interface"].abi),
-                this.provider
-              );
-              const underlyingDecimals: number = await erc20.methods.decimals()
-              conf.initialExchangeRateMantissa = utils.parseUnits("0.02", 18)
-                .mul(BigNumber.from(10).pow(BigNumber.from(underlyingDecimals)))
-                .div(BigNumber.from(10).pow(BigNumber.from(conf.decimals)));
-            }
-      
-            // Get Comptroller
-            const comptroller = new Contract(
-              conf.comptroller, 
-              JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi),
-              this.provider.getSigner()
-            );
-      
-            // Check for price feed assuming !bypassPriceFeedCheck
-            if (!bypassPriceFeedCheck) await this.checkForCErc20PriceFeed(comptroller, conf, options);
-      
-            // Deploy CErc20Delegate implementation contract if necessary
-            if (!implementationAddress) {
-              const cErc20DelegateContract = new ContractFactory(
-                JSON.parse(this.compoundContracts["contracts/CErc20Delegate.sol:CErc20Delegate"].abi),
-                this.compoundContracts["contracts/CErc20Delegate.sol:CErc20Delegate"].bin,
-                this.provider.getSigner()
-              );
-              const deployedCErc20Delegate = await cErc20DelegateContract.deploy({...options})
-              implementationAddress = deployedCErc20Delegate.options.address;
-            }
-      
-            // Deploy CErc20Delegator proxy contract if necessary
-            const cErc20DelegatorContract = new Contract(
-              JSON.parse(this.compoundContracts["contracts/CErc20Delegator.sol:CErc20Delegator"].abi),
-              this.compoundContracts["contracts/CErc20Delegator.sol:CErc20Delegator"].bin,
-              this.provider
-            );
+              // Get Comptroller
+        var comptroller = new Contract(
+          conf.comptroller,
+          JSON.parse(this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi)
+        );
 
-            let deployArgs = [
-              conf.underlying,
-              conf.comptroller,
-              conf.interestRateModel,
-              conf.initialExchangeRateMantissa.toString(),
-              conf.name,
-              conf.symbol,
-              conf.decimals,
-              conf.admin,
-              implementationAddress,
-              "0x0",
-              reserveFactor ? reserveFactor : 0,
-              adminFee ? adminFee : 0,
-            ];
-            const deployedCErc20Delegator = await cErc20DelegatorContract.deploy(deployArgs, {...options})
-      
-            // Register new asset with Comptroller
-            deployedCErc20Delegator.options.jsonInterface = JSON.parse( this.compoundContracts["contracts/CErc20Delegate.sol:CErc20Delegate"].abi );
-      
-            if (supportMarket) {
-              if (collateralFactor)
-                await comptroller
-                    ._supportMarketAndSetCollateralFactor(
-                            deployedCErc20Delegator.options.address,
-                            collateralFactor,
-                            {...options}
-                    )
-              else
-                await comptroller._supportMarket(deployedCErc20Delegator.options.address, {...options})
-            }
-      
-            // Return cToken proxy and implementation contract addresses
-            return [deployedCErc20Delegator.options.address, implementationAddress];
-        };
+        // Check for price feed assuming !bypassPriceFeedCheck
+        if (!bypassPriceFeedCheck)
+          await this.checkForCErc20PriceFeed(comptroller, conf);
+
+        // Deploy CErc20Delegate implementation contract if necessary
+        if (!implementationAddress) {
+          if (!conf.delegateContractName)
+            conf.delegateContractName = "CErc20Delegate";
+          const cErc20Delegate = new ContractFactory(
+            JSON.parse(
+              this.compoundContracts[
+                "contracts/" +
+                  conf.delegateContractName +
+                  ".sol:" +
+                  conf.delegateContractName
+              ].abi
+            ),
+              this.compoundContracts[
+                "contracts/" +
+                  conf.delegateContractName +
+                  ".sol:" +
+                  conf.delegateContractName
+              ].bin,
+              this.provider.getSigner()
+            
+          );
+          const cErc20DelegateDeployed = await cErc20Delegate.deploy()
+          implementationAddress = cErc20DelegateDeployed.address;
+        }
+
+        let deployArgs = [
+          conf.underlying,
+          conf.comptroller,
+          conf.interestRateModel,
+          conf.name,
+          conf.symbol,
+          implementationAddress,
+          "0x00",
+          reserveFactor ? reserveFactor.toString() : 0,
+          adminFee ? adminFee.toString() : 0,
+        ];
+
+        const abiCoder = new utils.AbiCoder
+        const constructorData = abiCoder.encode(
+          [
+            "address",
+            "address",
+            "address",
+            "string",
+            "string",
+            "address",
+            "bytes",
+            "uint256",
+            "uint256",
+          ],
+          deployArgs
+        );
+        const errorCode = await comptroller
+          ._deployMarket(false, constructorData, collateralFactor)
+        if (errorCode != constants.Zero)
+          throw (
+            "Failed to deploy market with error code: " +
+            Fuse.COMPTROLLER_ERROR_CODES[errorCode]
+          );
+
+        const receipt = await comptroller
+          ._deployMarket(false, constructorData, collateralFactor)
+        
+        const saltsHash = utils.solidityKeccak256(["address", "address", "uint"], [conf.comptroller, conf.underlying, receipt.blockNumber])
+        const byteCodeHash = utils.keccak256("0x" + this.compoundContracts["contracts/Unitroller.sol:Unitroller"])
+        
+        const cErc20DelegatorAddress = utils.getCreate2Address(
+          Fuse.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS,
+          saltsHash,
+          byteCodeHash
+        );
+
+        // Return cToken proxy and implementation contract addresses
+        return [cErc20DelegatorAddress, implementationAddress, receipt];
+          };
 
         this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<any> {
             // Get interest rate model type from runtime bytecode hash and init class
@@ -1468,5 +1590,66 @@ export default class Fuse {
             return null;
             }
           };
+        
+        this.deployRewardsDistributor = async function (rewardToken, options) {
+          const distributor = new ContractFactory(
+            JSON.parse(
+              this.compoundContracts[
+                "contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"
+              ].abi
+            ),
+            this.compoundContracts[
+              "contracts/RewardsDistributorDelegator.sol:RewardsDistributorDelegator"
+            ].bin,
+            this.provider.getSigner()
+
+          );
+          console.log({ options, rewardToken });
+    
+          const deployedDistributor = await distributor
+            .deploy({
+              arguments: [
+                options.from,
+                rewardToken,
+                Fuse.REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS,
+              ],
+            })
+          // const rdAddress = distributor.options.address;
+          return deployedDistributor;
+        };
+      
+        this.checkCardinality = async function (uniswapV3Pool: string) {
+          var uniswapV3PoolContract = new Contract(
+            uniswapV3Pool,
+            uniswapV3PoolAbiSlim
+          );
+          const shouldPrime =
+            (await uniswapV3PoolContract.methods.slot0().call())
+              .observationCardinalityNext < 64;
+          return shouldPrime;
+        };
+      
+        this.primeUniswapV3Oracle = async function (uniswapV3Pool, options) {
+          var uniswapV3PoolContract = new Contract(
+            uniswapV3Pool,
+            uniswapV3PoolAbiSlim
+          );
+          await uniswapV3PoolContract.methods
+            .increaseObservationCardinalityNext(64)
+            .send(options);
+        };
+      
+        this.identifyInterestRateModelName = (irmAddress) => {
+          let name = "";
+    
+          Object.entries(
+            Fuse.PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES
+          ).forEach(([key, value]) => {
+            if (value === irmAddress) {
+              name = key;
+            }
+          });
+          return name;
+        };
     }
 }
