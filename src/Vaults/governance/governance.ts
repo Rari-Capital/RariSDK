@@ -60,9 +60,11 @@ export default class Governance {
         this.provider = provider
         this.cache = new Cache({ rgtUsdPrice: 900, lpTokenData: 900 });
 
-        this.contracts = {}
-        for(const contractName of Object.keys(contractAddresses)) {
-            this.contracts[contractName] = new Contract(contractAddresses[contractName], abis[contractName], provider)
+        this.contracts = {
+          RariGovernanceToken: new Contract(contractAddresses["RariGovernanceToken"], abis["RariGovernanceToken"], this.provider.getSigner()),
+          RariGovernanceTokenDistributor: new Contract(contractAddresses["RariGovernanceTokenDistributor"], abis["RariGovernanceTokenDistributor"], this.provider.getSigner()),
+          RariGovernanceTokenUniswapDistributor: new Contract(contractAddresses["RariGovernanceTokenUniswapDistributor"], abis["RariGovernanceTokenUniswapDistributor"], this.provider.getSigner()),
+          RariGovernanceTokenVesting: new Contract(contractAddresses["RariGovernanceTokenVesting"], abis["RariGovernanceTokenVesting"], this.provider.getSigner()),
         }
 
         const self = this
@@ -349,11 +351,11 @@ export default class Governance {
                 getReservesPerLpToken: async function () {
                     // TODO: RGT price getter function from Coingecko
                     const data = await self.rgt.sushiSwapDistributions.getLpTokenData();
-                    const rgtReserves = (data.data.ethRgtPair.reserve1 / data.data.ethRgtPair.totalSupply).toString()
-                    const ethReserves = (data.data.ethRgtPair.reserve0 / data.data.ethRgtPair.totalSupply).toString()
+                    const rgtReserves = (data.data.ethRgtPair.reserve1 / data.data.ethRgtPair.totalSupply)
+                    const ethReserves = (data.data.ethRgtPair.reserve0 / data.data.ethRgtPair.totalSupply)
                     return {
-                        rgt: utils.parseUnits(rgtReserves),
-                        eth: utils.formatUnits(ethReserves),
+                        rgt: utils.parseUnits(rgtReserves.toString()),
+                        eth: utils.parseUnits(ethReserves.toString()),
                     };
                 },
                 totalStakedUsd: async function () {
@@ -361,22 +363,18 @@ export default class Governance {
                     .mul(await self.rgt.sushiSwapDistributions.getLpTokenUsdPrice())
                     .div(constants.WeiPerEther);
                 },
-                stakingBalanceOf: async function (account) {
-                    return BigNumber.from(
-                        await self.contracts.RariGovernanceTokenUniswapDistributor.stakingBalances(account)
-                    );
+                stakingBalanceOf: async function (account: string) {
+                    return await self.contracts.RariGovernanceTokenUniswapDistributor.stakingBalances(account)
                 },
-                usdStakingBalanceOf: async function (account) {
+                usdStakingBalanceOf: async function (account: string) {
                     return (
                     await self.rgt.sushiSwapDistributions.stakingBalanceOf(account)
                     )
                     .mul(await self.rgt.sushiSwapDistributions.getLpTokenUsdPrice())
                     .div(constants.WeiPerEther);
                 },
-                stakedReservesOf: async function (account) {
-                    const stakingBalance = await self.rgt.sushiSwapDistributions.stakingBalanceOf(
-                    account
-                    );
+                stakedReservesOf: async function (account: string) {
+                    const stakingBalance = await self.rgt.sushiSwapDistributions.stakingBalanceOf(account);
                     const reservesPerLpToken = await self.rgt.sushiSwapDistributions.getReservesPerLpToken();
                     return {
                     rgt: reservesPerLpToken.rgt
@@ -387,40 +385,25 @@ export default class Governance {
                         .div(constants.WeiPerEther),
                     };
                 },
-                deposit: async function (amount, options) {
-                    const slp = new Contract(
-                        self.rgt.sushiSwapDistributions.LP_TOKEN_CONTRACT,
-                        ERC20ABI,
-                        self.provider
-                    );
-                    const allowance = await slp.methods
-                        .allowance(
-                            options.from,
-                            self.contracts.RariGovernanceTokenUniswapDistributor.options
-                                .address
-                        )
-                    amount = BigNumber.from(amount);
+                deposit: async function (amount: BigNumber, sender: string) {
+                    const slp = new Contract(LP_TOKEN_CONTRACT, ERC20ABI, self.provider.getSigner() );
+                    const allowance = await slp.allowance(sender, self.contracts.RariGovernanceTokenUniswapDistributor.address)
                     if (amount.gt(allowance))
-                        await slp.methods.approve(
-                                self.contracts.RariGovernanceTokenUniswapDistributor.options.address,
-                                amount
-                                )
-                    await self.contracts.RariGovernanceTokenUniswapDistributor.methods.deposit(amount)
+                        await slp.approve( self.contracts.RariGovernanceTokenUniswapDistributor.address, amount )
+                    await self.contracts.RariGovernanceTokenUniswapDistributor.deposit(amount)
                 },
-                withdraw: async function (amount, options) {
-                    await self.contracts.RariGovernanceTokenUniswapDistributor.methods
-                    .withdraw(amount)
-                    .send(options);
+                withdraw: async function (amount: BigNumber) {
+                    await self.contracts.RariGovernanceTokenUniswapDistributor.withdraw(amount);
                 },
-                getUnclaimed: async function (account) {
+                getUnclaimed: async function (account: string) {
                     return BigNumber.from(
                         await self.contracts.RariGovernanceTokenUniswapDistributor.getUnclaimedRgt(account)
                     );
                 },
-                claim: async function (amount, options) {
+                claim: async function (amount: string) {
                     return await self.contracts.RariGovernanceTokenUniswapDistributor.claimRgt(amount)
                 },
-                claimAll: async function (options) {
+                claimAll: async function () {
                     return await self.contracts.RariGovernanceTokenUniswapDistributor.claimAllRgt()
                 },
             },
@@ -450,10 +433,10 @@ export default class Governance {
                     .div(BigNumber.from(self.rgt.vesting.PRIVATE_VESTING_PERIOD));
                 },
             },
-            balanceOf: async function (account) {
+            balanceOf: async function (account: string) {
                 return await self.contracts.RariGovernanceToken.balanceOf(account)
               },
-            transfer: async function (recipient, amount, options) {
+            transfer: async function (recipient: string, amount: BigNumber) {
               return await self.contracts.RariGovernanceToken.transfer(recipient, amount)
             },
         }
