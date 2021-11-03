@@ -9,6 +9,7 @@ import fusePoolDirectoryAbi from './abi/FusepoolDirectory.json';
 import fusePoolLensAbi from './abi/FusePoolLens.json';
 import fuseSafeLiquidatorAbi from './abi/FuseSafeLiquidator.json';
 import fuseFeeDistributorAbi from './abi/FuseFeeDistributor.json';
+import fusePoolLensSecondaryAbi from './abi/FusePoolLensSecondary.json';
 
 // Contracts
 import Compound from './contracts/compound-protocol.min.json';
@@ -98,6 +99,7 @@ export default class Fuse {
     openOracleContracts: MinifiedContracts
     oracleContracts: MinifiedContracts
     getEthUsdPriceBN
+    identifyPriceOracle
     deployPool
     deployPriceOracle
     deployComptroller
@@ -373,6 +375,7 @@ export default class Fuse {
         this.contracts = {
             FusePoolDirectory: new Contract(Fuse.FUSE_POOL_DIRECTORY_CONTRACT_ADDRESS, fusePoolDirectoryAbi, this.provider),
             FusePoolLens: new Contract(Fuse.FUSE_POOL_LENS_CONTRACT_ADDRESS, fusePoolLensAbi, this.provider),
+            FusePoolLensSecondary: new Contract(Fuse.FUSE_POOL_LENS_SECONDARY_CONTRACT_ADDRESS, fusePoolLensSecondaryAbi, this.provider),
             FuseSafeLiquidator: new Contract(Fuse.FUSE_SAFE_LIQUIDATOR_CONTRACT_ADDRESS, fuseSafeLiquidatorAbi, this.provider),
             FuseFeeDistributorAbi: new Contract(Fuse.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS, fuseFeeDistributorAbi, this.provider)
         }
@@ -1146,6 +1149,29 @@ export default class Fuse {
         // Return cToken proxy and implementation contract addresses
         return [cErc20DelegatorAddress, implementationAddress, receipt];
           };
+        
+        this.identifyPriceOracle = async function (priceOracleAddress: string) {
+          // Get PriceOracle type from runtime bytecode hash
+          const runtimeBytecodeHash = utils.keccak256(
+            await this.provider.getCode(priceOracleAddress)
+          )
+    
+          for (const oracleContractName of Object.keys(
+            Fuse.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES
+          )) {
+            const valueOrArr =
+              Fuse.PRICE_ORACLE_RUNTIME_BYTECODE_HASHES[oracleContractName];
+    
+            if (Array.isArray(valueOrArr)) {
+              for (const potentialHash of valueOrArr)
+              if (runtimeBytecodeHash == potentialHash) return oracleContractName;
+            } else {
+              if (runtimeBytecodeHash == valueOrArr) return oracleContractName;
+            }
+          }
+    
+          return null;
+        };
 
         this.identifyInterestRateModel = async function (interestRateModelAddress: string): Promise<any> {
             // Get interest rate model type from runtime bytecode hash and init class
