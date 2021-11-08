@@ -1,6 +1,7 @@
 // Ethers
 import { BigNumber, Contract, utils, ContractFactory, constants, ethers} from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
+
 // Axios
 import axios from 'axios';
 
@@ -377,7 +378,7 @@ export default class Fuse {
             FusePoolLens: new Contract(Fuse.FUSE_POOL_LENS_CONTRACT_ADDRESS, fusePoolLensAbi, this.provider),
             FusePoolLensSecondary: new Contract(Fuse.FUSE_POOL_LENS_SECONDARY_CONTRACT_ADDRESS, fusePoolLensSecondaryAbi, this.provider),
             FuseSafeLiquidator: new Contract(Fuse.FUSE_SAFE_LIQUIDATOR_CONTRACT_ADDRESS, fuseSafeLiquidatorAbi, this.provider),
-            FuseFeeDistributorAbi: new Contract(Fuse.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS, fuseFeeDistributorAbi, this.provider)
+            FuseFeeDistributor: new Contract(Fuse.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS, fuseFeeDistributorAbi, this.provider)
         }
 
         this.getEthUsdPriceBN = async function () {

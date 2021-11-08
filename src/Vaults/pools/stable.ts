@@ -150,7 +150,7 @@ export default class StablePool {
       getTotalSupply: () => Promise<BigNumber>
       getTotalInterestAccrued: (fromBlock: number, toBlock: number | string) => Promise<BigNumber>
       balanceOf: (address: string) => Promise<BigNumber>
-      interestAccruedBy: (account: string, fromBlock: number, toBlock: number | string) => Promise<any>
+      interestAccruedBy: (account: string, fromBlock: number, toBlock?: number | string) => Promise<any>
       transfer: (recipient: string, amount: BigNumber, ) => any
     }
     allocations
@@ -195,11 +195,11 @@ export default class StablePool {
         });
 
         this.contracts = {
-          RariFundController: new Contract(contractAddressesStable["RariFundController"], abisStable["RariFundController"], this.provider.getSigner()),
-          RariFundManager: new Contract(contractAddressesStable["RariFundManager"], abisStable["RariFundManager"], this.provider.getSigner()),
-          RariFundToken: new Contract(contractAddressesStable["RariFundToken"], abisStable["RariFundToken"], this.provider.getSigner()),
-          RariFundPriceConsumer: new Contract(contractAddressesStable["RariFundPriceConsumer"], abisStable["RariFundPriceConsumer"], this.provider.getSigner()),
-          RariFundProxy: new Contract(contractAddressesStable["RariFundProxy"], abisStable["RariFundProxy"], this.provider.getSigner())
+          RariFundController: new Contract(contractAddressesStable["RariFundController"], abisStable["RariFundController"], this.provider),
+          RariFundManager: new Contract(contractAddressesStable["RariFundManager"], abisStable["RariFundManager"], this.provider),
+          RariFundToken: new Contract(contractAddressesStable["RariFundToken"], abisStable["RariFundToken"], this.provider),
+          RariFundPriceConsumer: new Contract(contractAddressesStable["RariFundPriceConsumer"], abisStable["RariFundPriceConsumer"], this.provider),
+          RariFundProxy: new Contract(contractAddressesStable["RariFundProxy"], abisStable["RariFundProxy"], this.provider)
         };
         
         this.legacyContracts = {
