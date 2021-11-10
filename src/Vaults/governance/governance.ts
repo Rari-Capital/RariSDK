@@ -61,10 +61,10 @@ export default class Governance {
         this.cache = new Cache({ rgtUsdPrice: 900, lpTokenData: 900 });
 
         this.contracts = {
-          RariGovernanceToken: new Contract(contractAddresses["RariGovernanceToken"], abis["RariGovernanceToken"], this.provider.getSigner()),
-          RariGovernanceTokenDistributor: new Contract(contractAddresses["RariGovernanceTokenDistributor"], abis["RariGovernanceTokenDistributor"], this.provider.getSigner()),
-          RariGovernanceTokenUniswapDistributor: new Contract(contractAddresses["RariGovernanceTokenUniswapDistributor"], abis["RariGovernanceTokenUniswapDistributor"], this.provider.getSigner()),
-          RariGovernanceTokenVesting: new Contract(contractAddresses["RariGovernanceTokenVesting"], abis["RariGovernanceTokenVesting"], this.provider.getSigner()),
+          RariGovernanceToken: new Contract(contractAddresses["RariGovernanceToken"], abis["RariGovernanceToken"], this.provider),
+          RariGovernanceTokenDistributor: new Contract(contractAddresses["RariGovernanceTokenDistributor"], abis["RariGovernanceTokenDistributor"], this.provider),
+          RariGovernanceTokenUniswapDistributor: new Contract(contractAddresses["RariGovernanceTokenUniswapDistributor"], abis["RariGovernanceTokenUniswapDistributor"], this.provider),
+          RariGovernanceTokenVesting: new Contract(contractAddresses["RariGovernanceTokenVesting"], abis["RariGovernanceTokenVesting"], this.provider),
         }
 
         const self = this
