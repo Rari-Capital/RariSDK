@@ -1,4 +1,4 @@
-import { createContract, toBN } from "../utils/web3";
+import { createContract, toBN } from "utils/web3";
 import JumpRateModel from "./JumpRateModel.js";
 import { contracts } from "../contracts/compound-protocol.min.json";
 import { BigNumber } from "@ethersproject/bignumber";
