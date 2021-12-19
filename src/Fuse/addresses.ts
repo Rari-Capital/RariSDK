@@ -1,5 +1,36 @@
 import { ChainID } from "../utils/networks";
 
+export enum ContractVersion {
+  "1.0.0",
+  "1.0.1",
+  "1.0.2",
+  "1.0.3",
+  "1.0.4",
+  "1.0.5",
+  "1.1.0",
+  "1.1.1",
+  "1.1.2",
+  "1.1.3",
+  "1.1.4",
+  "1.1.5",
+  "1.1.6",
+  "1.2.0",
+  "1.2.1",
+  "1.2.2",
+}
+export interface Oracle {
+  address: string;
+  bytecodeHash: string;
+  deployable: boolean;
+  oldVersions: {
+    // Todo - coerce this to be type ContractVersion
+    [version: string]: Pick<Oracle, "address" | "bytecodeHash">;
+  };
+}
+export interface Oracles {
+  [oracleName: string]: Oracle;
+}
+
 export interface FuseAddresses {
   // Fundamentals   (every chain)
   FUSE_POOL_DIRECTORY_CONTRACT_ADDRESS: string;
@@ -33,7 +64,7 @@ export interface FuseAddresses {
   };
 
   ORACLES: string[];
-  oracles: any;
+  oracles: Oracles;
 
   // // UNI-V2 Oracles
   UNISWAP_V2_FACTORY_ADDRESS: string;
@@ -286,8 +317,8 @@ const addresses: {
             bytecodeHash:
               "0x7a2a5633a99e8abb759f0b52e87875181704b8e29f6567d4a92f12c3f956d313",
             deployable: false,
-          }
-        }
+          },
+        },
       },
     },
 

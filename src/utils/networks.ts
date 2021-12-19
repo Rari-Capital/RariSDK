@@ -6,4 +6,12 @@ export enum ChainID {
   KOVAN = 42,
   //
   ARBITRUM = 42161,
+  //
+  OPTIMISM = 10,
 }
+
+export const isSupportedChainId = (chainId: number) => {
+  const isSupported = Object.values(ChainID).includes(chainId);
+  console.log(Object.values(chainId), chainId, { isSupportedChainId });
+  return isSupported;
+};

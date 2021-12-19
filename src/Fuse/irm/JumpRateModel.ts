@@ -1,5 +1,5 @@
 import { BigNumberish, BigNumber } from "ethers";
-import { createContract, toBN } from "utils/web3";
+import { createContract, toBN } from "../../utils/web3";
 import { contracts } from "../contracts/compound-protocol.min.json";
 import { Web3Provider } from "@ethersproject/providers";
 
