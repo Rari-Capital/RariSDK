@@ -1,6 +1,13 @@
 import { ChainID } from "../utils/networks";
 
-export enum ContractVersion {
+export enum CompoundContractVersion {
+  "1.0.0",
+  "1.0.1",
+  "1.0.2",
+  "1.1.0",
+}
+
+export enum FuseContractVersion {
   "1.0.0",
   "1.0.1",
   "1.0.2",
@@ -23,7 +30,7 @@ export interface Oracle {
   bytecodeHash: string;
   deployable: boolean;
   oldVersions: {
-    // Todo - coerce this to be type ContractVersion
+    // Todo - coerce this to be type FuseContractVersion
     [version: string]: Pick<Oracle, "address" | "bytecodeHash">;
   };
 }
@@ -106,25 +113,25 @@ const addresses: {
     FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS:
       "0xa731585ab05fC9f83555cf9Bff8F58ee94e18F85",
     FUSE_POOL_LENS_CONTRACT_ADDRESS:
-      "0x8dA38681826f4ABBe089643D2B3fE4C6e4730493",
+      "0x6Dc585Ad66A10214Ef0502492B0CC02F0e836eec",
     FUSE_POOL_LENS_SECONDARY_CONTRACT_ADDRESS:
       "0xc76190E04012f26A364228Cfc41690429C44165d",
-    COMPTROLLER_IMPLEMENTATION_CONTRACT_ADDRESS:
-      "0x94b2200d28932679def4a7d08596a229553a994e",
 
     // CEther and CERC20
+    COMPTROLLER_IMPLEMENTATION_CONTRACT_ADDRESS:
+      "0x94b2200d28932679def4a7d08596a229553a994e", // v1.0.0: 0x94b2200d28932679def4a7d08596a229553a994e; v1.0.1 (with _unsupportMarket): 0x8A78A9D35c9C61F9E0Ff526C5d88eC28354543fE
     CERC20_DELEGATE_CONTRACT_ADDRESS:
-      "0x67e70eeb9dd170f7b4a9ef620720c9069d5e706c", //
+      "0x67e70eeb9dd170f7b4a9ef620720c9069d5e706c", // v1.0.0: 0x67e70eeb9dd170f7b4a9ef620720c9069d5e706c; v1.0.2 (for V2 yVaults): 0x2b3dd0ae288c13a730f6c422e2262a9d3da79ed1
     CETHER_DELEGATE_CONTRACT_ADDRESS:
-      "0x60884c8faad1b30b1c76100da92b76ed3af849ba",
+      "0xd77e28a1b9a9cfe1fc2eee70e391c05d25853cbf", // v1.0.0: 0x60884c8faad1b30b1c76100da92b76ed3af849ba
 
     // Oracles
-    OPEN_ORACLE_PRICE_DATA_CONTRACT_ADDRESS:
-      "0xc629c26dced4277419cde234012f8160a0278a79",
-
     // Implementation for V3
     MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS:
       "0xb3c8ee7309be658c186f986388c2377da436d8fb",
+
+    INITIALIZABLE_CLONES_CONTRACT_ADDRESS:
+      "0x91ce5566dc3170898c5aee4ae4dd314654b47415",
 
     // All Functional Public Oralce you can use
     PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {
@@ -316,7 +323,6 @@ const addresses: {
             address: "0xe102421A85D9C0e71C0Ef1870DaC658EB43E1493",
             bytecodeHash:
               "0x7a2a5633a99e8abb759f0b52e87875181704b8e29f6567d4a92f12c3f956d313",
-            deployable: false,
           },
         },
       },
@@ -353,17 +359,18 @@ const addresses: {
     },
 
     // Tokens / ETC
+    WETH_ADDRESS: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+
+    REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS:
+      "0x220f93183a69d1598e8405310cb361cff504146f",
+
+    // Legacy
+    OPEN_ORACLE_PRICE_DATA_CONTRACT_ADDRESS:
+      "0xc629c26dced4277419cde234012f8160a0278a79",
     COINBASE_PRO_REPORTER_ADDRESS: "0xfCEAdAFab14d46e20144F48824d0C09B1a03F2BC",
 
     DAI_POT: "0x197e90f9fad81970ba7976f33cbd77088e5d7cf7",
     DAI_JUG: "0x19c0976f590d67707e62397c87829d896dc0f1f1",
-
-    WETH_ADDRESS: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-    INITIALIZABLE_CLONES_CONTRACT_ADDRESS:
-      "0x91ce5566dc3170898c5aee4ae4dd314654b47415",
-
-    REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS:
-      "0x220f93183a69d1598e8405310cb361cff504146f",
   },
   // Todo - update all these addresses
   [ChainID.ARBITRUM]: {
@@ -411,6 +418,8 @@ const addresses: {
       "ChainlinkPriceOracleV2",
       "UniswapTwapPriceOracle_SushiSwap",
     ],
+
+    oracles: {},
 
     // // UNI-V2 Oracles (Sushi for arbi)
     UNISWAP_V2_FACTORY_ADDRESS: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
