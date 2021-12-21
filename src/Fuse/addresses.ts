@@ -34,6 +34,7 @@ export interface Oracle {
     [version: string]: Pick<Oracle, "address" | "bytecodeHash">;
   };
 }
+
 export interface Oracles {
   [oracleName: string]: Oracle;
 }
@@ -71,7 +72,10 @@ export interface FuseAddresses {
   };
 
   ORACLES: string[];
+
+  // new oracles stuff
   oracles: Oracles;
+  DEPLOYABLE_ORACLES: (keyof Oracles)[]
 
   // // UNI-V2 Oracles
   UNISWAP_V2_FACTORY_ADDRESS: string;
@@ -250,6 +254,7 @@ const addresses: {
         "0x11daa8dfb8957304aa7d926ce6876c523c7567b4052962e65e7d6a324ddcb4cc",
       FixedTokenPriceOracle_OHM:
         "0x136d369f53594c2f10e3ff3f14eaaf0bada4a63964f3cfeda3923e3531e407dc",
+
       UniswapTwapPriceOracleV2_SushiSwap_DAI:
         "0xb4d279232ab52a2fcaee6dc47db486a733c24a499ade9d7de1b0d417d4730817",
       UniswapTwapPriceOracleV2_SushiSwap_CRV:
@@ -312,7 +317,10 @@ const addresses: {
       "SushiBarPriceOracle",
     ],
 
+
+    // Todo - verify old versions
     oracles: {
+      // ChainLink
       ChainlinkPriceOracle: {
         address: "0xe102421A85D9C0e71C0Ef1870DaC658EB43E1493",
         bytecodeHash:
@@ -326,7 +334,294 @@ const addresses: {
           },
         },
       },
+      ChainlinkPriceOracleV2: {
+        address: "0xb0602af43Ca042550ca9DA3c33bA3aC375d20Df4",
+        bytecodeHash:
+          "0x8d2bcaa1429031ae2b19a4516e5fdc68fb9346f158efb642fcf9590c09de2175",
+        deployable: false,
+        oldVersions: {}
+      },
+      ChainlinkPriceOracleV3: {
+        address: "0x058c345D3240001088b6280e008F9e78b3B2112d",
+        bytecodeHash:
+          "0x4b3bef9f57e381dc6b6e32bff270ce8a72d8aae541cb7c686b09555de3526d39",
+        deployable: false,
+        oldVersions: {}
+      },
+      // Uniswap V2
+      UniswapTwapPriceOracle_Uniswap: {
+        address: "0xCd8f1c72Ff98bFE3B307869dDf66f5124D57D3a9",
+        bytecodeHash:
+          "0xa2537dcbd2b55b1a690db3b83fa1042f86b21ec3e1557f918bc3930b6bbb9244",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapTwapPriceOracle_SushiSwap: {
+        address: "0xfD4B4552c26CeBC54cD80B1BDABEE2AC3E7eB324",
+        bytecodeHash:
+          "0x9b11abfe7bfc1dcef0b1bc513959f1172cfe2cb595c5131b9cabc3b6448d89ac",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapLpTokenPriceOracle: {
+        address: "0x50f42c004bd9b0e5acc65c33da133fbfbe86c7c0",
+        bytecodeHash:
+          "0xbcddb66e4e9c038b4ee1cf4caf1e8c8119225d72a8407fc32caa1988e4a7fe31",
+        deployable: false,
+        oldVersions: {}
+      },
+      // Uniswap V3
+      UniswapV3TwapPriceOracle_Uniswap_3000: {
+        address: "0x80829b8A344741E28ae70374Be02Ec9d4b51CD89",
+        bytecodeHash:
+          "0xb300f7f64110b952340e896d33f133482de6715f1b8b7e0acbd2416e0e6593c1",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapV3TwapPriceOracle_Uniswap_10000: {
+        address: "0xF8731EB567c4C7693cF497849247668c91C9Ed36",
+        bytecodeHash:
+          "0xef237fadaffff8a1b5daa4d448c7935cf0f71e2ee01a53856bb0d7884b0ad78c",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapV3TwapPriceOracleV2_Uniswap_500_USDC: {
+        address: "0x29490a6F5B4A999601378547Fe681d04d877D29b",
+        bytecodeHash:
+          "0xaaba60b3af593a8ecde61d8516ad0353db8cc2777018e0dde07f654c22a3171d",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapV3TwapPriceOracleV2_Uniswap_3000_USDC: {
+        address: "0xf3a36BB3B627A5C8c36BA0714Fe035A401E86B78",
+        bytecodeHash:
+          "0x204541bdea985113b68dad86bf67fbbd52829f8984b6f17f6271bcec203161d1",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapV3TwapPriceOracleV2_Uniswap_10000_USDC: {
+        address: "0x3288a2d5f11FcBefbf77754e073cAD2C10325dE2",
+        bytecodeHash:
+          "0xc301f891f1f905e68d1c5df5202cf0eec2ee8abcf3a510d5bd00d46f7dea01b4",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapV3TwapPriceOracleV2: {
+        address: "", // no address since its deployed per Univ3pool
+        bytecodeHash:
+          "0xc844372c8856a5f9569721d3aca38c7804bae2ae4e296605e683aa8d1601e538",
+        deployable: false,
+        oldVersions: {}
+      },
+
+      // Yvault
+      YVaultV1PriceOracleV1: {
+        address: "0xb5e8e42639e20285c9e58a317c28d9a4d7cb7000",
+        bytecodeHash:
+          "0xd0dda181a4eb699a966b23edb883cff43377297439822b1b0f99b06af2002cc3",
+        deployable: false,
+        oldVersions: {}
+      },
+      YVaultV1PriceOracleV2: {
+        address: "", // TODO: Missing address
+        bytecodeHash:
+          "0x78ac4b231a4ce3ac5259847cd1cb227bf45882d736722290bee6b6c99a722f22",
+        deployable: false,
+        oldVersions: {}
+      },
+      YVaultV2PriceOracle: {
+        address: "0xb669d0319fb9de553e5c206e6fbebd58512b668b",
+        bytecodeHash:
+          "0x177c22cc7d05280cea84a36782303d17246783be7b8c0b6f9731bb9002ffcc68",
+        deployable: false,
+        oldVersions: {}
+      },
+
+      // MasterPriceOracle
+      MasterPriceOracleV1: {
+        address: "0x1887118E49e0F4A78Bd71B792a49dE03504A764D", // Original Rari Dao MPO
+        bytecodeHash:
+          "0xfa1349af05af40ffb5e66605a209dbbdc8355ba7dda76b2be10bafdf5ffd1dc6",
+        deployable: false,
+        oldVersions: {}
+      },
+      MasterPriceOracleV2: {
+        address: "", // Doesn't have an address since it's supposed to be deployed (NOT IN USE)
+        bytecodeHash:
+          "0xdfa5aa37efea3b16d143a12c4ae7006f3e29768b3e375b59842c7ecd3809f1d1",
+        deployable: false,
+        oldVersions: {}
+      },
+      MasterPriceOracleV3: {
+        address: "", // Doesn't have an address since not supposed to be deployed
+        bytecodeHash:
+          "0xe4199a03b164ca492d19d655b85fdf8cc14cf2da6ddedd236712552b7676b03d",
+        deployable: true,
+        oldVersions: {}
+      },
+
+      // Curve
+      CurveLpTokenPriceOracle: {
+        address: "0x43c534203339bbf15f62b8dde91e7d14195e7a60",
+        bytecodeHash:
+          "0x6742ae836b1f7df0cfd9b858c89d89da3ee814c28c5ee9709a371bcf9dfd2145",
+        deployable: false,
+        oldVersions: {}
+      },
+      CurveLiquidityGaugeV2PriceOracle: {
+        address: "0xd9eefdb09d75ca848433079ea72ef609a1c1ea21",
+        bytecodeHash:
+          "0xfcf0d93de474152898668c4ebd963e0237bfc46c3d5f0ce51b7045b60c831734",
+        deployable: false,
+        oldVersions: {}
+      },
+
+      // Token Price Oracles (?)
+      FixedEthPriceOracle: {
+        address: "0xffc9ec4adbf75a537e4d233720f06f0df01fb7f5",
+        bytecodeHash:
+          "0xcb669c93632a1c991adced5f4d97202aa219fab3d5d86ebd28f4f62ad7aa6cb3",
+        deployable: false,
+        oldVersions: {}
+      },
+      FixedEurPriceOracle: {
+        address: "0x817158553F4391B0d53d242fC332f2eF82463e2a",
+        bytecodeHash:
+          "0x678dbe9f2399a44e89edc934dc17f6d4ee7004d9cbcee83c0fa0ef43de924b84",
+        deployable: false,
+        oldVersions: {}
+      },
+      WSTEthPriceOracle: {
+        address: "0xb11de4c003c80dc36a810254b433d727ac71c517",
+        bytecodeHash:
+          "0x11daa8dfb8957304aa7d926ce6876c523c7567b4052962e65e7d6a324ddcb4cc",
+        deployable: false,
+        oldVersions: {}
+      },
+      FixedTokenPriceOracle_OHM: {
+        address: "0x71FE48562B816D03Ce9e2bbD5aB28674A8807CC5",
+        bytecodeHash:
+          "0x136d369f53594c2f10e3ff3f14eaaf0bada4a63964f3cfeda3923e3531e407dc",
+        deployable: false,
+        oldVersions: {}
+      },
+
+      // Uniswap TWAP
+      UniswapTwapPriceOracleV2_SushiSwap_DAI: {
+        address: "0x72fd4c801f5845ab672a12bce1b05bdba1fd851a",
+        bytecodeHash:
+          "0xb4d279232ab52a2fcaee6dc47db486a733c24a499ade9d7de1b0d417d4730817",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapTwapPriceOracleV2_SushiSwap_CRV: {
+        address: "0x552163f2a63f82bb47b686ffc665ddb3ceaca0ea",
+        bytecodeHash:
+          "0x9df749314d6494a785bb5ff7a5fab25adadb772e10d58b7f692028cc23e2cbb3",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapTwapPriceOracleV2_SushiSwap_USDC: {
+        address: "0x9ee412a83a52f033d23a0b7e2e030382b3e53208",
+        bytecodeHash:
+          "0x2219b54a3e2c36b8b1eca8d511392eacace73a3e1cb55c97dd495f5e47024ba6",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapTwapPriceOracleV2_Uniswap_FRAX: {
+        address: "0x6127e381756796fb978bc872556bf790f14cde98",
+        bytecodeHash:
+          "0xc884332403a6234bbb5e860fa27bcf69389b7e372b20045af687d23426e654e3",
+        deployable: false,
+        oldVersions: {}
+      },
+      UniswapTwapPriceOracleV2_SushiSwap_ETH: {
+        address: "0xf411CD7c9bC70D37f194828ce71be00d9aEC9edF",
+        bytecodeHash:
+          "0xea501eef0ca55dc6a8360a5a1274895d6dc245dd0ae8cffbff3a14c6624711f0",
+        deployable: false,
+        oldVersions: {}
+      },
+
+      // idk
+      SushiBarPriceOracle: {
+        address: "0x290E0f31e96e13f9c0DB14fD328a3C2A94557245",
+        bytecodeHash:
+          "0x3736e8b6c11fcd413c0b60c3291a3a2e2ebe496a2780f3c45790a123f5ee9705",
+        deployable: false,
+        oldVersions: {}
+      },
+      BadgerPriceOracle: {
+        address: "0xd0C86943e594640c4598086a2359A0e70b80eF8D",
+        bytecodeHash:
+          "0x310210400b2d3992dc8fb9ace5001b1b55d3a468fba18ae0bc82a375fd150638",
+        deployable: false,
+        oldVersions: {}
+      },
+      HarvestPriceOracleV1: {
+        address: "0x6141d9353bb1fb8131d07d358c112b372aa92514", //v1.2.1 && v1.2.4
+        bytecodeHash:
+          "0x6e23380d1d640118cf80cf2bfa9ca7a89068659dfcb50abc0a7f8b9e5f9daab7",
+        deployable: false,
+        oldVersions: {}
+      },
+      HarvestPriceOracleV2: {
+        address: "", // ?
+        bytecodeHash:
+          "0x5eff948725404a38311ebe4b3bafc312f63dd8ae611e3ddcdfebb9cfa231988c",
+        deployable: false,
+        oldVersions: {}
+      },
+      StakedSdtPriceOracle: {
+        address: "0x5447c825ee330015418c1a0d840c4a1b5a7176cc",
+        bytecodeHash:
+          "0x1b489bd00e5cbe4998e985f147297c1a39bd9da659e78544c94c1f3415edf7b7",
+        deployable: false,
+        oldVersions: {}
+      },
+      TokemakPoolTAssetPriceOracle: {
+        address: "0x6141d9353bb1fb8131d07d358c112b372aa92514",
+        bytecodeHash:
+          "0xc820466d7af2319646d25e2203187254a37cb9b9ae6c8a263d40fb5c01a54c51",
+        deployable: false,
+        oldVersions: {}
+      },
+      MStablePriceOracle: {
+        address: "0xeb988f5492C86584f8D8f1B8662188D5A9BfE357",
+        bytecodeHash:
+          "0x39fc7b2cdac3d401ea91becf897346b2156dbe261162de14082e856103456eb4",
+        deployable: false,
+        oldVersions: {}
+      },
+      StakedSpellPriceOracle: {
+        address: "0xb544f62045b96a60b398abb5a5c23bf04cb4ed9c",
+        bytecodeHash:
+          "0x9fcea6d23c7e2e330e35e303a49f39e0c2c783e6b770ccc2de41fbbfbfc539e7",
+        deployable: false,
+        oldVersions: {}
+      },
+      CurveTriCryptoLpTokenPriceOracle: {
+        address: "0xb2d16916d520d585ee49f08db1436b961b48fe60",
+        bytecodeHash:
+          "0x92014d914370d8c59082044786d9b056ea188a95891778c555209c210850d5ae",
+        deployable: false,
+        oldVersions: {}
+      },
+      GelatoGUniPriceOracle: {
+        address: "0xea3633b38c747cea231adb74b511dc2ed3992b43",
+        bytecodeHash:
+          "", // ?
+        deployable: false,
+        oldVersions: {}
+      },
+
     },
+
+    DEPLOYABLE_ORACLES: [
+      "MasterPriceOracle",
+      "UniswapTwapPriceOracleV2",
+      "UniswapV3TwapPriceOracleV2",
+    ],
 
     // // UNI-V2 Oracles
     UNISWAP_V2_FACTORY_ADDRESS: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
@@ -385,17 +680,19 @@ const addresses: {
       "0xe4D84b252308645098846312286E6c6D2846DbB0",
     FUSE_POOL_LENS_SECONDARY_CONTRACT_ADDRESS:
       "0xc76190E04012f26A364228Cfc41690429C44165d",
-    COMPTROLLER_IMPLEMENTATION_CONTRACT_ADDRESS:
-      "0x2f6d8Ff753886AE2b49E0c3bB6504867F2977078",
+
 
     // CEther and CERC20
+    COMPTROLLER_IMPLEMENTATION_CONTRACT_ADDRESS:
+      "0x2f6d8Ff753886AE2b49E0c3bB6504867F2977078",
     CETHER_DELEGATE_CONTRACT_ADDRESS: "",
     CERC20_DELEGATE_CONTRACT_ADDRESS:
       "0xCFA81742393B52c493b8d76E55FFE4992A5cfFd9",
 
     // Oracles
-    OPEN_ORACLE_PRICE_DATA_CONTRACT_ADDRESS: "",
     MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS: "",
+    INITIALIZABLE_CLONES_CONTRACT_ADDRESS: "",
+
 
     PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {
       PreferredPriceOracle_V2_Quick_USDC:
@@ -420,6 +717,11 @@ const addresses: {
     ],
 
     oracles: {},
+    DEPLOYABLE_ORACLES: [
+      "PreferredPriceOracle",
+      "ChainlinkPriceOracleV2",
+      "UniswapTwapPriceOracle_SushiSwap",
+    ],
 
     // // UNI-V2 Oracles (Sushi for arbi)
     UNISWAP_V2_FACTORY_ADDRESS: "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
@@ -438,20 +740,20 @@ const addresses: {
     PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {
       JumpRateModel_Cream_Stables_Majors:
         "0xa80F8CC22b4Ff9442B7F188D96E9B75d6cFd80F6",
-
       JumpRateModel_Cream_Major: "0x8dbf1250c805fc2ed29fc0d3aed31ec69a928ffe",
-
       JumpRateModel_Cream_Gov: "0x46c54c7D214117c79f2f6F368549776F00c0a6c4",
     },
 
     // Tokens / ETC
+    WETH_ADDRESS: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+    REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS: "",
+
+    // Legacy
     COINBASE_PRO_REPORTER_ADDRESS: "0xfCEAdAFab14d46e20144F48824d0C09B1a03F2BC",
     DAI_POT: "",
     DAI_JUG: "",
-    WETH_ADDRESS: "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+    OPEN_ORACLE_PRICE_DATA_CONTRACT_ADDRESS: "",
 
-    INITIALIZABLE_CLONES_CONTRACT_ADDRESS: "",
-    REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS: "",
   },
 };
 
