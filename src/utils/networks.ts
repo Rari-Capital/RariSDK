@@ -6,6 +6,7 @@ export enum ChainID {
   KOVAN = 42,
   //
   ARBITRUM = 42161,
+  ARBITRUM_TESTNET = 421611,
   //
   OPTIMISM = 10,
 }
