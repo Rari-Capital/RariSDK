@@ -25,7 +25,7 @@ export default class JumpRateModel {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
-      provider
+      provider.getSigner()
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = toBN(await jumpRateModelContract.callStatic.multiplierPerBlock());

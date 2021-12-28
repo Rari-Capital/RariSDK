@@ -1,6 +1,7 @@
 // Ethers
 import {
   BigNumber,
+  BigNumberish,
   Contract,
   utils,
   ContractFactory,
@@ -595,7 +596,7 @@ export default class Fuse {
       switch (model) {
         // Keep MasterPriceOracle
         case "MasterPriceOracle":
-          console.log("In MasterPriceOracle")
+          console.log("0.) In MasterPriceOracle")
 
           // let initializableClones = new Contract(
           //   this.addresses.INITIALIZABLE_CLONES_CONTRACT_ADDRESS,
@@ -608,12 +609,15 @@ export default class Fuse {
             this.provider.getSigner()
           )
 
+          console.log("1.) In MasterPriceOracle", { initializableClones })
+
           let masterPriceOracle = {
             interface: new Interface(
               Oracle.contracts["MasterPriceOracle"].abi
             )
           }
 
+          console.log("2.) In MasterPriceOracle", { masterPriceOracle })
           // let masterPriceOracle = new MasterPriceOracle__factory(this.provider.getSigner())
 
           deployArgs = [
@@ -633,6 +637,8 @@ export default class Fuse {
             ];
 
           let initializerData = masterPriceOracle.interface.encodeFunctionData("initialize", deployArgs)
+
+          console.log("3.) In MasterPriceOracle", { initializerData })
 
           let tx = await initializableClones.clone(
             this.addresses.MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS,
@@ -954,12 +960,22 @@ export default class Fuse {
 
     this.deployAsset = async function (
       conf: interestRateModelConf,
-      collateralFactor: number,
-      reserveFactor: number, // Amount of accrue interest that will go to the pool's reserves. Usually 0.1
-      adminFee: number,
+      collateralFactor: BigNumberish,
+      reserveFactor: BigNumberish, // Amount of accrue interest that will go to the pool's reserves. Usually 0.1
+      adminFee: BigNumberish,
       options: any,
       bypassPriceFeedCheck: any // ?
     ) {
+
+      console.log("Inside this.deployAsset", {
+        conf,
+        collateralFactor,
+        reserveFactor,
+        adminFee,
+        options,
+        bypassPriceFeedCheck,
+      })
+
       // Deploy new interest rate model via SDK if requested
       if (
         [
@@ -1086,15 +1102,25 @@ export default class Fuse {
       options: any,
       bypassPriceFeedCheck: boolean
     ) {
+
+
       // BigNumbers
+      // TOdo - pass these in as BN by default
       const reserveFactorBN = BigNumber.from(reserveFactor);
       const adminFeeBN = BigNumber.from(adminFee);
-      const collateralFactorBN = utils.parseUnits(collateralFactor, 18); // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
+      const collateralFactorBN = BigNumber.from(collateralFactor); // TODO: find out if this is a number or string. If its a number, parseUnits will not work. Also parse Units works if number is between 0 - 0.9
+
+
+      console.log("1: Inside this.deployCToken", {
+        reserveFactorBN,
+        adminFeeBN,
+        collateralFactorBN
+      })
 
       // Check collateral factor
       if (
-        !collateralFactorBN.gte(constants.Zero) ||
-        collateralFactorBN.gt(utils.parseUnits("0.9", 18))
+        collateralFactorBN.lt(constants.Zero) ||
+        collateralFactorBN.gt(utils.parseEther("0.9"))
       )
         throw Error("Collateral factor must range from 0 to 0.9.");
 
@@ -1260,17 +1286,24 @@ export default class Fuse {
       bypassPriceFeedCheck: boolean,
       implementationAddress?: string // cERC20Delegate implementation
     ) {
+
+      console.log("1: Inside deployCerc20:", {
+        conf, collateralFactor, reserveFactor, adminFee, options, bypassPriceFeedCheck, implementationAddress
+      })
+
+
       // Get Comptroller
-      var comptroller = new Contract(
+      let comptroller = new Contract(
         conf.comptroller,
         JSON.parse(
           this.compoundContracts["contracts/Comptroller.sol:Comptroller"].abi
-        )
+        ),
+        this.provider.getSigner()
       );
 
       // Check for price feed assuming !bypassPriceFeedCheck
-      if (!bypassPriceFeedCheck)
-        await this.checkForCErc20PriceFeed(comptroller, conf);
+      // if (!bypassPriceFeedCheck)
+      //   await this.checkForCErc20PriceFeed(comptroller, conf);
 
       // Deploy CErc20Delegate implementation contract if necessary
       if (!implementationAddress) {
@@ -1309,8 +1342,7 @@ export default class Fuse {
         adminFee ? adminFee.toString() : 0,
       ];
 
-      const abiCoder = new utils.AbiCoder();
-      const constructorData = abiCoder.encode(
+      const constructorData = new utils.AbiCoder().encode(
         [
           "address",
           "address",
@@ -1324,22 +1356,37 @@ export default class Fuse {
         ],
         deployArgs
       );
-      const errorCode = await comptroller._deployMarket(
-        false,
-        constructorData,
-        collateralFactor
-      );
-      if (errorCode != constants.Zero)
+
+      console.log("2: Inside deployCErc20", { constructorData, deployArgs, comptroller })
+
+      try {
+
+        const errorCode = await comptroller.callStatic._deployMarket(
+          false,
+          constructorData,
+          collateralFactor
+        );
+        console.log("3: Inside deployCErc20", { errorCode })
+        if (errorCode != constants.Zero)
         throw (
           "Failed to deploy market with error code: " +
           Fuse.COMPTROLLER_ERROR_CODES[errorCode]
         );
+      } catch (err) {
+        throw (
+          "Failed to deploy market with error: " +
+          err
+        );
+      }
+
 
       const receipt = await comptroller._deployMarket(
         false,
         constructorData,
         collateralFactor
       );
+
+      console.log("4: Inside deployCErc20", { receipt })
 
       const saltsHash = utils.solidityKeccak256(
         ["address", "address", "uint"],
@@ -1349,11 +1396,15 @@ export default class Fuse {
         "0x" + this.compoundContracts["contracts/Unitroller.sol:Unitroller"]
       );
 
+      console.log("5: Inside deployCErc20", { saltsHash, byteCodeHash })
+
       const cErc20DelegatorAddress = utils.getCreate2Address(
         this.addresses.FUSE_FEE_DISTRIBUTOR_CONTRACT_ADDRESS,
         saltsHash,
         byteCodeHash
       );
+
+      console.log("6: Inside deployCErc20", { cErc20DelegatorAddress })
 
       // Return cToken proxy and implementation contract addresses
       return [cErc20DelegatorAddress, implementationAddress, receipt];
