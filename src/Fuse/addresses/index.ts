@@ -1,7 +1,7 @@
 import { ChainID } from "../../utils/networks";
-import MAINNET from "./mainnet";
-import ARBITRUM_RINKEBY from "./arbitrumRinkeby";
-import ARBITRUM from "./arbitrum";
+import MAINNET_ADDRESSES from "./mainnet";
+import ARBITRUM_ADDRESSES from "./arbitrum";
+import ARBITRUM_RINKEBY_ADDRESSES from "./arbitrumRinkeby";
 
 export enum CompoundContractVersion {
   "1.0.0",
@@ -111,10 +111,10 @@ export interface FuseAddresses {
 const addresses: {
   [chainId: number]: FuseAddresses;
 } = {
-  [ChainID.ETHEREUM]: MAINNET,
+  [ChainID.ETHEREUM]: MAINNET_ADDRESSES,
   // Todo - update all these addresses
-  [ChainID.ARBITRUM]: ARBITRUM,
-  [ChainID.ARBITRUM_TESTNET]: ARBITRUM_RINKEBY,
+  [ChainID.ARBITRUM]: ARBITRUM_ADDRESSES,
+  [ChainID.ARBITRUM_TESTNET]: ARBITRUM_RINKEBY_ADDRESSES,
 };
 
 export default addresses;

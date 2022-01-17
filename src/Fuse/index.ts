@@ -9,7 +9,7 @@ import {
 } from "ethers";
 import { JsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 
-import FUSE_ADDRESSES, { FuseAddresses } from "./addresses";
+import FUSE_ADDRESSES, { FuseAddresses } from "./addresses/index";
 
 // ABIs
 import fusePoolDirectoryAbi from "./contracts/abi/FusepoolDirectory.json";
@@ -387,10 +387,10 @@ export default class Fuse {
     this.constants = constants;
 
     // Set the addresses based on ChainId
-    this.addresses = isSupportedChainId(chainId)
-      ? FUSE_ADDRESSES[chainId]
-      : FUSE_ADDRESSES[1];
-
+    if (!isSupportedChainId(chainId)) {
+      throw new Error(`unsupported chainid: ${chainId}`);
+    }
+    this.addresses = FUSE_ADDRESSES[chainId];
     this.compoundContracts = Compound.contracts;
     this.oracleContracts = Oracle.contracts;
 
@@ -1213,7 +1213,7 @@ export default class Fuse {
         reserveFactor ? reserveFactor.toString() : 0,
         adminFee ? adminFee.toString() : 0,
       ];
-
+      console.log("1. deployCEther", { deployArgs });
       const abiCoder = new utils.AbiCoder();
       const constructorData = abiCoder.encode(
         [
@@ -1228,6 +1228,8 @@ export default class Fuse {
         ],
         deployArgs
       );
+      console.log("2. deployCEther", { constructorData });
+
       const comptroller = new Contract(
         conf.comptroller,
         JSON.parse(
@@ -1236,9 +1238,11 @@ export default class Fuse {
         this.provider.getSigner()
       );
 
+      console.log("3. deployCEther", { comptroller });
+
       try {
         const errorCode = await comptroller.callStatic._deployMarket(
-          "0x0000000000000000000000000000000000000000",
+          true,
           constructorData,
           collateralFactor
         );
@@ -1251,11 +1255,15 @@ export default class Fuse {
         console.error(err);
       }
 
+      console.log("4. deployCEther", {constructorData, collateralFactor});
+
       const receipt = await comptroller._deployMarket(
-        "0x0000000000000000000000000000000000000000",
+        true,
         constructorData,
         collateralFactor
       );
+
+      console.log("5. receipt");
 
       const saltsHash = utils.solidityKeccak256(
         ["address", "address", "uint"],
