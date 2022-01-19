@@ -1,6 +1,6 @@
 {
   "name": "rari-sdk",
-  "version": "1.0.0",
+  "version": "1.0.0.20220120",
   "description": "",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
