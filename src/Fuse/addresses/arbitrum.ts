@@ -88,6 +88,10 @@ export default {
   PUBLIC_INTEREST_RATE_MODEL_CONTRACT_ADDRESSES: {
     JumpRateModel_Cream_Stables_Majors:
       "0xef562dd508f3dbba4b4ad62a869627d379692557",
+      JumpRateModel_Fei_TRIBE:
+      "0xFaf37621559Eb801b2276865B381e994c6745b5F",
+      JumpRateModel_Fei_DAI:
+      "0x1ce7281ce601d06cf5f47a3023b80ebd73e3b35d",
   },
 
   // Tokens / ETC
