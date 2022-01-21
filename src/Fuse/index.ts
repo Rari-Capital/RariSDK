@@ -704,7 +704,6 @@ export default class Fuse {
 
         // Keep UniV2 Twap V2
         case "UniswapTwapPriceOracleV2":
-          console.log('inside the right one')
           // Input validation
           if (!conf.uniswapV2Factory)
             conf.uniswapV2Factory = this.addresses.UNISWAP_V2_FACTORY_ADDRESS;
@@ -716,13 +715,10 @@ export default class Fuse {
             this.provider.getSigner()
           );
 
-          console.log({oracleFactoryContract})
-          
           deployedPriceOracle = await oracleFactoryContract.oracles(
             this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
             conf.baseToken
           );
-          console.log(deployedPriceOracle)
 
           // Deploy if oracle does not exist
           if (
@@ -737,7 +733,7 @@ export default class Fuse {
               conf.baseToken
             );
           }
-          break;
+          return deployedPriceOracle;
 
         // TODO : Delete all these after the tests gets moved into the contracts repo
 
