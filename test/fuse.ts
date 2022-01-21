@@ -1,0 +1,3 @@
+import { Fuse } from "../src";
+
+

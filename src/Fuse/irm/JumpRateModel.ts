@@ -1,5 +1,5 @@
 import { BigNumberish, BigNumber } from "ethers";
-import { createContract, toBN } from "../utils/web3";
+import { createContract, toBN } from "../../utils/web3";
 import { contracts } from "../contracts/compound-protocol.min.json";
 import { Web3Provider } from "@ethersproject/providers";
 
@@ -25,7 +25,7 @@ export default class JumpRateModel {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
       contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
-      provider
+      provider.getSigner()
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
     this.multiplierPerBlock = toBN(await jumpRateModelContract.callStatic.multiplierPerBlock());

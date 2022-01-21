@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2015", 
+    "target": "ES2015",
     "lib": ["ES2019", "DOM"],
-    "module": "ES2020", 
+    "module": "ES2020",
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
@@ -11,8 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./lib/esm",
     "declaration": true,
+    "baseUrl": "./src"
   },
-  "include": [
-    "./src"
-  ]
+  "include": ["./src"],
+  "exclude": ["./test"]
 }
