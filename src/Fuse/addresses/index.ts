@@ -115,7 +115,7 @@ const addresses: {
   [ChainID.HARDHAT]: MAINNET_ADDRESSES,
   // Todo - update all these addresses
   [ChainID.ARBITRUM]: ARBITRUM_ADDRESSES,
-  [ChainID.ARBITRUM_TESTNET]: ARBITRUM_RINKEBY_ADDRESSES,
+  //ChainID.ARBITRUM_TESTNET]: ARBITRUM_RINKEBY_ADDRESSES,
 };
 
 export default addresses;
