@@ -587,7 +587,7 @@ export default class Fuse {
 
     this.deployPriceOracle = async function (
       model: string, // TODO: find a way to use this.ORACLES
-      conf: OracleConf, // This conf depends on which comptroller model we're deploying
+      conf: OracleConf, // This conf depends on which oracle model we're deploying
       options: any
     ) {
       console.log(model, conf, options, "inside DeployPrice");
@@ -646,7 +646,7 @@ export default class Fuse {
             deployArgs
           );
 
-          console.log("3.) In MasterPriceOracle", { initializerData });
+          console.log("3.) In MasterPriceOracle", { initializerData }, this.addresses.MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS);
 
           let tx = await initializableClones.clone(
             this.addresses.MASTER_PRICE_ORACLE_IMPLEMENTATION_CONTRACT_ADDRESS,
@@ -681,9 +681,8 @@ export default class Fuse {
             this.provider.getSigner()
           );
 
-          deployedPriceOracle = await oracleFactoryContract.methods
+          deployedPriceOracle = await oracleFactoryContract
             .oracles(conf.uniswapV3Factory, conf.feeTier, conf.baseToken)
-            .call();
 
           // Deploy if oracle does not exist
           if (
@@ -715,8 +714,9 @@ export default class Fuse {
             this.oracleContracts.UniswapTwapPriceOracleV2Factory.abi,
             this.provider.getSigner()
           );
+
           deployedPriceOracle = await oracleFactoryContract.oracles(
-            this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+            conf.uniswapV2Factory,
             conf.baseToken
           );
 
@@ -725,15 +725,15 @@ export default class Fuse {
             deployedPriceOracle === "0x0000000000000000000000000000000000000000"
           ) {
             await oracleFactoryContract.deploy(
-              this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+              conf.uniswapV2Factory,
               conf.baseToken
             );
             deployedPriceOracle = await oracleFactoryContract.oracles(
-              this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+              conf.uniswapV2Factory,
               conf.baseToken
             );
           }
-          break;
+          return deployedPriceOracle;
 
         // TODO : Delete all these after the tests gets moved into the contracts repo
 
@@ -1612,10 +1612,11 @@ export default class Fuse {
     this.checkCardinality = async function (uniswapV3Pool: string) {
       var uniswapV3PoolContract = new Contract(
         uniswapV3Pool,
-        uniswapV3PoolAbiSlim
+        uniswapV3PoolAbiSlim,
+        this.provider
       );
       const shouldPrime =
-        (await uniswapV3PoolContract.methods.slot0().call())
+        (await uniswapV3PoolContract.callStatic.slot0())
           .observationCardinalityNext < 64;
       return shouldPrime;
     };
@@ -1623,11 +1624,11 @@ export default class Fuse {
     this.primeUniswapV3Oracle = async function (uniswapV3Pool, options) {
       var uniswapV3PoolContract = new Contract(
         uniswapV3Pool,
-        uniswapV3PoolAbiSlim
+        uniswapV3PoolAbiSlim,
+        this.provider.getSigner()
       );
-      await uniswapV3PoolContract.methods
+      await uniswapV3PoolContract
         .increaseObservationCardinalityNext(64)
-        .send(options);
     };
 
     this.identifyInterestRateModelName = (irmAddress) => {
