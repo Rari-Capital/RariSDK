@@ -9,6 +9,7 @@ export enum ChainID {
   ARBITRUM_TESTNET = 421611,
   //
   OPTIMISM = 10,
+  HARDHAT = 31337
 }
 
 interface ChainMetadata {
@@ -78,7 +79,7 @@ export const chainMetadata = {
     chainId: ChainID.ARBITRUM_TESTNET,
     name: "Arbi Rinkeby",
     imageUrl: "/static/networks/arbitrum.svg",
-    supported: true,
+    supported: false,
     rpcUrl:
       "https://arb-rinkeby.g.alchemy.com/v2/PkZ7ilUhTBT6tHUsgToel62IOcuyKcwb",
     blockExplorerURL: "https://testnet.arbiscan.io",
@@ -93,6 +94,15 @@ export const chainMetadata = {
     blockExplorerURL: "https://optimistic.etherscan.io",
     color: "#FE0521",
   },
+  // [ChainID.HARDHAT]: {
+  //   chainId: ChainID.HARDHAT,
+  //   name: "Hardhat",
+  //   imageUrl: "/static/networks/optimism.svg", // no logo
+  //   supported: true,
+  //   rpcUrl: "http://localhost:8545",
+  //   blockExplorerURL: "",
+  //   color: "#BC6C6C"
+  // }
 };
 
 export const isSupportedChainId = (chainId: number) =>

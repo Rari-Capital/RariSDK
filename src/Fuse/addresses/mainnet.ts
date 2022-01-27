@@ -85,10 +85,13 @@ export default {
     StakedSdtPriceOracle: "0x5447c825ee330015418c1a0d840c4a1b5a7176cc",
     TokemakPoolTAssetPriceOracle: "0xd806782b31EC52FcB7f2a009d7D045bB732431Fb",
     MStablePriceOracle: "0xeb988f5492C86584f8D8f1B8662188D5A9BfE357",
-    GelatoGUniPriceOracle: "0xea3633b38c747cea231adb74b511dc2ed3992b43",
+    GelatoGUniPriceOracle: "0xEa3633b38C747ceA231aDB74b511DC2eD3992B43",
     StakedSpellPriceOracle: "0xb544f62045b96a60b398abb5a5c23bf04cb4ed9c",
     CurveTriCryptoLpTokenPriceOracle:
       "0xb2d16916d520d585ee49f08db1436b961b48fe60",
+    CurveFactoryLpTokenPriceOracle:
+      "0xa9f3faac3b8eDF7b3DCcFDBBf25033D6F5fc02F3",
+    TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -175,6 +178,12 @@ export default {
       "0x9fcea6d23c7e2e330e35e303a49f39e0c2c783e6b770ccc2de41fbbfbfc539e7",
     CurveTriCryptoLpTokenPriceOracle:
       "0x92014d914370d8c59082044786d9b056ea188a95891778c555209c210850d5ae",
+    CurveFactoryLpTokenPriceOracle:
+      "0x90cb470d00fd449254eda43856b1e32b5c9a9bf25a8070c10ed1ff92ca656616",
+    GUniLpTokenPriceOracle:
+      "0xbed0eddba7009021dd774a530b53a784fc80217c7bf27c15c9b2487b13fb2863",
+    TribeMasterPriceOracle:
+      "0xf79f348bef443bef108c446753829e55eb5e4e3028d2064d9edefab2f95fd876",
   },
 
   // Deployable Oracles
@@ -519,7 +528,8 @@ export default {
     "0xa170dba2cd1f68cdd7567cf70184d5492d2e8138",
   UNISWAP_TWAP_PRICE_ORACLE_V2_ROOT_CONTRACT_ADDRESS:
     "0xf1860b3714f0163838cf9ee3adc287507824ebdb",
-  UNISWAP_TWAP_PRICE_ORACLE_V2_FACTORY_CONTRACT_ADDRESS: "", // TODO: Set correct mainnet address after deployment
+  UNISWAP_TWAP_PRICE_ORACLE_V2_FACTORY_CONTRACT_ADDRESS:
+    "0x3472f7e0179Fe15cd7450C9c5269C876fAc64B73", // TODO: Set correct mainnet address after deployment
 
   // // UNI-V3 Oracles
   UNISWAP_V3_FACTORY_ADDRESS: "0x1f98431c8ad98523631ae4a59f267346ea31f984",
