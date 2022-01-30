@@ -79,10 +79,14 @@ export default {
       "0x6127e381756796fb978bc872556bf790f14cde98", // v1.1.3
     UniswapTwapPriceOracleV2_SushiSwap_ETH:
       "0xf411CD7c9bC70D37f194828ce71be00d9aEC9edF", // v1.1.3
+    UniswapTwapPriceOracleV2_SushiSwap_WBTC:
+      "0xC9Ad18928B1D9F61105d43Ecc33c670838D1C853", // v1.1.3
+    UniswapTwapPriceOracleV2_Uniswap_ETH:
+      "0xd4219c15b9cfc40090181ab934a08bed14017372", // v1.1.3
     SushiBarPriceOracle: "0x290E0f31e96e13f9c0DB14fD328a3C2A94557245",
     BadgerPriceOracle: "0xd0C86943e594640c4598086a2359A0e70b80eF8D",
     HarvestPriceOracle: "0x6141d9353bb1fb8131d07d358c112b372aa92514", // v1.2.1; v1.1.4 = 0x8D364609cd2716172016838fF9FBC7fBcAC91792
-    StakedSdtPriceOracle: "0x5447c825ee330015418c1a0d840c4a1b5a7176cc",
+    StakedSdtPriceOracle: "0xb544f62045b96a60b398abb5a5c23bf04cb4ed9c",
     TokemakPoolTAssetPriceOracle: "0xd806782b31EC52FcB7f2a009d7D045bB732431Fb",
     MStablePriceOracle: "0xeb988f5492C86584f8D8f1B8662188D5A9BfE357",
     GelatoGUniPriceOracle: "0xEa3633b38C747ceA231aDB74b511DC2eD3992B43",
@@ -92,7 +96,12 @@ export default {
     CurveFactoryLpTokenPriceOracle:
       "0xa9f3faac3b8eDF7b3DCcFDBBf25033D6F5fc02F3",
     TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
+    GOhmPriceOracle: "0x057eCDA7f61C73c3Adcc36899d2626C7b79C3249",
+    WSSquidPriceOracle: "0xAE7C2169f3B5179bA56E471623BC47bEE06E4aA7",
+    WXBtrflyPriceOracle: "0x66159b1250f7ec2e335176643c25a0a3deae7b1f",
+    StakedFodlPriceOracle: "0x92cf2299680c063ccaf18f62a60c500a625e08e2",
   },
+
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
       "0x7a2a5633a99e8abb759f0b52e87875181704b8e29f6567d4a92f12c3f956d313",
@@ -174,6 +183,8 @@ export default {
       "0xc820466d7af2319646d25e2203187254a37cb9b9ae6c8a263d40fb5c01a54c51",
     MStablePriceOracle:
       "0x39fc7b2cdac3d401ea91becf897346b2156dbe261162de14082e856103456eb4",
+    GelatoGUniPriceOracle:
+      "0xbed0eddba7009021dd774a530b53a784fc80217c7bf27c15c9b2487b13fb2863",
     StakedSpellPriceOracle:
       "0x9fcea6d23c7e2e330e35e303a49f39e0c2c783e6b770ccc2de41fbbfbfc539e7",
     CurveTriCryptoLpTokenPriceOracle:
@@ -580,6 +591,10 @@ export default {
   OPEN_ORACLE_PRICE_DATA_CONTRACT_ADDRESS:
     "0xc629c26dced4277419cde234012f8160a0278a79",
   COINBASE_PRO_REPORTER_ADDRESS: "0xfCEAdAFab14d46e20144F48824d0C09B1a03F2BC",
+
+
+  COMPTROLLER_IMPLEMENTATION_TEMP_TOKEN_MIGRATION: "0x1a1e7b69348b22b304428a07a7ffa1c6347f8ef6",
+  CERC20_DELEGATE_TEMP_TOKEN_MIGRATION: "0x49a4af90cfc103a71e893a0302dd25940a8baf18",
 
   DAI_POT: "0x197e90f9fad81970ba7976f33cbd77088e5d7cf7",
   DAI_JUG: "0x19c0976f590d67707e62397c87829d896dc0f1f1",
