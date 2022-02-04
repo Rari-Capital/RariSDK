@@ -28,7 +28,7 @@ export default {
 
   PUBLIC_PRICE_ORACLE_CONTRACT_ADDRESSES: {
     MasterPriceOracle: "0x137a6Bf7D4C866fFd430cDd0107dE6C4828Ce54d", // Rari DAO MasterPriceOracle actual
-    ChainlinkPriceOracleV2: "0xCc5F01efd5647C77861Ce15C923731f9e27E3132",
+    ChainlinkPriceOracleV2: "0xd1a758149896530a114c7f5e4c4daf093fc184a6",
     FixedETHPriceOracle: "0xf826E4fE62c206Ec51B5744b29C71A2245DD540e",
   },
 
