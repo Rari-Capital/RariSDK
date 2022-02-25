@@ -30,7 +30,7 @@ export default {
     MasterPriceOracle: "0x137a6Bf7D4C866fFd430cDd0107dE6C4828Ce54d", // Rari DAO MasterPriceOracle actual
     ChainlinkPriceOracleV2: "0xd1a758149896530a114c7f5e4c4daf093fc184a6",
     FixedETHPriceOracle: "0xf826E4fE62c206Ec51B5744b29C71A2245DD540e",
-    GOhmPriceOracleArbitrum: "0xE18eC050838175eFdc4e878B087D986638a1FFa7",
+    GOhmPriceOracleArbitrum: "0xA7aC11110F13097a022A6A975BdDc4a3ed6a23bD",
     UniswapTwapPriceOracleV2_SushiSwap_ETH: "0x41fa6c04b8a2d1a30200f39b4714c78c81e0e227",
     UniswapTwapPriceOracleV2_SushiSwap_GOHM: "0x71bc92b8b848c287f82a56efe1f30a439b1976b2",
   },
@@ -43,7 +43,7 @@ export default {
     FixedETHPriceOracle:
       "0x009b75414e3135a12bb0d9ee0a420f96a41b198df7ee9c4a5667a05187860a1d",
     GOhmPriceOracleArbitrum:
-      "0xce075a561806260b1d4472b68c07b3784c1f5b2065500f2f217085fcf78e4470",
+      "0x1103989d8bf5ce18084976a1bc279c029bc5b5c6c82aa127b57e943e9b3f9670",
     UniswapTwapPriceOracleV2_SushiSwap:
       "0x9fd6d9f10e83d15240e17ade5fbacf6ad30dbffa3b3596ebc985cce96f4aaef2",
   },
