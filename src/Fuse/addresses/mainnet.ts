@@ -91,7 +91,11 @@ export default {
       "0xb2d16916d520d585ee49f08db1436b961b48fe60",
     CurveFactoryLpTokenPriceOracle:
       "0xa9f3faac3b8eDF7b3DCcFDBBf25033D6F5fc02F3",
+    CurveFactoryLpTokenPriceOracleV2:
+      "0x4f84a621158CdecBB5e71061127ec7f61418b2F2",
     TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
+    BalancerV2TwapPriceOracle:
+    "0x5B643292e3733f5691ac7fd7ce14D2FD3c2dF868",
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -180,10 +184,14 @@ export default {
       "0x92014d914370d8c59082044786d9b056ea188a95891778c555209c210850d5ae",
     CurveFactoryLpTokenPriceOracle:
       "0x90cb470d00fd449254eda43856b1e32b5c9a9bf25a8070c10ed1ff92ca656616",
+    CurveFactoryLpTokenPriceOracleV2:
+      "0x8f69ce5f159abf8255326f7052ace26a2a416d4d553c5bcb92fad4fd8cb8f7e6",
     GUniLpTokenPriceOracle:
       "0xbed0eddba7009021dd774a530b53a784fc80217c7bf27c15c9b2487b13fb2863",
     TribeMasterPriceOracle:
       "0xf79f348bef443bef108c446753829e55eb5e4e3028d2064d9edefab2f95fd876",
+    BalancerV2TwapPriceOracle:
+    "0x0fcca2c7996f4a0e768107f953f6c5fc82d074199a8d3c638ad902772efacd66",
   },
 
   // Deployable Oracles
