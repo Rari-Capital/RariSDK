@@ -1,4 +1,4 @@
-import { createContract, toBN } from "../utils/web3";
+import { createContract, toBN } from "../../utils/web3";
 import JumpRateModel from "./JumpRateModel.js";
 import compoundProtocolABI from "../contracts/compound-protocol.min.json";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -6,7 +6,8 @@ import { BigNumberish } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
 
 export default class DAIInterestRateModelV2 extends JumpRateModel {
-  static RUNTIME_BYTECODE_HASH = "0x4b4c4f6386fd72d3f041a03e9eee3945189457fcf4299e99098d360a9f619539";
+  static RUNTIME_BYTECODE_HASH =
+    "0x4b4c4f6386fd72d3f041a03e9eee3945189457fcf4299e99098d360a9f619539";
 
   initialized: boolean | undefined;
   dsrPerBlock: BigNumber | undefined;
@@ -15,16 +16,23 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   reserves: BigNumber | undefined;
   reserveFactorMantissa: BigNumber | undefined;
 
-  async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
-    await super.init( interestRateModelAddress, assetAddress, provider);
+  async init(
+    interestRateModelAddress: string,
+    assetAddress: string,
+    provider: any
+  ) {
+    await super.init(interestRateModelAddress, assetAddress, provider);
 
     const interestRateContract = createContract(
       interestRateModelAddress,
-      (compoundProtocolABI as any).contracts['contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2'].abi,
+      (compoundProtocolABI as any).contracts['contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2']
+        .abi,
       provider
     );
 
-    this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
+    this.dsrPerBlock = toBN(
+      await interestRateContract.callStatic.dsrPerBlock()
+    );
 
 
     const cTokenContract = createContract(
@@ -45,14 +53,23 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
     fuseFeeMantissa: BigNumberish,
     provider: Web3Provider
   ) {
-    await super._init(interestRateModelAddress, reserveFactorMantissa, adminFeeMantissa, fuseFeeMantissa, provider);
+    await super._init(
+      interestRateModelAddress,
+      reserveFactorMantissa,
+      adminFeeMantissa,
+      fuseFeeMantissa,
+      provider
+    );
 
     const interestRateContract = createContract(
       interestRateModelAddress,
-      (compoundProtocolABI as any).contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"].abi,
+      (compoundProtocolABI as any).contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"]
+        .abi,
       provider
     );
-    this.dsrPerBlock = toBN(await interestRateContract.callStatic.dsrPerBlock());
+    this.dsrPerBlock = toBN(
+      await interestRateContract.callStatic.dsrPerBlock()
+    );
     this.cash = toBN(0);
     this.borrows = toBN(0);
     this.reserves = toBN(0);
@@ -65,7 +82,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
     kink: BigNumberish,
     reserveFactorMantissa: BigNumberish,
     adminFeeMantissa: BigNumberish,
-    fuseFeeMantissa: BigNumberish,
+    fuseFeeMantissa: BigNumberish
   ) {
     await super.__init(
       baseRatePerBlock,
@@ -74,7 +91,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
       kink,
       reserveFactorMantissa,
       adminFeeMantissa,
-      fuseFeeMantissa,
+      fuseFeeMantissa
     );
     this.dsrPerBlock = toBN(0); // TODO: Make this work if DSR ever goes positive again
     this.cash = toBN(0);
@@ -83,7 +100,14 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
   }
 
   getSupplyRate(utilizationRate: BigNumber) {
-    if (!this.initialized || !this.cash || !this.borrows || !this.reserves || !this.dsrPerBlock) throw new Error("Interest rate model class not initialized.");
+    if (
+      !this.initialized ||
+      !this.cash ||
+      !this.borrows ||
+      !this.reserves ||
+      !this.dsrPerBlock
+    )
+      throw new Error("Interest rate model class not initialized.");
 
     // const protocolRate = super.getSupplyRate(utilizationRate, this.reserveFactorMantissa); //todo - do we need this
     const protocolRate = super.getSupplyRate(utilizationRate);
