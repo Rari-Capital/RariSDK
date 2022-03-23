@@ -1,6 +1,6 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { createContract, toBN } from "../utils/web3";
-import { contracts } from "../contracts/compound-protocol.min.json";
+import compoundProtocolABI from "../contracts/compound-protocol.min.json";
 import { Web3Provider } from "@ethersproject/providers";
 
 export default class JumpRateModelV2 {
@@ -16,7 +16,7 @@ export default class JumpRateModelV2 {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
+      (compoundProtocolABI as any).contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider
     );
 
@@ -28,7 +28,7 @@ export default class JumpRateModelV2 {
 
     const cTokenContract = createContract(
       assetAddress,
-      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
+      JSON.parse((compoundProtocolABI as any).contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
       provider
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -51,7 +51,7 @@ export default class JumpRateModelV2 {
   {
     const jumpRateModelContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
+      (compoundProtocolABI as any).contracts["contracts/JumpRateModel.sol:JumpRateModel"].abi,
       provider
     );
     this.baseRatePerBlock = toBN(await jumpRateModelContract.callStatic.baseRatePerBlock());
