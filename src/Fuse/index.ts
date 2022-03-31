@@ -1598,13 +1598,11 @@ export default class Fuse {
         this.provider.getSigner()
       );
 
-      const deployedDistributor = await distributor.deploy({
-        arguments: [
+      const deployedDistributor = await distributor.deploy(
           options.from,
           rewardToken,
           this.addresses.REWARDS_DISTRIBUTOR_DELEGATE_CONTRACT_ADDRESS,
-        ],
-      });
+      );
       // const rdAddress = distributor.options.address;
       return deployedDistributor;
     };

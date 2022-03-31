@@ -187,6 +187,8 @@ export default {
       "0x92014d914370d8c59082044786d9b056ea188a95891778c555209c210850d5ae",
     CurveFactoryLpTokenPriceOracle:
       "0x90cb470d00fd449254eda43856b1e32b5c9a9bf25a8070c10ed1ff92ca656616",
+    CurveFactoryLpTokenPriceOracleV2:
+      "0x8f69ce5f159abf8255326f7052ace26a2a416d4d553c5bcb92fad4fd8cb8f7e6",
     GUniLpTokenPriceOracle:
       "0xbed0eddba7009021dd774a530b53a784fc80217c7bf27c15c9b2487b13fb2863",
     TribeMasterPriceOracle:
