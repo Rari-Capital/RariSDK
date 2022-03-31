@@ -67,6 +67,7 @@ export default {
       "0xd9eefdb09d75ca848433079ea72ef609a1c1ea21",
     FixedEthPriceOracle: "0xffc9ec4adbf75a537e4d233720f06f0df01fb7f5",
     FixedEurPriceOracle: "0x817158553F4391B0d53d242fC332f2eF82463e2a",
+    FixedUSDPriceOracle: "0xa7ac11110f13097a022a6a975bddc4a3ed6a23bd",
     WSTEthPriceOracle: "0xb11de4c003c80dc36a810254b433d727ac71c517",
     FixedTokenPriceOracle_OHM: "0x71FE48562B816D03Ce9e2bbD5aB28674A8807CC5",
     UniswapTwapPriceOracleV2_SushiSwap_DAI:
@@ -91,7 +92,11 @@ export default {
       "0xb2d16916d520d585ee49f08db1436b961b48fe60",
     CurveFactoryLpTokenPriceOracle:
       "0xa9f3faac3b8eDF7b3DCcFDBBf25033D6F5fc02F3",
+    CvxFXSPriceOracle:
+      "0x6104d45971D7E1b0A61Aa5332fC153dcF110D26d",
     TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
+    BalancerV2TwapPriceOracle: "0x5B643292e3733f5691ac7fd7ce14D2FD3c2dF868",
+    BalancerStableLpTokenPriceOracle: "0xe058d9dBA5076627639c045d45Cb5d8d24D9A9B4",
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -143,6 +148,8 @@ export default {
       "0xcb669c93632a1c991adced5f4d97202aa219fab3d5d86ebd28f4f62ad7aa6cb3",
     FixedEurPriceOracle:
       "0x678dbe9f2399a44e89edc934dc17f6d4ee7004d9cbcee83c0fa0ef43de924b84",
+    FixedUSDPriceOracle:
+      "0x948ac042dcfd530a7918de3d5ade84919c206d076e7cd9caff5e7e2301f9be16",
     WSTEthPriceOracle:
       "0x11daa8dfb8957304aa7d926ce6876c523c7567b4052962e65e7d6a324ddcb4cc",
     FixedTokenPriceOracle_OHM:
@@ -184,6 +191,12 @@ export default {
       "0xbed0eddba7009021dd774a530b53a784fc80217c7bf27c15c9b2487b13fb2863",
     TribeMasterPriceOracle:
       "0xf79f348bef443bef108c446753829e55eb5e4e3028d2064d9edefab2f95fd876",
+    CvxFXSPriceOracle: 
+      "0x6014cac13a95ba888f7087ff476a89c511c1cd2b5b4a95d9ab323d630a269acb",
+    BalancerV2TwapPriceOracle: 
+      "0x0fcca2c7996f4a0e768107f953f6c5fc82d074199a8d3c638ad902772efacd66",
+    BalancerStableLpTokenPriceOracle:
+      "0x7297a1a7b5cb6dbb1ed2a497bd7ef44cbd3fde7f1cb2be5b843dd7a8383eaaf5",
   },
 
   // Deployable Oracles
