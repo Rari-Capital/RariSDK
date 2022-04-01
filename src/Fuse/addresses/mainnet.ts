@@ -91,7 +91,7 @@ export default {
     CurveTriCryptoLpTokenPriceOracle:
       "0xb2d16916d520d585ee49f08db1436b961b48fe60",
     CurveFactoryLpTokenPriceOracle:
-      "0xa9f3faac3b8eDF7b3DCcFDBBf25033D6F5fc02F3",
+      "0x4f84a621158CdecBB5e71061127ec7f61418b2F2",
     CvxFXSPriceOracle:
       "0x6104d45971D7E1b0A61Aa5332fC153dcF110D26d",
     TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
@@ -186,7 +186,7 @@ export default {
     CurveTriCryptoLpTokenPriceOracle:
       "0x92014d914370d8c59082044786d9b056ea188a95891778c555209c210850d5ae",
     CurveFactoryLpTokenPriceOracle:
-      "0x90cb470d00fd449254eda43856b1e32b5c9a9bf25a8070c10ed1ff92ca656616",
+      "0x8f69ce5f159abf8255326f7052ace26a2a416d4d553c5bcb92fad4fd8cb8f7e6",
     CurveFactoryLpTokenPriceOracleV2:
       "0x8f69ce5f159abf8255326f7052ace26a2a416d4d553c5bcb92fad4fd8cb8f7e6",
     GUniLpTokenPriceOracle:
