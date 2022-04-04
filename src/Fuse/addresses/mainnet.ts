@@ -200,6 +200,8 @@ export default {
       "0x0fcca2c7996f4a0e768107f953f6c5fc82d074199a8d3c638ad902772efacd66",
     BalancerStableLpTokenPriceOracle:
       "0x7297a1a7b5cb6dbb1ed2a497bd7ef44cbd3fde7f1cb2be5b843dd7a8383eaaf5",
+    XVaultPriceOracle:
+      "0x2dda99e1104ca02d17ce20bc9e353046418ca592122ec7c12960c016dcf1d2fe"
   },
 
   // Deployable Oracles
