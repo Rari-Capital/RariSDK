@@ -97,6 +97,7 @@ export default {
     TribeMasterPriceOracle: "0x4d10BC156FBaD2474a94f792fe0D6c3261469cdd",
     BalancerV2TwapPriceOracle: "0x5B643292e3733f5691ac7fd7ce14D2FD3c2dF868",
     BalancerStableLpTokenPriceOracle: "0xe058d9dBA5076627639c045d45Cb5d8d24D9A9B4",
+    XVaultPriceOracle: "0x6503cae60b13b9a563fcd0d7fbe81d9cc5db7e00",
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
