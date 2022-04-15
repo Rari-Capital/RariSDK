@@ -68,7 +68,7 @@ export default {
     FixedEthPriceOracle: "0xffc9ec4adbf75a537e4d233720f06f0df01fb7f5",
     FixedEurPriceOracle: "0x817158553F4391B0d53d242fC332f2eF82463e2a",
     FixedUSDPriceOracle: "0xa7ac11110f13097a022a6a975bddc4a3ed6a23bd",
-    WSTEthPriceOracle: "0xb11de4c003c80dc36a810254b433d727ac71c517",
+    WSTEthPriceOracle: "0xD007067A6c1877457D179206B628C326600ca36b",
     FixedTokenPriceOracle_OHM: "0x71FE48562B816D03Ce9e2bbD5aB28674A8807CC5",
     UniswapTwapPriceOracleV2_SushiSwap_DAI:
       "0x72fd4c801f5845ab672a12bce1b05bdba1fd851a", // v1.1.2
@@ -98,6 +98,9 @@ export default {
     BalancerV2TwapPriceOracle: "0x5B643292e3733f5691ac7fd7ce14D2FD3c2dF868",
     BalancerStableLpTokenPriceOracle: "0xe058d9dBA5076627639c045d45Cb5d8d24D9A9B4",
     XVaultPriceOracle: "0x6503cae60b13b9a563fcd0d7fbe81d9cc5db7e00",
+    ETHMAXYPriceOracle: "0x745B95bE182A01408bccb1c35ab2927866A5CAd3",
+    SaddleLpTokenPriceOracle: "0x7cFa667E9c6019683c1210b12647a1370Ee483E2",
+    GAlcxPriceOracle: "0x819Ef3C70aE87377746af4c83Edd68B396D43d0D"
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -152,7 +155,7 @@ export default {
     FixedUSDPriceOracle:
       "0x948ac042dcfd530a7918de3d5ade84919c206d076e7cd9caff5e7e2301f9be16",
     WSTEthPriceOracle:
-      "0x11daa8dfb8957304aa7d926ce6876c523c7567b4052962e65e7d6a324ddcb4cc",
+      "0x0cb3d4c32c02641dd8e857355baaa87f6e0b1dad40373f3c139ea9a13b0c1590",
     FixedTokenPriceOracle_OHM:
       "0x136d369f53594c2f10e3ff3f14eaaf0bada4a63964f3cfeda3923e3531e407dc",
 
@@ -201,7 +204,13 @@ export default {
     BalancerStableLpTokenPriceOracle:
       "0x7297a1a7b5cb6dbb1ed2a497bd7ef44cbd3fde7f1cb2be5b843dd7a8383eaaf5",
     XVaultPriceOracle:
-      "0x2dda99e1104ca02d17ce20bc9e353046418ca592122ec7c12960c016dcf1d2fe"
+      "0x2dda99e1104ca02d17ce20bc9e353046418ca592122ec7c12960c016dcf1d2fe",
+    ETHMAXYPriceOracle:
+      "0x985ce8d05302c5d4b34c66d64779052011b44d39d50a9f5b1b61383befe3e31c",
+    SaddleLpTokenPriceOracle:
+      "0x0db5283096540f07fd080cc9b481ed2b808e663243e84ec07a8b3778a1cdf950",
+    GAlcxPriceOracle:
+      "0x9949f96685e869c90760799819d17bf030b8af377ea1c12746b714993df03fa9"
   },
 
   // Deployable Oracles
@@ -408,9 +417,9 @@ export default {
       oldVersions: {},
     },
     WSTEthPriceOracle: {
-      address: "0xb11de4c003c80dc36a810254b433d727ac71c517",
+      address: "0xD007067A6c1877457D179206B628C326600ca36b",
       bytecodeHash:
-        "0x11daa8dfb8957304aa7d926ce6876c523c7567b4052962e65e7d6a324ddcb4cc",
+        "0x0cb3d4c32c02641dd8e857355baaa87f6e0b1dad40373f3c139ea9a13b0c1590",
       deployable: false,
       oldVersions: {},
     },
