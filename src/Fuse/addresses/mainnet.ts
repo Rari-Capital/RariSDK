@@ -100,7 +100,8 @@ export default {
     XVaultPriceOracle: "0x6503cae60b13b9a563fcd0d7fbe81d9cc5db7e00",
     ETHMAXYPriceOracle: "0x745B95bE182A01408bccb1c35ab2927866A5CAd3",
     SaddleLpTokenPriceOracle: "0x7cFa667E9c6019683c1210b12647a1370Ee483E2",
-    GAlcxPriceOracle: "0x819Ef3C70aE87377746af4c83Edd68B396D43d0D"
+    GAlcxPriceOracle: "0x819Ef3C70aE87377746af4c83Edd68B396D43d0D",
+    VoltPriceOracle: "0x316b2a8a2EDD2201238e72FD3fB0df2529C51721"
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -210,7 +211,9 @@ export default {
     SaddleLpTokenPriceOracle:
       "0x0db5283096540f07fd080cc9b481ed2b808e663243e84ec07a8b3778a1cdf950",
     GAlcxPriceOracle:
-      "0x9949f96685e869c90760799819d17bf030b8af377ea1c12746b714993df03fa9"
+      "0x9949f96685e869c90760799819d17bf030b8af377ea1c12746b714993df03fa9",
+    VoltPriceOracle:
+      "0x1cb6c4e8005963e7fa3e840a6d61c81cb17b00d81770564eaa045b8372b2ad4e"
   },
 
   // Deployable Oracles
@@ -586,6 +589,7 @@ export default {
     JumpRateModel_Olympus_Majors_New: "0x4EF29407a8dbcA2F37B7107eAb54d6f2a3f2ad60",
 
     JumpRateModel_Flat_3_Percent_Borrow_APY: "0xc8acad405ff67eaee2aca374764883cecbd490ad",
+    JumpRateModel_Flat_Half_Percent_Borrow_APY: "0x09472B8cdCae7c777d4fBf67e0dA9b58CCfA8870",
 
     Custom_JumpRateModel: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
     // Custom_JumpRateModel: "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
