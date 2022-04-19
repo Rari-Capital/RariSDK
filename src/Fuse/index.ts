@@ -801,7 +801,7 @@ export default class Fuse {
             this.provider.getSigner()
           );
           deployedPriceOracle = await oracleFactoryContract.oracles(
-            this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+            conf.uniswapV2Factory,
             conf.baseToken
           );
 
@@ -810,11 +810,11 @@ export default class Fuse {
             deployedPriceOracle === "0x0000000000000000000000000000000000000000"
           ) {
             await oracleFactoryContract.deploy(
-              this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+              conf.uniswapV2Factory,
               conf.baseToken
             );
             deployedPriceOracle = await oracleFactoryContract.oracles(
-              this.addresses.UNISWAP_V2_FACTORY_ADDRESS,
+              conf.uniswapV2Factory,
               conf.baseToken
             );
           }
