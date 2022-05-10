@@ -18,7 +18,7 @@ export default {
   CERC20_DELEGATE_CONTRACT_ADDRESS:
     "0x67db14e73c2dce786b5bbbfa4d010deab4bbfcf9", // v1.0.0: 0x67e70eeb9dd170f7b4a9ef620720c9069d5e706c; v1.0.2 (for V2 yVaults): 0x2b3dd0ae288c13a730f6c422e2262a9d3da79ed1
   CETHER_DELEGATE_CONTRACT_ADDRESS:
-    "0xd77e28a1b9a9cfe1fc2eee70e391c05d25853cbf", // v1.0.0: 0x60884c8faad1b30b1c76100da92b76ed3af849ba
+    "0xbDADDC6a1321Ed458b53aB9e51DC0De8dba78D43", // v1.0.0: 0x60884c8faad1b30b1c76100da92b76ed3af849ba
 
   // Oracles
   // Implementation for V3
