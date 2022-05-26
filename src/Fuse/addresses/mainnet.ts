@@ -101,7 +101,8 @@ export default {
     ETHMAXYPriceOracle: "0x745B95bE182A01408bccb1c35ab2927866A5CAd3",
     SaddleLpTokenPriceOracle: "0x7cFa667E9c6019683c1210b12647a1370Ee483E2",
     GAlcxPriceOracle: "0x819Ef3C70aE87377746af4c83Edd68B396D43d0D",
-    VoltPriceOracle: "0x316b2a8a2EDD2201238e72FD3fB0df2529C51721"
+    VoltPriceOracle: "0x316b2a8a2EDD2201238e72FD3fB0df2529C51721",
+    ZeroPriceOracle: "0xF2c0CFdBA9aF786f94A683BA3b6e21c122A647C1"
   },
   PRICE_ORACLE_RUNTIME_BYTECODE_HASHES: {
     ChainlinkPriceOracle:
@@ -213,7 +214,9 @@ export default {
     GAlcxPriceOracle:
       "0x9949f96685e869c90760799819d17bf030b8af377ea1c12746b714993df03fa9",
     VoltPriceOracle:
-      "0x1cb6c4e8005963e7fa3e840a6d61c81cb17b00d81770564eaa045b8372b2ad4e"
+      "0x1cb6c4e8005963e7fa3e840a6d61c81cb17b00d81770564eaa045b8372b2ad4e",
+    ZeroPriceOracle:
+      "0x9c59102d4463210f65007140937bd3389c39e0785a091ba0b61629d8137a32e1"
   },
 
   // Deployable Oracles
