@@ -1,6 +1,6 @@
 import { BigNumber, BigNumberish } from "ethers";
-import { createContract, toBN } from "../../utils/web3";
-import { contracts } from "../contracts/compound-protocol.min.json";
+import { createContract, toBN } from "../utils/web3";
+import compoundProtocolABI from "../contracts/compound-protocol.min.json";
 import { Web3Provider } from "@ethersproject/providers";
 
 export default class WhitePaperInterestRateModel {
@@ -14,7 +14,7 @@ export default class WhitePaperInterestRateModel {
   async init(interestRateModelAddress: string, assetAddress: string, provider: any) {
     const whitePaperModelContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      (compoundProtocolABI as any).contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
       provider
     );
 
@@ -23,7 +23,7 @@ export default class WhitePaperInterestRateModel {
 
     const cTokenContract = createContract(
       assetAddress,
-      JSON.parse(contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
+      JSON.parse((compoundProtocolABI as any).contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi),
       provider
     );
     this.reserveFactorMantissa = toBN(await cTokenContract.callStatic.reserveFactorMantissa());
@@ -45,7 +45,7 @@ export default class WhitePaperInterestRateModel {
   ) {
     const whitePaperModelContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
+      (compoundProtocolABI as any).contracts["contracts/WhitePaperInterestRateModel.sol:WhitePaperInterestRateModel"].abi,
       provider
     );
 

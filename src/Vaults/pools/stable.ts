@@ -3479,49 +3479,49 @@ export default class StablePool {
         address: "0x6b175474e89094c44da98b954eedeac495271d0f",
         name: "Dai Stablecoin",
         decimals: 18,
-        Contract: new Contract("0x6b175474e89094c44da98b954eedeac495271d0f", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0x6b175474e89094c44da98b954eedeac495271d0f", erc20Abi, this.provider)
       },
       USDC: {
         symbol: "USDC",
         address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
         name: "USD Coin",
         decimals: 6,
-        Contract: new Contract("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", erc20Abi, this.provider)
       },
       USDT: {
         symbol: "USDT",
         address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
         name: "Tether USD",
         decimals: 6,
-        Contract: new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0xdac17f958d2ee523a2206206994597c13d831ec7", erc20Abi, this.provider)
       },
       TUSD: {
         symbol: "TUSD",
         address: "0x0000000000085d4780b73119b644ae5ecd22b376",
         name: "TrueUSD",
         decimals: 18,
-        Contract: new Contract("0x0000000000085d4780b73119b644ae5ecd22b376", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0x0000000000085d4780b73119b644ae5ecd22b376", erc20Abi, this.provider)
       },
       BUSD: {
         symbol: "BUSD",
         address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
         name: "Binance USD",
         decimals: 18,
-        Contract: new Contract("0x4Fabb145d64652a948d72533023f6E7A623C7C53", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0x4Fabb145d64652a948d72533023f6E7A623C7C53", erc20Abi, this.provider)
       },
       sUSD: {
         symbol: "sUSD",
         address: "0x57ab1ec28d129707052df4df418d58a2d46d5f51",
         name: "sUSD",
         decimals: 18,
-        Contract: new Contract("0x57ab1ec28d129707052df4df418d58a2d46d5f51", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0x57ab1ec28d129707052df4df418d58a2d46d5f51", erc20Abi, this.provider)
       },
       mUSD: {
         symbol: "mUSD",
         address: "0xe2f2a5c287993345a840db3b0845fbc70f5935a5",
         name: "mStable USD",
         decimals: 18,
-        Contract: new Contract("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", erc20Abi, this.provider.getSigner())
+        Contract: new Contract("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", erc20Abi, this.provider)
       },
     };
   }

@@ -1,6 +1,6 @@
 import { createContract, toBN } from "../../utils/web3";
 import JumpRateModel from "./JumpRateModel.js";
-import { contracts } from "../contracts/compound-protocol.min.json";
+import compoundProtocolABI from "../contracts/compound-protocol.min.json";
 import { BigNumber } from "@ethersproject/bignumber";
 import { BigNumberish } from "ethers";
 import { Web3Provider } from "@ethersproject/providers";
@@ -25,7 +25,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
 
     const interestRateContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"]
+      (compoundProtocolABI as any).contracts['contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2']
         .abi,
       provider
     );
@@ -34,9 +34,10 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
       await interestRateContract.callStatic.dsrPerBlock()
     );
 
+
     const cTokenContract = createContract(
       assetAddress,
-      contracts["contracts/CTokenInterfaces.sol:CTokenInterface"].abi,
+      (compoundProtocolABI as any).contracts['contracts/CTokenInterfaces.sol:CTokenInterface'].abi,
       provider
     );
 
@@ -62,7 +63,7 @@ export default class DAIInterestRateModelV2 extends JumpRateModel {
 
     const interestRateContract = createContract(
       interestRateModelAddress,
-      contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"]
+      (compoundProtocolABI as any).contracts["contracts/DAIInterestRateModelV2.sol:DAIInterestRateModelV2"]
         .abi,
       provider
     );

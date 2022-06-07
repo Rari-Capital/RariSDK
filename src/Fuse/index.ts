@@ -1607,6 +1607,7 @@ export default class Fuse {
       return deployedDistributor;
     };
 
+
     this.checkCardinality = async function (uniswapV3Pool: string) {
       var uniswapV3PoolContract = new Contract(
         uniswapV3Pool,
